@@ -288,7 +288,13 @@ function renderSummary(data) {
 }
 
 function renderCards() {
-  let data = [...RAW_DATA];
+  // 排除所有活動歷史率都是 0 且三月也全為 0 的無效名單
+  let data = RAW_DATA.filter(p =>
+    ACTIVITIES.some(act => {
+      const a = p.activities[act];
+      return a.historical > 0 || a.march.some(v => v === 1);
+    })
+  );
 
   if (currentFilter === 'flagged') data = data.filter(p => p.flags.length > 0);
 
