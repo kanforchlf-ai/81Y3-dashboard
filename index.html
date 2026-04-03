@@ -209,6 +209,41 @@
   }
 
   .legend { display: flex; gap: 14px; font-size: 12px; color: #666; padding: 10px 0; flex-wrap: wrap; }
+
+  .attendance-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 28px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .attendance-hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  }
+  .ah-main { text-align: center; padding: 0 32px; }
+  .ah-num { font-size: 64px; font-weight: 900; color: #fff; line-height: 1; }
+  .ah-label { font-size: 13px; color: #aaa; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
+  .ah-sub { font-size: 11px; color: #666; margin-top: 2px; }
+  .ah-divider { width: 1px; height: 60px; background: rgba(255,255,255,0.1); margin: 0 8px; }
+  .ah-stat { padding: 0 28px; }
+  .ah-stat-num { font-size: 22px; font-weight: 800; }
+  .ah-stat-label { font-size: 12px; color: #888; margin-top: 3px; }
+  .ah-down { color: #e74c3c; }
+  .ah-gap { color: #f39c12; }
+  .ah-progress-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .ah-progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; min-width: 100px; }
+  .ah-progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e74c3c); border-radius: 4px; }
+  .ah-progress-label { font-size: 12px; color: #888; white-space: nowrap; }
+  .ah-cta {
+    margin-left: auto; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+    padding: 14px 22px; color: #fff; font-size: 15px; font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  @media (max-width: 700px) {
+    .ah-divider { display: none; }
+    .attendance-hero-inner { gap: 16px; justify-content: center; }
+    .ah-cta { margin-left: 0; width: 100%; text-align: center; }
+  }
   .legend-item { display: flex; align-items: center; gap: 5px; }
   .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
 
@@ -232,6 +267,36 @@
   <label>篩選：</label>
   <button class="filter-btn active" onclick="setFilter('all')">全部成員</button>
   <button class="filter-btn" onclick="setFilter('flagged')">僅顯示疑似漏填</button>
+</div>
+
+<div class="attendance-hero">
+  <div class="attendance-hero-inner">
+    <div class="ah-main">
+      <div class="ah-num">24</div>
+      <div class="ah-label">最近主日人數</div>
+      <div class="ah-sub">2026年3月第五週</div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-stat">
+      <div class="ah-stat-num ah-down">▼ 1.8</div>
+      <div class="ah-stat-label">vs 上月平均（25.8人）</div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-stat">
+      <div class="ah-stat-num ah-gap">還差 16 人</div>
+      <div class="ah-stat-label">距離目標 40 人</div>
+      <div class="ah-progress-wrap">
+        <div class="ah-progress-track">
+          <div class="ah-progress-fill" style="width:60%"></div>
+        </div>
+        <div class="ah-progress-label">24 / 40</div>
+      </div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-cta">
+      🙏 這週帶一個人來！
+    </div>
+  </div>
 </div>
 
 <div class="container">
