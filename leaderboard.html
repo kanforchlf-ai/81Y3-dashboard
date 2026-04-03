@@ -34,6 +34,21 @@
     margin-bottom: 6px;
   }
   .title-sub { font-size: 13px; color: #888; letter-spacing: 1px; }
+  .info-block {
+    display: inline-flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+    margin-top: 16px; padding: 14px 24px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+  }
+  .info-item { text-align: center; }
+  .info-label { font-size: 11px; color: #666; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .info-value { font-size: 13px; color: #ccc; font-weight: 600; }
+  .score-rule { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+  .score-pill {
+    font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
+  }
+  .score-pill-gold { background: rgba(246,211,101,0.15); color: #f6d365; border: 1px solid rgba(246,211,101,0.3); }
+  .score-pill-gray { background: rgba(255,255,255,0.06); color: #aaa; border: 1px solid rgba(255,255,255,0.1); }
   .period-badge {
     display: inline-block; margin-top: 12px;
     background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
@@ -137,8 +152,18 @@
 
 <header>
   <div class="title-main">青三中流砥柱</div>
-  <div class="title-sub">PILLAR OF THE GROUP · TOP 20</div>
-  <div class="period-badge">📅 2026年3月 第二～第五週</div>
+  <div class="title-sub">PILLAR OF THE GROUP · TOP 36</div>
+  <div class="period-badge">📅 計算區間：2026年3月 第二～第五週（共 4 週）</div>
+  <div style="margin-top:14px">
+    <div class="score-rule">
+      <span class="score-pill score-pill-gold">主日出席 × 3 分</span>
+      <span class="score-pill score-pill-gray">小排出席 × 1 分</span>
+      <span class="score-pill score-pill-gray">晨興出席 × 1 分</span>
+      <span class="score-pill score-pill-gray">申言出席 × 1 分</span>
+      <span class="score-pill score-pill-gray">禱告出席 × 1 分</span>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:8px">每週最高 7 分 · 4 週滿分 28 分 · 主日為三倍權重</div>
+  </div>
 </header>
 
 <div class="container" id="app"></div>
