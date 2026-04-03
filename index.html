@@ -3,6 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  const CORRECT = '5281';
+  const KEY = 'auth_81y3';
+  if (sessionStorage.getItem(KEY) !== CORRECT) {
+    const input = prompt('請輸入密碼');
+    if (input !== CORRECT) {
+      document.documentElement.innerHTML = '<div style="font-family:sans-serif;text-align:center;margin-top:20%;color:#999">密碼錯誤</div>';
+      throw new Error('unauthorized');
+    }
+    sessionStorage.setItem(KEY, CORRECT);
+  }
+})();
+</script>
 <title>青年三區 出席漏填警示 — 2026年3月</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
