@@ -229,9 +229,6 @@
   <label>篩選：</label>
   <button class="filter-btn active" onclick="setFilter('all')">全部成員</button>
   <button class="filter-btn" onclick="setFilter('flagged')">僅顯示疑似漏填</button>
-  <button class="filter-btn" onclick="setFilter('一排')">一排</button>
-  <button class="filter-btn" onclick="setFilter('二排')">二排</button>
-  <button class="filter-btn" onclick="setFilter('noGroup')">未分排</button>
 </div>
 
 <div class="container">
@@ -282,6 +279,7 @@ function renderSummary(data) {
 
   document.getElementById('flagCount').textContent = `${flagged} 人待確認`;
   document.getElementById('summaryBar').innerHTML = `
+    <div class="stat-box"><div class="stat-num" style="color:#333;font-size:18px">2026/03/29</div><div class="stat-label">最新統計日期 <span class="tip-icon" data-tip="資料最後一週為 2026年3月第五週（3/29），請回溯此日期的出席記錄">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#333">${total}</div><div class="stat-label">顯示人數 <span class="tip-icon" data-tip="目前篩選條件下的成員總數">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#e74c3c">${flagged}</div><div class="stat-label">疑似漏填 <span class="tip-icon" data-tip="歷史出席率 ≥50%，但本月至少有一週記錄為 0 的人數">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#27ae60">${clean}</div><div class="stat-label">記錄正常 <span class="tip-icon" data-tip="本月沒有疑似漏填情況的人數">?</span></div></div>
@@ -293,9 +291,6 @@ function renderCards() {
   let data = [...RAW_DATA];
 
   if (currentFilter === 'flagged') data = data.filter(p => p.flags.length > 0);
-  else if (currentFilter === '一排') data = data.filter(p => p['排'] === '一排');
-  else if (currentFilter === '二排') data = data.filter(p => p['排'] === '二排');
-  else if (currentFilter === 'noGroup') data = data.filter(p => !p['排'] || p['排'] === '');
 
   // Sort: flagged first, then by flag count desc
   data.sort((a, b) => b.flags.length - a.flags.length);
@@ -308,23 +303,9 @@ function renderCards() {
     return;
   }
 
-  // Group by 排
-  const groups = {};
-  data.forEach(p => {
-    const key = p['排'] || '未分排';
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(p);
-  });
-
-  const groupOrder = ['一排', '二排', '未分排'];
   let html = '';
-
-  groupOrder.forEach(grpName => {
-    if (!groups[grpName]) return;
-    html += `<div class="section-title">${grpName}</div>`;
-    groups[grpName].forEach(person => {
-      html += renderCard(person);
-    });
+  data.forEach(person => {
+    html += renderCard(person);
   });
 
   container.innerHTML = html;
