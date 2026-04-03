@@ -58,17 +58,18 @@
   .container { max-width: 680px; margin: 0 auto; padding: 30px 16px 60px; }
 
   /* Top 3 podium */
-  .podium { display: flex; align-items: flex-end; justify-content: center; gap: 12px; margin-bottom: 32px; }
+  .podium { display: flex; align-items: flex-start; justify-content: center; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
   .podium-card {
-    flex: 1; max-width: 180px; border-radius: 16px; padding: 20px 12px 16px;
+    flex: 1; min-width: 130px; max-width: 180px; border-radius: 16px; padding: 20px 12px 16px;
     text-align: center; cursor: pointer; transition: transform 0.2s;
     position: relative; overflow: hidden;
   }
   .podium-card:hover { transform: translateY(-4px); }
   .podium-1 {
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-    color: #7a3d00; order: 2; padding-top: 30px;
+    color: #7a3d00; transform: scale(1.04); box-shadow: 0 6px 20px rgba(253,160,133,0.4);
   }
+  .podium-1:hover { transform: scale(1.04) translateY(-4px); }
   .podium-2 {
     background: linear-gradient(135deg, #d0d0d0 0%, #a8a8a8 100%);
     color: #444;
@@ -216,32 +217,41 @@ function renderCard(p, isPodium) {
 }
 
 function render() {
-  const top3 = DATA.rankings.slice(0,3);
-  const rest = DATA.rankings.slice(3);
+  // Group top 3 ranks (handles ties)
+  const rankInfo = {
+    1: { crown: '👑', label: 'NO.1', cls: 'podium-1' },
+    2: { crown: '🥈', label: 'NO.2', cls: 'podium-2' },
+    3: { crown: '🥉', label: 'NO.3', cls: 'podium-3' },
+  };
+  const podiumGroups = {};
+  DATA.rankings.forEach((p, idx) => {
+    if (p.rank <= 3) {
+      if (!podiumGroups[p.rank]) podiumGroups[p.rank] = [];
+      podiumGroups[p.rank].push({...p, _idx: idx});
+    }
+  });
 
-  const crowns = ['👑','🥈','🥉'];
-  const podiumOrder = [1,0,2]; // 2nd, 1st, 3rd
+  const podiumCards = [1,2,3].flatMap(rank => {
+    const group = podiumGroups[rank] || [];
+    const info = rankInfo[rank];
+    return group.map(p => `
+      <div class="podium-card ${info.cls}" onclick="document.querySelectorAll('.list-card')[${p._idx}].classList.toggle('open');document.querySelectorAll('.list-card')[${p._idx}].scrollIntoView({behavior:'smooth'})">
+        <div class="podium-crown">${info.crown}</div>
+        <div class="podium-rank">${info.label}</div>
+        <div class="podium-name">${p.姓名}</div>
+        <div class="podium-score">${p.score}</div>
+        <div class="podium-score-label">/ ${DATA.max_score} 分</div>
+        <div class="podium-bar">${renderPodiumDots(p)}</div>
+      </div>`);
+  });
 
-  const podiumHTML = `
-    <div class="podium">
-      ${podiumOrder.map(i => {
-        const p = top3[i];
-        return `
-          <div class="podium-card podium-${i+1}" onclick="document.querySelectorAll('.list-card')[${i}].classList.toggle('open');document.querySelectorAll('.list-card')[${i}].scrollIntoView({behavior:'smooth'})">
-            <div class="podium-crown">${crowns[i]}</div>
-            <div class="podium-rank">${i===0?'NO.1':i===1?'NO.2':'NO.3'}</div>
-            <div class="podium-name">${p.姓名}</div>
-            <div class="podium-score">${p.score}</div>
-            <div class="podium-score-label">/ ${DATA.max_score} 分</div>
-            <div class="podium-bar">${renderPodiumDots(p)}</div>
-          </div>`;
-      }).join('')}
-    </div>`;
+  const podiumHTML = `<div class="podium">${podiumCards.join('')}</div>`;
+  const rest = DATA.rankings.filter(p => p.rank > 3);
 
   const listHTML = `
     <div class="section-label">完整排名</div>
     ${DATA.rankings.map(p => renderCard(p)).join('')}
-    <div class="score-note">主日×3分 · 小排×1分 · 晨興×1分 · 申言×1分 · 禱告×1分 · 滿分 ${DATA.max_score} 分</div>`;
+    <div class="score-note">主日×3分 · 小排×1分 · 晨興×1分 · 禱告×1分 · 滿分 ${DATA.max_score} 分</div>`;
 
   document.getElementById('app').innerHTML = podiumHTML + listHTML;
 }
