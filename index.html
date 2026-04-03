@@ -77,6 +77,39 @@
   }
   .section-title:first-child { margin-top: 0; }
 
+  /* Nav cards */
+  .nav-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .nav-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+  }
+  .nav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .nav-card-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-card-text {}
+  .nav-card-title { font-size: 16px; font-weight: 800; letter-spacing: 0.3px; }
+  .nav-card-desc { font-size: 12px; opacity: 0.85; margin-top: 3px; line-height: 1.4; }
+  .nav-card-gold { background: linear-gradient(135deg, #f6a623 0%, #e8522a 100%); }
+  .nav-card-blue { background: linear-gradient(135deg, #2f80ed 0%, #56ccf2 100%); }
+
   .card {
     background: white;
     border-radius: 10px;
@@ -284,17 +317,30 @@
     <h1>青年三區點名提醒</h1>
     <div class="subtitle">青年三區 · 2026年3月 · 歷史出席率 ≥ 50% 但當週記錄為 0</div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="badge-count" id="flagCount">— 人待確認</div>
-    <a href="leaderboard.html" title="青三中流砥柱排行榜" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f6d365,#fda085);text-decoration:none;font-size:20px;flex-shrink:0;">🏆</a>
-    <a href="invite.html" title="可邀請名單" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#56ccf2,#2f80ed);text-decoration:none;font-size:20px;flex-shrink:0;">📋</a>
-  </div>
+  <div class="badge-count" id="flagCount">— 人待確認</div>
 </header>
 
 <div class="filter-bar">
   <label>篩選：</label>
   <button class="filter-btn active" onclick="setFilter('all')">全部成員</button>
   <button class="filter-btn" onclick="setFilter('flagged')">僅顯示疑似漏填</button>
+</div>
+
+<div class="nav-cards">
+  <a href="leaderboard.html" class="nav-card nav-card-gold">
+    <div class="nav-card-icon">🏆</div>
+    <div class="nav-card-text">
+      <div class="nav-card-title">青三中流砥柱</div>
+      <div class="nav-card-desc">主日、小排、晨興、禱告<br>近4週綜合出席排行榜</div>
+    </div>
+  </a>
+  <a href="invite.html" class="nav-card nav-card-blue">
+    <div class="nav-card-icon">📋</div>
+    <div class="nav-card-text">
+      <div class="nav-card-title">挽回與邀請名單</div>
+      <div class="nav-card-desc">久未出席、可聯繫邀請<br>及出席不穩定的成員</div>
+    </div>
+  </a>
 </div>
 
 <div class="attendance-hero">
