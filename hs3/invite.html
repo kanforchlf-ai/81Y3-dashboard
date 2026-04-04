@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../hs.html'); }
+})();
+</script>
+<title>高中三區 · 可邀請名單</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; }
+
+  header {
+    background: #1a1a2e; color: white;
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .subtitle { font-size: 13px; color: #aaa; margin-top: 3px; }
+  .back-btn {
+    color: #aaa; text-decoration: none; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; transition: all 0.15s;
+  }
+  .back-btn:hover { color: white; border-color: rgba(255,255,255,0.4); }
+
+  .goal-bar {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    padding: 20px 32px;
+    display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+  }
+  .goal-stat { text-align: center; }
+  .goal-num { font-size: 36px; font-weight: 900; color: white; }
+  .goal-num.active { color: #2ecc71; }
+  .goal-num.need { color: #e74c3c; }
+  .goal-label { font-size: 12px; color: #888; margin-top: 2px; }
+  .goal-arrow { font-size: 24px; color: #555; }
+  .goal-progress-wrap { flex: 1; min-width: 200px; }
+  .goal-track { height: 12px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
+  .goal-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #2ecc71, #f39c12); }
+  .goal-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-top: 5px; }
+  .goal-cta { font-size: 14px; color: #f39c12; font-weight: 600; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px; margin-top: 28px;
+  }
+  .section-header:first-child { margin-top: 0; }
+  .section-icon { font-size: 20px; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-desc { font-size: 13px; color: #888; margin-left: auto; }
+  .section-badge {
+    font-size: 12px; font-weight: 700; padding: 3px 10px;
+    border-radius: 12px; color: white;
+  }
+  .badge-red { background: #e74c3c; }
+  .badge-orange { background: #e67e22; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+
+  .person-card {
+    background: white; border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    border-left: 4px solid #eee;
+    transition: box-shadow 0.15s;
+  }
+  .person-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .person-card.priority-high { border-left-color: #e74c3c; }
+  .person-card.priority-med { border-left-color: #e67e22; }
+  .person-card.priority-low { border-left-color: #bbb; }
+
+  .pc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .pc-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .pc-name { font-size: 15px; font-weight: 600; }
+  .pc-baptism { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .pc-last { margin-left: auto; text-align: right; }
+  .pc-last-label { font-size: 10px; color: #aaa; }
+  .pc-last-val { font-size: 12px; font-weight: 600; color: #555; }
+
+  .pc-stats { display: flex; gap: 8px; }
+  .pc-stat {
+    flex: 1; background: #f8f9fa; border-radius: 6px;
+    padding: 6px 8px; text-align: center;
+  }
+  .pc-stat-num { font-size: 16px; font-weight: 700; }
+  .pc-stat-label { font-size: 10px; color: #aaa; margin-top: 1px; }
+  .pc-stat-num.red { color: #e74c3c; }
+  .pc-stat-num.orange { color: #e67e22; }
+  .pc-stat-num.green { color: #27ae60; }
+
+  .pc-trend { margin-top: 8px; }
+  .trend-bar { display: flex; gap: 2px; align-items: flex-end; height: 20px; }
+  .trend-dot { flex: 1; border-radius: 2px; }
+
+  .empty { text-align: center; color: #aaa; padding: 30px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📋 可邀請 · 可挽回名單</h1>
+    <div class="subtitle">高中三區 · 2025年9月起有活動紀錄</div>
+  </div>
+  <a href="index.html" class="back-btn">← 返回點名提醒</a>
+</header>
+
+<div class="goal-bar">
+  <div class="goal-stat">
+    <div class="goal-num active">13</div>
+    <div class="goal-label">本月活躍人數</div>
+  </div>
+  <div class="goal-arrow">→</div>
+  <div class="goal-stat">
+    <div class="goal-num" style="color:white">18</div>
+    <div class="goal-label">目標人數</div>
+  </div>
+  <div class="goal-progress-wrap">
+    <div class="goal-track">
+      <div class="goal-fill" style="width:72%"></div>
+    </div>
+    <div class="goal-progress-labels">
+      <span>0</span>
+      <span style="color:#f39c12">還差 5 人</span>
+      <span>18</span>
+    </div>
+  </div>
+  <div class="goal-cta">👥 以下 2 人都是潛在人選</div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+const RECOVERABLE = [{"姓名": "沈芮恩", "受浸日期": "2019-07-06", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}];
+
+const IRREGULAR = [{"姓名": "張少軒", "受浸日期": "2020-07-11", "recent_4weeks": 1, "attendance_since_sep": 19, "sep_to_feb": 17}];
+
+const COLORS = ['#3498db','#9b59b6','#e67e22','#1abc9c','#e74c3c','#f39c12','#2c3e50','#16a085'];
+function getColor(name) {
+  let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % COLORS.length;
+  return COLORS[h];
+}
+
+function priority(p) {
+  if (p.sep_to_feb >= 5) return 'high';
+  if (p.sep_to_feb >= 3) return 'med';
+  return 'low';
+}
+
+function priorityLabel(p) {
+  if (p.sep_to_feb >= 5) return '優先聯繫';
+  if (p.sep_to_feb >= 3) return '可聯繫';
+  return '曾到訪';
+}
+
+function renderRecoverable(p) {
+  const pr = priority(p);
+  const color = getColor(p.姓名);
+  const baptism = p.受浸日期 && p.受浸日期 !== '—' && p.受浸日期 !== '0000-00-00' ? p.受浸日期.replace(/-00/g,'').replace(/-0$/,'') : '—';
+  return `
+    <div class="person-card priority-${pr}">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:${color}">${p.姓名[0]}</div>
+        <div>
+          <div class="pc-name">${p.姓名}</div>
+          <div class="pc-baptism">受浸 ${baptism}</div>
+        </div>
+        <div class="pc-last">
+          <div class="pc-last-label">最後出席</div>
+          <div class="pc-last-val">${p.last_active_month}</div>
+        </div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat">
+          <div class="pc-stat-num ${p.sep_to_feb>=5?'green':p.sep_to_feb>=3?'orange':'red'}">${p.sep_to_feb}</div>
+          <div class="pc-stat-label">Sep~Feb 出席</div>
+        </div>
+        <div class="pc-stat">
+          <div class="pc-stat-num red">0</div>
+          <div class="pc-stat-label">近 4 週</div>
+        </div>
+        <div class="pc-stat" style="background:${pr==='high'?'#fef0f0':pr==='med'?'#fff8f0':'#f8f9fa'}">
+          <div class="pc-stat-num" style="font-size:12px;color:${pr==='high'?'#e74c3c':pr==='med'?'#e67e22':'#aaa'}">${priorityLabel(p)}</div>
+          <div class="pc-stat-label">建議</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderIrregular(p) {
+  const color = getColor(p.姓名);
+  const baptism = p.受浸日期 && p.受浸日期 !== '—' && p.受浸日期 !== '0000-00-00' ? p.受浸日期.replace(/-00/g,'').replace(/-0$/,'') : '—';
+  return `
+    <div class="person-card priority-med">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:${color}">${p.姓名[0]}</div>
+        <div>
+          <div class="pc-name">${p.姓名}</div>
+          <div class="pc-baptism">受浸 ${baptism}</div>
+        </div>
+        <div class="pc-last">
+          <div class="pc-last-label">近 4 週出席</div>
+          <div class="pc-last-val" style="color:#e67e22">${p.recent_4weeks} / 4 次</div>
+        </div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat">
+          <div class="pc-stat-num green">${p.attendance_since_sep}</div>
+          <div class="pc-stat-label">Sep 至今出席</div>
+        </div>
+        <div class="pc-stat">
+          <div class="pc-stat-num orange">${p.recent_4weeks}</div>
+          <div class="pc-stat-label">近 4 週</div>
+        </div>
+        <div class="pc-stat" style="background:#fff8f0">
+          <div class="pc-stat-num" style="font-size:12px;color:#e67e22">鼓勵出席</div>
+          <div class="pc-stat-label">建議</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+const high = RECOVERABLE.filter(p => p.sep_to_feb >= 5);
+const med = RECOVERABLE.filter(p => p.sep_to_feb >= 3 && p.sep_to_feb < 5);
+const low = RECOVERABLE.filter(p => p.sep_to_feb < 3);
+
+document.getElementById('app').innerHTML = `
+  <div class="section-header">
+    <span class="section-icon">🔴</span>
+    <span class="section-title">優先挽回</span>
+    <span class="section-badge badge-red">${high.length} 人</span>
+    <span class="section-desc">曾穩定出席，近期消失</span>
+  </div>
+  <div class="card-grid">${high.map(renderRecoverable).join('')}</div>
+
+  <div class="section-header">
+    <span class="section-icon">🟠</span>
+    <span class="section-title">可聯繫邀請</span>
+    <span class="section-badge badge-orange">${med.length} 人</span>
+    <span class="section-desc">偶爾出席，值得邀請</span>
+  </div>
+  <div class="card-grid">${med.map(renderRecoverable).join('')}</div>
+
+  <div class="section-header">
+    <span class="section-icon">⚪</span>
+    <span class="section-title">曾到訪</span>
+    <span class="section-badge" style="background:#aaa;color:white">${low.length} 人</span>
+    <span class="section-desc">出席次數少，仍可嘗試聯繫</span>
+  </div>
+  <div class="card-grid">${low.map(renderRecoverable).join('')}</div>
+
+  <div class="section-header">
+    <span class="section-icon">🟡</span>
+    <span class="section-title">出席不穩定</span>
+    <span class="section-badge" style="background:#e67e22;color:white">${IRREGULAR.length} 人</span>
+    <span class="section-desc">仍在名單中，但近期出席率低</span>
+  </div>
+  <div class="card-grid">${IRREGULAR.map(renderIrregular).join('')}</div>
+`;
+</script>
+</body>
+</html>

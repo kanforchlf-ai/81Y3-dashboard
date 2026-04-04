@@ -5,31 +5,538 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
 (function(){
-  if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../index.html'); }
+  if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../hs.html'); }
 })();
 </script>
-<title>高中三區 出席統計</title>
+<title>高中三區 出席漏填警示 — 2026年3月</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
-  header { background: #b45309; color: white; padding: 20px 32px; display: flex; align-items: center; gap: 12px; }
-  header a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 22px; }
-  header h1 { font-size: 20px; font-weight: 700; }
-  .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px 20px; color: #999; }
-  .placeholder .icon { font-size: 64px; opacity: 0.4; }
-  .placeholder h2 { font-size: 20px; color: #bbb; font-weight: 600; }
-  .placeholder p { font-size: 14px; line-height: 1.6; text-align: center; max-width: 320px; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; }
+
+  header {
+    background: #1a1a2e;
+    color: white;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
+  header .subtitle { font-size: 13px; color: #aaa; margin-top: 3px; }
+  .badge-count {
+    background: #e74c3c;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .filter-bar {
+    background: white;
+    padding: 12px 32px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #e8e8e8;
+    flex-wrap: wrap;
+  }
+  .filter-bar label { font-size: 13px; color: #666; }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 16px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { background: #f0f0f0; }
+  .filter-btn.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 24px;
+    padding-left: 4px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* Nav cards */
+  .nav-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .nav-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+  }
+  .nav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .nav-card-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-card-text {}
+  .nav-card-title { font-size: 16px; font-weight: 800; letter-spacing: 0.3px; }
+  .nav-card-desc { font-size: 12px; opacity: 0.85; margin-top: 3px; line-height: 1.4; }
+  .nav-card-gold { background: linear-gradient(135deg, #f6a623 0%, #e8522a 100%); }
+  .nav-card-blue { background: linear-gradient(135deg, #2f80ed 0%, #56ccf2 100%); }
+
+  .card {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    cursor: pointer;
+    gap: 12px;
+    user-select: none;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: white; flex-shrink: 0;
+  }
+  .person-info { flex: 1; }
+  .person-name { font-size: 15px; font-weight: 600; }
+  .person-meta { font-size: 12px; color: #888; margin-top: 2px; }
+  .flag-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .pill-warning { background: #fff3cd; color: #856404; }
+  .pill-ok { background: #d1f0e0; color: #1a7a42; }
+  .chevron { color: #bbb; font-size: 18px; transition: transform 0.2s; }
+  .card.open .chevron { transform: rotate(90deg); }
+
+  .card-body { display: none; padding: 0 18px 16px; }
+  .card.open .card-body { display: block; }
+
+  .activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .activity-block {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fafafa;
+  }
+  .activity-block.has-flag { border-color: #f5c518; background: #fffbf0; }
+  .activity-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .historical-rate {
+    font-size: 11px;
+    background: #e8eaf6;
+    color: #3949ab;
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+  .week-dots { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .dot {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600;
+    flex-direction: column;
+  }
+  .dot-attended { background: #2ecc71; color: white; }
+  .dot-absent { background: #ecf0f1; color: #aaa; }
+  .dot-flag { background: #e74c3c; color: white; animation: pulse 1.5s infinite; }
+  .dot-blank { background: #f5f5f5; color: #ccc; border: 1px dashed #ddd; }
+  .dot .wk { font-size: 8px; line-height: 1; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .no-flag-msg {
+    font-size: 13px;
+    color: #27ae60;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .summary-bar {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .stat-box {
+    background: white; border-radius: 10px; padding: 14px 20px;
+    flex: 1; min-width: 120px; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-label { font-size: 12px; color: #888; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .tip-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #ccc; color: white; font-size: 10px; font-weight: 700;
+    cursor: help; flex-shrink: 0; line-height: 1;
+    position: relative;
+  }
+  .tip-icon:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: #333; color: white; font-size: 12px; font-weight: 400;
+    padding: 6px 10px; border-radius: 6px; white-space: nowrap;
+    pointer-events: none; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .tip-icon:hover::before {
+    content: '';
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    border: 4px solid transparent; border-top-color: #333;
+    pointer-events: none; z-index: 100;
+  }
+
+  .legend { display: flex; gap: 14px; font-size: 12px; color: #666; padding: 10px 0; flex-wrap: wrap; }
+
+  .attendance-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 28px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .attendance-hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  }
+  .ah-main { text-align: center; padding: 0 32px; }
+  .ah-num { font-size: 64px; font-weight: 900; color: #fff; line-height: 1; }
+  .ah-label { font-size: 13px; color: #aaa; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
+  .ah-sub { font-size: 11px; color: #666; margin-top: 2px; }
+  .ah-divider { width: 1px; height: 60px; background: rgba(255,255,255,0.1); margin: 0 8px; }
+  .ah-stat { padding: 0 28px; }
+  .ah-stat-num { font-size: 22px; font-weight: 800; }
+  .ah-stat-label { font-size: 12px; color: #888; margin-top: 3px; }
+  .ah-down { color: #e74c3c; }
+  .ah-gap { color: #f39c12; }
+  .ah-progress-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .ah-progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; min-width: 100px; }
+  .ah-progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e74c3c); border-radius: 4px; }
+  .ah-progress-label { font-size: 12px; color: #888; white-space: nowrap; }
+  .ah-cta {
+    margin-left: auto; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+    padding: 14px 22px; color: #fff; font-size: 15px; font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  @media (max-width: 700px) {
+    .ah-divider { display: none; }
+    .attendance-hero-inner { gap: 16px; justify-content: center; }
+    .ah-cta { margin-left: 0; width: 100%; text-align: center; }
+  }
+
+  .weekly-compare {
+    background: #1e2235;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 16px 32px;
+  }
+  .weekly-compare-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 0; align-items: stretch; flex-wrap: wrap;
+  }
+  .wc-block { flex: 1; min-width: 220px; padding: 4px 24px 4px 0; }
+  .wc-block:last-child { padding-left: 24px; padding-right: 0; }
+  .wc-divider { width: 1px; background: rgba(255,255,255,0.08); margin: 0 8px; }
+  .wc-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .wc-subtitle { font-size: 11px; color: #666; margin-bottom: 8px; }
+  .wc-names { display: flex; gap: 6px; flex-wrap: wrap; }
+  .wc-tag {
+    font-size: 13px; font-weight: 600; padding: 4px 12px;
+    border-radius: 16px;
+  }
+  .wc-tag-red { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+  .wc-tag-green { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+  @media (max-width: 600px) {
+    .wc-divider { width: 100%; height: 1px; margin: 12px 0; }
+    .wc-block { padding: 0; }
+    .wc-block:last-child { padding: 0; }
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+
+  .no-results { text-align: center; color: #aaa; padding: 40px; font-size: 15px; }
 </style>
 </head>
 <body>
+
 <header>
-  <a href="../hs.html">‹</a>
-  <h1>高中三區 出席統計</h1>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="../hs.html" style="color:#aaa;text-decoration:none;font-size:20px;line-height:1" title="返回區選擇">‹</a>
+    <div>
+      <h1>高中三區點名提醒</h1>
+      <div class="subtitle">高中三區 · 2026年3月 · 歷史出席率 ≥ 50% 但當週記錄為 0</div>
+    </div>
+  </div>
+  <div class="badge-count" id="flagCount">— 人待確認</div>
 </header>
-<div class="placeholder">
-  <div class="icon">📂</div>
-  <h2>資料準備中</h2>
-  <p>請提供高中三區的出席 Excel 檔案<br>上傳後即可自動產生分析報告</p>
+
+<div class="filter-bar">
+  <label>篩選：</label>
+  <button class="filter-btn active" onclick="setFilter('all')">全部成員</button>
+  <button class="filter-btn" onclick="setFilter('flagged')">僅顯示疑似漏填</button>
 </div>
+
+<div class="nav-cards">
+  <a href="leaderboard.html" class="nav-card nav-card-gold">
+    <div class="nav-card-icon">🏆</div>
+    <div class="nav-card-text">
+      <div class="nav-card-title">高三中流砥柱</div>
+      <div class="nav-card-desc">主日、小排、晨興、禱告<br>近4週綜合出席排行榜</div>
+    </div>
+  </a>
+  <a href="invite.html" class="nav-card nav-card-blue">
+    <div class="nav-card-icon">📋</div>
+    <div class="nav-card-text">
+      <div class="nav-card-title">挽回與邀請名單</div>
+      <div class="nav-card-desc">久未出席、可聯繫邀請<br>及出席不穩定的成員</div>
+    </div>
+  </a>
+</div>
+
+<div class="attendance-hero">
+  <div class="attendance-hero-inner">
+    <div class="ah-main">
+      <div class="ah-num">10</div>
+      <div class="ah-label">最近主日人數</div>
+      <div class="ah-sub">2026年3月第五週</div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-stat">
+      <div class="ah-stat-num ah-down">▼ 2.5</div>
+      <div class="ah-stat-label">vs 上月平均（12.5人）</div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-stat">
+      <div class="ah-stat-num ah-gap">還差 5 人</div>
+      <div class="ah-stat-label">距離目標 15 人</div>
+      <div class="ah-progress-wrap">
+        <div class="ah-progress-track">
+          <div class="ah-progress-fill" style="width:67%"></div>
+        </div>
+        <div class="ah-progress-label">10 / 15</div>
+      </div>
+    </div>
+    <div class="ah-divider"></div>
+    <div class="ah-cta">
+      🙏 這週帶一個人來！
+    </div>
+  </div>
+</div>
+
+<div class="weekly-compare">
+  <div class="weekly-compare-inner">
+    <div class="wc-block wc-missing">
+      <div class="wc-title">😕 上週有來、這週沒來</div>
+      <div class="wc-subtitle">可以主動關心一下</div>
+      <div class="wc-names"><span class="wc-tag wc-tag-red">葉庭驊</span><span class="wc-tag wc-tag-red">金雨卉</span></div>
+    </div>
+    <div class="wc-divider"></div>
+    <div class="wc-block wc-returned">
+      <div class="wc-title">🙌 上週沒來、這週來了</div>
+      <div class="wc-subtitle">歡迎回來！</div>
+      <div class="wc-names"><span style="color:#aaa;font-size:13px">無</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div> 有出席</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div> 疑似漏填（歷史≥50%但為0）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ecf0f1;border:1px solid #ddd"></div> 未出席</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f5f5f5;border:1px dashed #ccc"></div> 空白（未填）</div>
+  </div>
+  <div id="cardContainer"></div>
+</div>
+
+<script>
+const ACTIVITIES = ['主日', '小排', '晨興', '禱告'];
+const WEEK_LABELS = ['一', '二', '三', '四', '五'];
+
+const COLORS = ['#3498db','#9b59b6','#e67e22','#1abc9c','#e74c3c','#f39c12','#2c3e50','#16a085'];
+function getColor(name) {
+  let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % COLORS.length;
+  return COLORS[h];
+}
+
+const RAW_DATA = [{"排": "二排", "姓名": "趙心樂", "activities": {"主日": {"historical": 1.0, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.9615, "march": [1, 1, 1, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 1.0, "march": [1, 1, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.9615, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["小排第四週", "小排第五週", "晨興第三週", "晨興第四週", "晨興第五週"]}, {"排": "二排", "姓名": "陸佳依", "activities": {"主日": {"historical": 1.0, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.9808, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 1.0, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.9615, "march": [1, 0, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["禱告第二週"]}, {"排": "一排", "姓名": "黃梓恆", "activities": {"主日": {"historical": 0.9833, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.9038, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.9038, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.9423, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": []}, {"排": "二排", "姓名": "劉牧心", "activities": {"主日": {"historical": 0.9333, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.1923, "march": [1, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.4615, "march": [0, 1, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0385, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": []}, {"排": "二排", "姓名": "吳昕芸", "activities": {"主日": {"historical": 1.0, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.8462, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.9231, "march": [0, 0, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.8654, "march": [1, 1, 0, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["晨興第一週", "晨興第二週", "禱告第三週"]}, {"排": "二排", "姓名": "沈芮恩", "activities": {"主日": {"historical": 0.0333, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.2885, "march": [0, 0, 1, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.8462, "march": [1, 1, 1, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0192, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["晨興第四週", "晨興第五週"]}, {"排": "", "姓名": "葉庭驊", "activities": {"主日": {"historical": 0.4667, "march": [1, 1, 1, 1, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.25, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.0577, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.1154, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": []}, {"排": "二排", "姓名": "蔡云齊", "activities": {"主日": {"historical": 0.95, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.0, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.9808, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": []}, {"排": "一排", "姓名": "謝全一", "activities": {"主日": {"historical": 0.9833, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.7692, "march": [0, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.9038, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.9615, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["小排第一週"]}, {"排": "二排", "姓名": "郭語珊", "activities": {"主日": {"historical": 0.8333, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.6923, "march": [1, 1, 0, 1, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.4231, "march": [0, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0577, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["小排第三週", "小排第五週"]}, {"排": "二排", "姓名": "金雨卉", "activities": {"主日": {"historical": 0.6167, "march": [1, 1, 1, 1, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.0, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.0192, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["主日第五週"]}, {"排": "一排", "姓名": "張少軒", "activities": {"主日": {"historical": 0.5, "march": [1, 1, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.1346, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.0769, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.0385, "march": [0, 0, 0, 0, 0], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["主日第三週", "主日第四週", "主日第五週"]}, {"排": "一排", "姓名": "黃治熙", "activities": {"主日": {"historical": 0.9667, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.9231, "march": [1, 0, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.7692, "march": [0, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.9038, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": ["小排第二週", "晨興第一週"]}, {"排": "一排", "姓名": "蔡溢恩", "activities": {"主日": {"historical": 0.4333, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "小排": {"historical": 0.3654, "march": [0, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "晨興": {"historical": 0.4808, "march": [1, 1, 0, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}, "禱告": {"historical": 0.3654, "march": [1, 1, 1, 1, 1], "weeks": ["第一週", "第二週", "第三週", "第四週", "第五週"]}}, "flags": []}];
+
+let currentFilter = 'all';
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderCards();
+}
+
+function flagKey(activity, weekLabel) {
+  return activity + weekLabel;
+}
+
+function isFlagged(person, activity, weekLabel) {
+  return person.flags.includes(activity + weekLabel);
+}
+
+function renderSummary(data) {
+  const total = data.length;
+  const flagged = data.filter(p => p.flags.length > 0).length;
+  const clean = total - flagged;
+  const totalFlags = data.reduce((s, p) => s + p.flags.length, 0);
+
+  document.getElementById('flagCount').textContent = `${flagged} 人待確認`;
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="stat-box"><div class="stat-num" style="color:#333;font-size:18px">2026/03/29</div><div class="stat-label">最新統計日期 <span class="tip-icon" data-tip="資料最後一週為 2026年3月第五週（3/29），請回溯此日期的出席記錄">?</span></div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#333">${total}</div><div class="stat-label">顯示人數 <span class="tip-icon" data-tip="目前篩選條件下的成員總數">?</span></div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#e74c3c">${flagged}</div><div class="stat-label">疑似漏填 <span class="tip-icon" data-tip="歷史出席率 ≥50%，但本月至少有一週記錄為 0 的人數">?</span></div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#27ae60">${clean}</div><div class="stat-label">記錄正常 <span class="tip-icon" data-tip="本月沒有疑似漏填情況的人數">?</span></div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#e67e22">${totalFlags}</div><div class="stat-label">待確認筆數 <span class="tip-icon" data-tip="所有人加總起來，疑似漏填的週次總數">?</span></div></div>
+  `;
+}
+
+function renderCards() {
+  // 排除所有活動歷史率都是 0 且三月也全為 0 的無效名單
+  let data = RAW_DATA.filter(p =>
+    ACTIVITIES.some(act => {
+      const a = p.activities[act];
+      return a.historical > 0 || a.march.some(v => v === 1);
+    })
+  );
+
+  if (currentFilter === 'flagged') data = data.filter(p => p.flags.length > 0);
+
+  // Sort: flagged first, then by flag count desc
+  data.sort((a, b) => b.flags.length - a.flags.length);
+
+  renderSummary(data);
+
+  const container = document.getElementById('cardContainer');
+  if (data.length === 0) {
+    container.innerHTML = '<div class="no-results">沒有符合條件的成員</div>';
+    return;
+  }
+
+  let html = '';
+  data.forEach(person => {
+    html += renderCard(person);
+  });
+
+  container.innerHTML = html;
+
+  // Attach toggle
+  container.querySelectorAll('.card-header').forEach(h => {
+    h.addEventListener('click', () => {
+      h.closest('.card').classList.toggle('open');
+    });
+  });
+}
+
+function renderCard(person) {
+  const name = person['姓名'];
+  const flagCount = person.flags.length;
+  const color = getColor(name);
+  const initial = name[0];
+
+  const flagPills = flagCount > 0
+    ? `<div class="flag-pills">${person.flags.slice(0, 4).map(f =>
+        `<span class="pill pill-warning">${f}</span>`
+      ).join('')}${flagCount > 4 ? `<span class="pill pill-warning">+${flagCount - 4} 項</span>` : ''}</div>`
+    : `<div class="no-flag-msg">✓ 本月記錄正常</div>`;
+
+  const mainRate = Math.round(person.activities['主日'].historical * 100);
+
+  // Activity blocks
+  const actBlocks = ACTIVITIES.map(act => {
+    const info = person.activities[act];
+    const hist = Math.round(info.historical * 100);
+    if (hist === 0 && info.march.every(v => v === 0)) return ''; // skip zero-history activities
+    const hasFlag = info.march.some((v, i) => isFlagged(person, act, info.weeks[i]));
+
+    const dots = info.march.map((v, i) => {
+      const wk = WEEK_LABELS[i];
+      const weekLabel = info.weeks[i];
+      const flagged = isFlagged(person, act, weekLabel);
+      let cls, symbol;
+      if (v === null) { cls = 'dot-blank'; symbol = '?'; }
+      else if (flagged) { cls = 'dot-flag'; symbol = '✗'; }
+      else if (v === 1) { cls = 'dot-attended'; symbol = '✓'; }
+      else { cls = 'dot-absent'; symbol = '—'; }
+      return `<div class="dot ${cls}" title="${act}${weekLabel}"><span>${symbol}</span><span class="wk">${wk}</span></div>`;
+    }).join('');
+
+    return `
+      <div class="activity-block ${hasFlag ? 'has-flag' : ''}">
+        <div class="activity-name">
+          ${act}
+          <span class="historical-rate">歷史 ${hist}%</span>
+        </div>
+        <div class="week-dots">${dots}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="card ${flagCount > 0 ? '' : ''}">
+      <div class="card-header">
+        <div class="avatar" style="background:${color}">${initial}</div>
+        <div class="person-info">
+          <div class="person-name">${name} <span style="font-size:12px;color:#aaa;font-weight:400">主日歷史 ${mainRate}%</span></div>
+          <div class="person-meta">${person['排'] || '未分排'}</div>
+        </div>
+        ${flagPills}
+        <span class="chevron">›</span>
+      </div>
+      <div class="card-body">
+        <div class="activity-grid">${actBlocks}</div>
+      </div>
+    </div>`;
+}
+
+renderCards();
+</script>
 </body>
 </html>
