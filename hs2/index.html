@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../index.html'); }
+})();
+</script>
+<title>高中二區 出席統計</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: #78350f; color: white; padding: 20px 32px; display: flex; align-items: center; gap: 12px; }
+  header a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 22px; }
+  header h1 { font-size: 20px; font-weight: 700; }
+  .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px 20px; color: #999; }
+  .placeholder .icon { font-size: 64px; opacity: 0.4; }
+  .placeholder h2 { font-size: 20px; color: #bbb; font-weight: 600; }
+  .placeholder p { font-size: 14px; line-height: 1.6; text-align: center; max-width: 320px; }
+</style>
+</head>
+<body>
+<header>
+  <a href="../hs.html">‹</a>
+  <h1>高中二區 出席統計</h1>
+</header>
+<div class="placeholder">
+  <div class="icon">📂</div>
+  <h2>資料準備中</h2>
+  <p>請提供高中二區的出席 Excel 檔案<br>上傳後即可自動產生分析報告</p>
+</div>
+</body>
+</html>

@@ -17,146 +17,101 @@
   }
 })();
 </script>
-<title>青年區出席統計</title>
+<title>81會所 出席統計</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: #0f0f1a;
+    background: #0a0a14;
     color: white;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px 20px;
+    padding: 40px 20px;
   }
+  .logo { font-size: 12px; letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 10px; }
+  h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.5px; }
+  .tagline { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 52px; }
 
-  .logo {
-    font-size: 13px;
-    letter-spacing: 3px;
-    color: rgba(255,255,255,0.35);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .tagline {
-    font-size: 14px;
-    color: rgba(255,255,255,0.45);
-    margin-bottom: 48px;
-  }
-
-  .district-grid {
+  .group-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 18px;
     width: 100%;
-    max-width: 680px;
+    max-width: 720px;
+  }
+  @media (max-width: 560px) {
+    .group-grid { grid-template-columns: 1fr; max-width: 340px; }
   }
 
-  @media (max-width: 480px) {
-    .district-grid { grid-template-columns: 1fr; max-width: 320px; }
-  }
-
-  .district-card {
+  .group-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    padding: 32px 20px 28px;
-    border-radius: 20px;
+    gap: 12px;
+    padding: 36px 20px 30px;
+    border-radius: 22px;
     text-decoration: none;
     color: white;
     transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
     position: relative;
     overflow: hidden;
   }
-  .district-card::before {
+  .group-card::before {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.06);
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.05);
     opacity: 0;
     transition: opacity 0.2s;
   }
-  .district-card:hover { transform: translateY(-6px); }
-  .district-card:hover::before { opacity: 1; }
+  .group-card:hover { transform: translateY(-6px); }
+  .group-card:hover::before { opacity: 1; }
 
-  .dc-y1 { background: linear-gradient(145deg, #1e3c72, #2a5298); box-shadow: 0 4px 20px rgba(42,82,152,0.4); }
-  .dc-y2 { background: linear-gradient(145deg, #134e5e, #71b280); box-shadow: 0 4px 20px rgba(113,178,128,0.4); }
-  .dc-y3 { background: linear-gradient(145deg, #7b2d8b, #a855f7); box-shadow: 0 4px 20px rgba(168,85,247,0.4); }
+  .gc-youth  { background: linear-gradient(145deg, #4a1580, #7c3aed); box-shadow: 0 4px 24px rgba(124,58,237,0.35); }
+  .gc-hs     { background: linear-gradient(145deg, #b45309, #d97706); box-shadow: 0 4px 24px rgba(217,119,6,0.35); }
+  .gc-ms     { background: linear-gradient(145deg, #065f46, #059669); box-shadow: 0 4px 24px rgba(5,150,105,0.35); }
 
-  .dc-icon { font-size: 42px; }
-  .dc-num {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    opacity: 0.65;
-    text-transform: uppercase;
-  }
-  .dc-name {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-  .dc-badge {
-    font-size: 11px;
-    background: rgba(255,255,255,0.18);
-    padding: 3px 10px;
-    border-radius: 20px;
-    opacity: 0.85;
-  }
-  .dc-badge.soon {
-    background: rgba(255,255,255,0.08);
-    opacity: 0.45;
-    font-style: italic;
-  }
+  .gc-icon { font-size: 44px; }
+  .gc-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; opacity: 0.6; text-transform: uppercase; }
+  .gc-name { font-size: 22px; font-weight: 800; }
+  .gc-sub { font-size: 12px; opacity: 0.55; }
 
-  .footer {
-    margin-top: 48px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.2);
-    letter-spacing: 1px;
-  }
+  .footer { margin-top: 52px; font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 1px; }
 </style>
 </head>
 <body>
 
 <div class="logo">台北市召會第八十一會所</div>
-<h1>青年出席統計</h1>
-<p class="tagline">選擇你要查看的區</p>
+<h1>出席統計系統</h1>
+<p class="tagline">選擇你要查看的大區</p>
 
-<div class="district-grid">
-  <a href="y1/index.html" class="district-card dc-y1">
-    <div class="dc-icon">🌊</div>
-    <div class="dc-num">DISTRICT 1</div>
-    <div class="dc-name">青年一區</div>
-    <div class="dc-badge">2026年3月</div>
+<div class="group-grid">
+  <a href="youth.html" class="group-card gc-youth">
+    <div class="gc-icon">⚡</div>
+    <div class="gc-label">YOUTH</div>
+    <div class="gc-name">青年大區</div>
+    <div class="gc-sub">一區 · 二區 · 三區</div>
   </a>
 
-  <a href="y2/index.html" class="district-card dc-y2">
-    <div class="dc-icon">🌿</div>
-    <div class="dc-num">DISTRICT 2</div>
-    <div class="dc-name">青年二區</div>
-    <div class="dc-badge">2026年3月</div>
+  <a href="hs.html" class="group-card gc-hs">
+    <div class="gc-icon">🔥</div>
+    <div class="gc-label">HIGH SCHOOL</div>
+    <div class="gc-name">高中大區</div>
+    <div class="gc-sub">一區 · 二區 · 三區</div>
   </a>
 
-  <a href="y3/index.html" class="district-card dc-y3">
-    <div class="dc-icon">⚡</div>
-    <div class="dc-num">DISTRICT 3</div>
-    <div class="dc-name">青年三區</div>
-    <div class="dc-badge">2026年3月</div>
+  <a href="ms.html" class="group-card gc-ms">
+    <div class="gc-icon">🌱</div>
+    <div class="gc-label">MIDDLE SCHOOL</div>
+    <div class="gc-name">國中大區</div>
+    <div class="gc-sub">一區 · 二區</div>
   </a>
 </div>
 
-<div class="footer">青年出席統計系統 · 81Y</div>
+<div class="footer">81Y · 出席統計系統</div>
 
 </body>
 </html>
