@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../index.html'); }
+})();
+</script>
+<title>青二中流砥柱</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+
+  header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    background: linear-gradient(180deg, #1a1a3e 0%, #0f0f1a 100%);
+  }
+  .title-main {
+    font-size: 32px; font-weight: 800; letter-spacing: 4px;
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .title-sub { font-size: 13px; color: #888; letter-spacing: 1px; }
+  .info-block {
+    display: inline-flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+    margin-top: 16px; padding: 14px 24px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+  }
+  .info-item { text-align: center; }
+  .info-label { font-size: 11px; color: #666; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .info-value { font-size: 13px; color: #ccc; font-weight: 600; }
+  .score-rule { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+  .score-pill {
+    font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
+  }
+  .score-pill-gold { background: rgba(246,211,101,0.15); color: #f6d365; border: 1px solid rgba(246,211,101,0.3); }
+  .score-pill-gray { background: rgba(255,255,255,0.06); color: #aaa; border: 1px solid rgba(255,255,255,0.1); }
+  .period-badge {
+    display: inline-block; margin-top: 12px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 5px 16px; font-size: 12px; color: #aaa;
+  }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 30px 16px 60px; }
+
+  /* Top 3 podium */
+  .podium { display: flex; align-items: flex-start; justify-content: center; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+  .podium-card {
+    flex: 1; min-width: 130px; max-width: 180px; border-radius: 16px; padding: 20px 12px 16px;
+    text-align: center; cursor: pointer; transition: transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .podium-card:hover { transform: translateY(-4px); }
+  .podium-1 {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #7a3d00; transform: scale(1.04); box-shadow: 0 6px 20px rgba(253,160,133,0.4);
+  }
+  .podium-1:hover { transform: scale(1.04) translateY(-4px); }
+  .podium-2 {
+    background: linear-gradient(135deg, #d0d0d0 0%, #a8a8a8 100%);
+    color: #444;
+  }
+  .podium-3 {
+    background: linear-gradient(135deg, #f0a070 0%, #c87941 100%);
+    color: #5a2a00;
+  }
+  .podium-crown { font-size: 28px; margin-bottom: 6px; }
+  .podium-rank { font-size: 11px; font-weight: 700; opacity: 0.6; letter-spacing: 1px; margin-bottom: 4px; }
+  .podium-name { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .podium-score { font-size: 28px; font-weight: 900; }
+  .podium-score-label { font-size: 10px; opacity: 0.6; margin-top: 2px; }
+  .podium-bar { display: flex; gap: 2px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .pb { width: 10px; height: 10px; border-radius: 2px; background: rgba(0,0,0,0.15); }
+  .pb.on { background: rgba(0,0,0,0.35); }
+
+  /* List */
+  .list-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; margin-bottom: 8px;
+    overflow: hidden; cursor: pointer; transition: background 0.15s;
+  }
+  .list-card:hover { background: rgba(255,255,255,0.07); }
+  .list-row {
+    display: flex; align-items: center; padding: 14px 16px; gap: 14px;
+  }
+  .list-rank {
+    width: 28px; text-align: center; font-size: 14px; font-weight: 700;
+    color: #666; flex-shrink: 0;
+  }
+  .list-rank.top { color: #fda085; }
+  .list-name { flex: 1; font-size: 16px; font-weight: 600; }
+  .list-score-bar { flex: 2; }
+  .score-track {
+    height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
+  }
+  .score-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #f6d365, #fda085);
+    transition: width 0.6s ease;
+  }
+  .list-score-num {
+    font-size: 18px; font-weight: 800; color: #fda085; min-width: 36px; text-align: right;
+  }
+
+  /* Detail panel */
+  .detail { display: none; padding: 0 16px 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .list-card.open .detail { display: block; }
+  .detail-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .act-block {
+    background: rgba(255,255,255,0.04); border-radius: 8px;
+    padding: 10px 12px; flex: 1; min-width: 90px;
+  }
+  .act-name { font-size: 11px; color: #888; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .act-pts { font-size: 13px; font-weight: 700; color: #fda085; }
+  .week-row { display: flex; gap: 4px; margin-top: 6px; }
+  .wdot {
+    width: 22px; height: 22px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+  .wdot.on { background: #fda085; color: #7a3d00; }
+  .wdot.off { background: rgba(255,255,255,0.07); color: #555; }
+
+  .chevron { color: #555; font-size: 16px; transition: transform 0.2s; flex-shrink: 0; }
+  .list-card.open .chevron { transform: rotate(90deg); }
+
+  .section-label {
+    font-size: 11px; color: #555; letter-spacing: 1px; text-transform: uppercase;
+    margin: 24px 0 10px; padding-left: 4px;
+  }
+
+  .score-note {
+    text-align: center; font-size: 12px; color: #555; margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" style="position:absolute;top:16px;left:16px;color:rgba(255,255,255,0.5);text-decoration:none;font-size:22px" title="返回三區主頁">‹</a>
+  <div class="title-main">青二中流砥柱</div>
+  <div class="title-sub">PILLAR OF THE GROUP · TOP 28</div>
+  <div class="period-badge">📅 計算區間：2026年3月 第二～第五週（共 4 週）</div>
+  <div style="margin-top:14px">
+    <div class="score-rule">
+      <span class="score-pill score-pill-gold">主日出席 × 3 分</span>
+      <span class="score-pill score-pill-gray">小排出席 × 1 分</span>
+      <span class="score-pill score-pill-gray">晨興出席 × 1 分</span>
+      <span class="score-pill score-pill-gray">禱告出席 × 1 分</span>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:8px">每週最高 6 分 · 4 週滿分 24 分 · 主日為三倍權重</div>
+  </div>
+</header>
+
+<div class="container" id="app"></div>
+
+<script>
+const DATA = {"period":"2026年3月 第二～第五週","max_score":24,"rankings":[{"姓名":"吳秉祈","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":24,"rank":1},{"姓名":"吳貞儀","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":24,"rank":1},{"姓名":"陳家潔","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":24,"rank":1},{"姓名":"冉以琳","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,0,1],"points":3},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":23,"rank":4},{"姓名":"張詠恩","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,0,1],"points":3},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":23,"rank":4},{"姓名":"陳聿新","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,1,0],"points":3}},"score":23,"rank":4},{"姓名":"王詩淇","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[0,1,1,0],"points":2}},"score":22,"rank":7},{"姓名":"陳迦美","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,1],"points":4},"晨興":{"weeks":[1,1,1,1],"points":4},"禱告":{"weeks":[1,1,0,0],"points":2}},"score":22,"rank":7},{"姓名":"史以凡","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,0,1],"points":3},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":19,"rank":9},{"姓名":"董宜睿","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,0,0,1],"points":2},"晨興":{"weeks":[0,0,0,1],"points":1},"禱告":{"weeks":[1,1,1,1],"points":4}},"score":19,"rank":9},{"姓名":"王冠傑","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,0,1,1],"points":3},"晨興":{"weeks":[1,0,1,1],"points":3},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":18,"rank":11},{"姓名":"王冠婷","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,1,1,0],"points":3},"晨興":{"weeks":[0,1,1,1],"points":3},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":18,"rank":11},{"姓名":"李彥煌","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,0,1,1],"points":3},"晨興":{"weeks":[0,0,1,1],"points":2},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":17,"rank":13},{"姓名":"葉子霓","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,1,0],"points":1},"禱告":{"weeks":[1,0,1,0],"points":2}},"score":15,"rank":14},{"姓名":"于擎楷","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[1,0,0,1],"points":2},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":14,"rank":15},{"姓名":"蘇芊均","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[0,1,0,0],"points":1},"晨興":{"weeks":[0,1,0,0],"points":1},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":14,"rank":15},{"姓名":"鄧蘋","breakdown":{"主日":{"weeks":[1,1,1,1],"points":12},"小排":{"weeks":[0,0,0,1],"points":1},"晨興":{"weeks":[0,0,0,1],"points":1},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":14,"rank":15},{"姓名":"吳晨莉","breakdown":{"主日":{"weeks":[1,1,1,0],"points":9},"小排":{"weeks":[1,1,1,0],"points":3},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":12,"rank":18},{"姓名":"吳樂予","breakdown":{"主日":{"weeks":[1,1,0,1],"points":9},"小排":{"weeks":[1,1,0,0],"points":2},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":11,"rank":19},{"姓名":"蔡宜倢","breakdown":{"主日":{"weeks":[1,0,1,0],"points":6},"小排":{"weeks":[1,1,1,0],"points":3},"晨興":{"weeks":[0,0,1,0],"points":1},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":10,"rank":20},{"姓名":"戴恩","breakdown":{"主日":{"weeks":[1,1,0,1],"points":9},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":9,"rank":21},{"姓名":"楊子敬","breakdown":{"主日":{"weeks":[1,1,0,0],"points":6},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":6,"rank":22},{"姓名":"賴昱宏","breakdown":{"主日":{"weeks":[0,1,1,0],"points":6},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":6,"rank":22},{"姓名":"楊葶萱","breakdown":{"主日":{"weeks":[1,0,1,0],"points":6},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":6,"rank":22},{"姓名":"高聖華","breakdown":{"主日":{"weeks":[0,1,0,0],"points":3},"小排":{"weeks":[1,0,0,1],"points":2},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":5,"rank":25},{"姓名":"康欣柔","breakdown":{"主日":{"weeks":[0,0,0,0],"points":0},"小排":{"weeks":[0,1,0,0],"points":1},"晨興":{"weeks":[1,0,0,1],"points":2},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":3,"rank":26},{"姓名":"黃沛盈 Sunnie","breakdown":{"主日":{"weeks":[0,0,0,0],"points":0},"小排":{"weeks":[0,1,0,0],"points":1},"晨興":{"weeks":[0,0,0,0],"points":0},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":1,"rank":27},{"姓名":"妍彤","breakdown":{"主日":{"weeks":[0,0,0,0],"points":0},"小排":{"weeks":[0,0,0,0],"points":0},"晨興":{"weeks":[0,0,0,1],"points":1},"禱告":{"weeks":[0,0,0,0],"points":0}},"score":1,"rank":27}]};
+
+const ACTS = ['主日','小排','晨興','禱告'];
+const ACT_WEIGHT = {'主日':3,'小排':1,'晨興':1,'禱告':1};
+
+function renderPodiumDots(person) {
+  return ACTS.map(act => {
+    const w = person.breakdown[act].weeks;
+    return w.map(v => `<div class="pb ${v?'on':''}"></div>`).join('');
+  }).join('');
+}
+
+function renderActBlock(act, info) {
+  const wt = ACT_WEIGHT[act];
+  const dots = info.weeks.map(v =>
+    `<div class="wdot ${v?'on':'off'}">${v?'✓':'—'}</div>`
+  ).join('');
+  return `
+    <div class="act-block">
+      <div class="act-name">
+        <span>${act} <span style="color:#555;font-size:10px">×${wt}</span></span>
+        <span class="act-pts">${info.points}pt</span>
+      </div>
+      <div class="week-row">${dots}</div>
+    </div>`;
+}
+
+function renderCard(p, isPodium) {
+  const pct = Math.round(p.score / DATA.max_score * 100);
+  const acts = ACTS.map(act => renderActBlock(act, p.breakdown[act])).join('');
+  return `
+    <div class="list-card" onclick="this.classList.toggle('open')">
+      <div class="list-row">
+        <div class="list-rank ${p.rank<=3?'top':''}">${p.rank}</div>
+        <div class="list-name">${p.姓名}</div>
+        <div class="list-score-bar">
+          <div class="score-track"><div class="score-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="list-score-num">${p.score}</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="detail">
+        <div class="detail-grid">${acts}</div>
+      </div>
+    </div>`;
+}
+
+function render() {
+  // Group top 3 ranks (handles ties)
+  const rankInfo = {
+    1: { crown: '👑', label: 'NO.1', cls: 'podium-1' },
+    2: { crown: '🥈', label: 'NO.2', cls: 'podium-2' },
+    3: { crown: '🥉', label: 'NO.3', cls: 'podium-3' },
+  };
+  const podiumGroups = {};
+  DATA.rankings.forEach((p, idx) => {
+    if (p.rank <= 3) {
+      if (!podiumGroups[p.rank]) podiumGroups[p.rank] = [];
+      podiumGroups[p.rank].push({...p, _idx: idx});
+    }
+  });
+
+  const podiumCards = [1,2,3].flatMap(rank => {
+    const group = podiumGroups[rank] || [];
+    const info = rankInfo[rank];
+    return group.map(p => `
+      <div class="podium-card ${info.cls}" onclick="document.querySelectorAll('.list-card')[${p._idx}].classList.toggle('open');document.querySelectorAll('.list-card')[${p._idx}].scrollIntoView({behavior:'smooth'})">
+        <div class="podium-crown">${info.crown}</div>
+        <div class="podium-rank">${info.label}</div>
+        <div class="podium-name">${p.姓名}</div>
+        <div class="podium-score">${p.score}</div>
+        <div class="podium-score-label">/ ${DATA.max_score} 分</div>
+        <div class="podium-bar">${renderPodiumDots(p)}</div>
+      </div>`);
+  });
+
+  const podiumHTML = `<div class="podium">${podiumCards.join('')}</div>`;
+  const rest = DATA.rankings.filter(p => p.rank > 3);
+
+  const listHTML = `
+    <div class="section-label">完整排名</div>
+    ${DATA.rankings.map(p => renderCard(p)).join('')}
+    <div class="score-note">主日×3分 · 小排×1分 · 晨興×1分 · 禱告×1分 · 滿分 ${DATA.max_score} 分</div>`;
+
+  document.getElementById('app').innerHTML = podiumHTML + listHTML;
+}
+
+render();
+</script>
+</body>
+</html>
