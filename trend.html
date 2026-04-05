@@ -99,6 +99,7 @@
   .rate-pct { font-size: 22px; font-weight: 800; }
   .rate-lbl { font-size: 11px; color: #999; margin-top: 1px; }
   .rate-base { font-size: 11px; color: #bbb; margin-top: 3px; }
+  .rate-note { font-size: 10px; color: #ccc; margin-top: 5px; line-height: 1.4; }
   .rate-bar-wrap { height: 4px; background: #f0f0f0; border-radius: 2px; margin-top: 7px; overflow: hidden; }
   .rate-bar { height: 100%; border-radius: 2px; transition: width 0.4s; }
 
@@ -303,6 +304,7 @@ function renderRates() {
         <div class="rate-lbl">${act} 比率</div>
         <div class="rate-base">${avg.toFixed(1)} / ${base} 人</div>
         <div class="rate-bar-wrap"><div class="rate-bar" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
+        <div class="rate-note">分子：近4週出席人數平均${nonZero.length < 4 ? '（排除 '+(4-nonZero.length)+' 個停辦週）' : ''}<br>分母：${DK_NAME[currentDk]}基數 ${base} 人</div>
       </div>`;
     }).join('');
 }
