@@ -111,6 +111,7 @@
   .stat-val { font-size: 20px; font-weight: 700; }
   .stat-lbl { font-size: 11px; color: #999; margin-top: 2px; }
   .stat-trend { font-size: 11px; margin-top: 3px; font-weight: 600; }
+  .stat-note { font-size: 10px; color: #aaa; margin-top: 6px; line-height: 1.5; }
   .trend-up   { color: #27ae60; }
   .trend-down { color: #e74c3c; }
   .trend-flat { color: #999; }
@@ -490,6 +491,7 @@ function renderStats() {
         <div class="stat-val" style="color:${clr.border}">${avg4}</div>
         <div class="stat-lbl">${act} 近4週均</div>
         <div class="stat-trend ${cls}">${str}</div>
+        <div class="stat-note">大數字：最近4週出席人數的平均值<br>箭頭：與再前4週均值（${avgP}）相比</div>
       </div>`;
     }).join('');
 }
