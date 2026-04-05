@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  const KEY = 'auth_81y3';
+  const CORRECT = '5281';
+  if (sessionStorage.getItem(KEY) !== CORRECT) {
+    window.location.href = 'index.html';
+  }
+})();
+</script>
+<title>本週點名追蹤 | 81會所</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #0f0f1a;
+  color: #e8e8f0;
+  min-height: 100vh;
+  padding-bottom: 48px;
+}
+
+/* Top bar */
+.topbar {
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.back-btn {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover { color: white; }
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.85);
+}
+.topbar-date {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
+}
+
+/* Alert banner */
+.alert-banner {
+  background: linear-gradient(135deg, #7f0000, #c0392b);
+  padding: 12px 24px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Main content */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 20px;
+}
+
+/* Page header */
+.page-header {
+  margin-bottom: 28px;
+}
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.page-header .sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* Summary stat cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+@media (max-width: 640px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.stat-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+}
+.stat-card .val {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-card .label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.5px;
+}
+.stat-card.alert .val { color: #e74c3c; }
+.stat-card.highlight .val { color: #f39c12; }
+
+/* District cards grid */
+.district-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 560px) {
+  .district-grid { grid-template-columns: 1fr; }
+}
+
+.district-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.district-card.unsubmitted { border-color: rgba(192,57,43,0.5); }
+.district-card.low { border-color: rgba(243,156,18,0.35); }
+
+.card-header {
+  padding: 16px 18px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.district-name {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.district-name::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.group-youth .district-name::before { background: #e8522a; }
+.group-hs .district-name::before { background: #c0392b; }
+.group-ms .district-name::before { background: #27ae60; }
+
+.status-badge {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-unsubmitted { background: rgba(192,57,43,0.25); color: #e74c3c; }
+.badge-low { background: rgba(243,156,18,0.2); color: #f39c12; }
+.badge-ok { background: rgba(39,174,96,0.2); color: #2ecc71; }
+
+.card-body {
+  padding: 0 18px 16px 18px;
+}
+
+.attendance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.attendance-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+}
+.attendance-val {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.progress-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.group-youth .progress-fill { background: #e8522a; }
+.group-hs .progress-fill { background: #c0392b; }
+.group-ms .progress-fill { background: #27ae60; }
+
+/* Per-row mini table */
+.row-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.row-table th {
+  text-align: left;
+  padding: 4px 6px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.row-table td {
+  padding: 5px 6px;
+  color: rgba(255,255,255,0.7);
+}
+.row-table tr.zero-row td {
+  background: rgba(192,57,43,0.15);
+  color: #e74c3c;
+  font-weight: 600;
+}
+.row-table tr.zero-row td:first-child::after {
+  content: ' ⚠';
+  font-size: 10px;
+}
+
+/* Extra stats row */
+.extra-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.extra-chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.5);
+}
+.extra-chip span {
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+  margin-left: 3px;
+}
+
+/* Toggle button */
+.toggle-btn {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.toggle-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+}
+
+/* Member chips */
+.member-list {
+  display: none;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 12px 18px 16px 18px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.member-list.open { display: flex; }
+
+.member-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.chip-zero {
+  background: rgba(192,57,43,0.25);
+  border: 1px solid rgba(192,57,43,0.4);
+  color: #ff6b6b;
+  font-weight: 600;
+}
+.chip-normal {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+}
+
+/* March comparison */
+.march-compare {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 10px;
+}
+.march-compare .up { color: #2ecc71; }
+.march-compare .down { color: #e74c3c; }
+
+/* Footer note */
+.footer-note {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.7;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="back-btn">← 首頁</a>
+  <div class="topbar-title">📋 本週點名追蹤</div>
+  <div class="topbar-date">3/30 – 4/5</div>
+</div>
+
+<div class="alert-banner">
+  ⚠️ 高中三區一排 本週尚未提交點名資料
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h1>📋 本週點名追蹤</h1>
+    <div class="sub">2026年3月30日 ～ 4月5日（第14週）</div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="stat-grid">
+    <div class="stat-card highlight">
+      <div class="val">82</div>
+      <div class="label">本週主日總計</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">231</div>
+      <div class="label">全會所基數</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">35.5%</div>
+      <div class="label">出席比率</div>
+    </div>
+    <div class="stat-card alert">
+      <div class="val">1排</div>
+      <div class="label">未提交（高中三區一排）</div>
+    </div>
+  </div>
+
+  <!-- District cards -->
+  <div class="district-grid" id="districtGrid"></div>
+
+  <!-- Footer note -->
+  <div class="footer-note">
+    本週資料為3/30~4/5統計。紅色成員所在排組今週主日提交人數為0，出席狀態待確認。其他成員資料來自歷史紀錄，僅供參考。
+  </div>
+</div>
+
+<script>
+const DISTRICTS = [{"id": "y1", "name": "青年一區", "group": "youth", "total": 15, "base": 24, "pct": 62.5, "march_avg": 20, "status": "ok", "rows": [{"name": "一排", "count": 3}, {"name": "二排", "count": 12}, {"name": "未分排", "count": 0}], "zero_rows": [], "extra": {"小排": 11, "禱告": 10, "晨興": 6}}, {"id": "y2", "name": "青年二區", "group": "youth", "total": 8, "base": 24, "pct": 33.3, "march_avg": 21, "status": "low", "rows": [{"name": "(無排)", "count": 8}], "zero_rows": [], "extra": {"小排": 2, "禱告": 3, "晨興": 2}}, {"id": "y3", "name": "青年三區", "group": "youth", "total": 18, "base": 26, "pct": 69.2, "march_avg": 24, "status": "ok", "rows": [{"name": "一排", "count": 11}, {"name": "二排", "count": 4}, {"name": "未分排", "count": 3}], "zero_rows": [], "extra": {"小排": 12, "禱告": 9, "晨興": 11}}, {"id": "hs1", "name": "高中一區", "group": "hs", "total": 3, "base": 19, "pct": 15.8, "march_avg": 17, "status": "low", "rows": [{"name": "一排", "count": 2}, {"name": "二排", "count": 1}], "zero_rows": [], "extra": {"小排": 3, "禱告": 3, "晨興": 2}}, {"id": "hs2", "name": "高中二區", "group": "hs", "total": 8, "base": 19, "pct": 42.1, "march_avg": 19, "status": "low", "rows": [{"name": "一排", "count": 4}, {"name": "二排", "count": 4}], "zero_rows": [], "extra": {"小排": 5, "禱告": 6, "晨興": 8}}, {"id": "hs3", "name": "高中三區", "group": "hs", "total": 5, "base": 12, "pct": 41.7, "march_avg": 11, "status": "unsubmitted", "rows": [{"name": "一排", "count": 0}, {"name": "二排", "count": 5}], "zero_rows": ["一排"], "extra": {"小排": 3, "禱告": 2, "晨興": 4}}, {"id": "ms1", "name": "國中一區", "group": "ms", "total": 19, "base": 56, "pct": 33.9, "march_avg": 49, "status": "low", "rows": [{"name": "九年級", "count": 2}, {"name": "八年級", "count": 17}], "zero_rows": [], "extra": {"小排": 6, "禱告": 11, "晨興": 12}}, {"id": "ms2", "name": "國中二區", "group": "ms", "total": 6, "base": 51, "pct": 11.8, "march_avg": 45, "status": "low", "rows": [{"name": "七年級", "count": 3}, {"name": "六年級", "count": 3}], "zero_rows": [], "extra": {"小排": 7, "禱告": 6, "晨興": 11}}];
+const MEMBERS = {"y1": [{"n": "廖健智", "pai": "二排", "hist": 100, "zero": false}, {"n": "張鈞哲", "pai": "二排", "hist": 100, "zero": false}, {"n": "鍾歆", "pai": "二排", "hist": 100, "zero": false}, {"n": "黃珮甄", "pai": "二排", "hist": 100, "zero": false}, {"n": "王晨瑄", "pai": "一排", "hist": 100, "zero": false}, {"n": "石真", "pai": "二排", "hist": 98, "zero": false}, {"n": "江嘉豪", "pai": "二排", "hist": 97, "zero": false}, {"n": "楊子葳", "pai": "二排", "hist": 97, "zero": false}, {"n": "丁博宏", "pai": "二排", "hist": 95, "zero": false}, {"n": "曾子誠", "pai": "二排", "hist": 95, "zero": false}, {"n": "賴雨德", "pai": "二排", "hist": 93, "zero": false}, {"n": "鍾安怡", "pai": "二排", "hist": 90, "zero": false}, {"n": "鍾愛", "pai": "一排", "hist": 90, "zero": false}, {"n": "柯新名", "pai": "未分排", "hist": 85, "zero": false}, {"n": "李彥翰", "pai": "二排", "hist": 82, "zero": false}, {"n": "余紹恩", "pai": "未分排", "hist": 82, "zero": false}, {"n": "蔡宜薰", "pai": "一排", "hist": 72, "zero": false}, {"n": "塗家柔", "pai": "一排", "hist": 70, "zero": false}, {"n": "管錫玉", "pai": "二排", "hist": 68, "zero": false}, {"n": "吳巧雯", "pai": "二排", "hist": 62, "zero": false}, {"n": "王平安", "pai": "二排", "hist": 42, "zero": false}, {"n": "黃國展", "pai": "二排", "hist": 38, "zero": false}, {"n": "彭柏崴", "pai": "二排", "hist": 27, "zero": false}, {"n": "莊凱閎", "pai": "未分排", "hist": 3, "zero": false}], "y2": [{"n": "吳秉祈", "pai": "未分排", "hist": 100, "zero": false}, {"n": "冉以琳", "pai": "未分排", "hist": 100, "zero": false}, {"n": "吳貞儀", "pai": "未分排", "hist": 100, "zero": false}, {"n": "史以凡", "pai": "未分排", "hist": 98, "zero": false}, {"n": "董宜睿", "pai": "未分排", "hist": 98, "zero": false}, {"n": "張詠恩", "pai": "未分排", "hist": 98, "zero": false}, {"n": "陳家潔", "pai": "未分排", "hist": 98, "zero": false}, {"n": "陳聿新", "pai": "未分排", "hist": 95, "zero": false}, {"n": "于擎楷", "pai": "未分排", "hist": 87, "zero": false}, {"n": "吳晨莉", "pai": "未分排", "hist": 85, "zero": false}, {"n": "王詩淇", "pai": "未分排", "hist": 82, "zero": false}, {"n": "葉子霓", "pai": "未分排", "hist": 78, "zero": false}, {"n": "蔡宜倢", "pai": "未分排", "hist": 77, "zero": false}, {"n": "楊葶萱", "pai": "未分排", "hist": 75, "zero": false}, {"n": "鄧蘋", "pai": "未分排", "hist": 73, "zero": false}, {"n": "楊子敬", "pai": "未分排", "hist": 62, "zero": false}, {"n": "王冠婷", "pai": "未分排", "hist": 60, "zero": false}, {"n": "謝宇泉", "pai": "未分排", "hist": 50, "zero": false}, {"n": "高聖華", "pai": "未分排", "hist": 50, "zero": false}, {"n": "蘇芊均", "pai": "未分排", "hist": 50, "zero": false}, {"n": "賴昱宏", "pai": "未分排", "hist": 42, "zero": false}, {"n": "江漢維", "pai": "未分排", "hist": 42, "zero": false}, {"n": "江漢翔", "pai": "未分排", "hist": 42, "zero": false}, {"n": "李瀚元", "pai": "未分排", "hist": 35, "zero": false}, {"n": "陳迦美", "pai": "未分排", "hist": 35, "zero": false}, {"n": "王冠傑", "pai": "未分排", "hist": 33, "zero": false}, {"n": "戴恩", "pai": "未分排", "hist": 32, "zero": false}, {"n": "李彥煌", "pai": "未分排", "hist": 25, "zero": false}, {"n": "呂全恩", "pai": "未分排", "hist": 25, "zero": false}], "y3": [{"n": "甘順基", "pai": "一排", "hist": 100, "zero": false}, {"n": "呂柔蒨", "pai": "二排", "hist": 100, "zero": false}, {"n": "王新恩", "pai": "一排", "hist": 100, "zero": false}, {"n": "朱璟軒", "pai": "二排", "hist": 98, "zero": false}, {"n": "蔡旻翰", "pai": "一排", "hist": 98, "zero": false}, {"n": "吳汶靜", "pai": "一排", "hist": 98, "zero": false}, {"n": "張若筠", "pai": "一排", "hist": 98, "zero": false}, {"n": "戴采薰", "pai": "未分排", "hist": 98, "zero": false}, {"n": "陳柏勳", "pai": "一排", "hist": 97, "zero": false}, {"n": "呂妍心", "pai": "一排", "hist": 97, "zero": false}, {"n": "葉倢妤", "pai": "二排", "hist": 97, "zero": false}, {"n": "趙培媛", "pai": "一排", "hist": 97, "zero": false}, {"n": "沈以恩", "pai": "二排", "hist": 95, "zero": false}, {"n": "陳昱宏", "pai": "未分排", "hist": 95, "zero": false}, {"n": "彭柏愷", "pai": "一排", "hist": 93, "zero": false}, {"n": "吳雨桐", "pai": "一排", "hist": 92, "zero": false}, {"n": "曾子榆", "pai": "二排", "hist": 92, "zero": false}, {"n": "梁凱婷", "pai": "一排", "hist": 92, "zero": false}, {"n": "高語謙", "pai": "一排", "hist": 92, "zero": false}, {"n": "張虔立", "pai": "未分排", "hist": 83, "zero": false}, {"n": "林書丞", "pai": "未分排", "hist": 68, "zero": false}, {"n": "吳呈峻", "pai": "二排", "hist": 53, "zero": false}, {"n": "徐靖城", "pai": "一排", "hist": 52, "zero": false}, {"n": "張舒涵", "pai": "二排", "hist": 50, "zero": false}, {"n": "陳利益", "pai": "一排", "hist": 32, "zero": false}], "hs1": [{"n": "吳均平", "pai": "一排", "hist": 100, "zero": false}, {"n": "吳秉佳", "pai": "二排", "hist": 100, "zero": false}, {"n": "石錄", "pai": "一排", "hist": 100, "zero": false}, {"n": "張君尊", "pai": "一排", "hist": 98, "zero": false}, {"n": "陳昱廷", "pai": "一排", "hist": 97, "zero": false}, {"n": "柯新一", "pai": "一排", "hist": 97, "zero": false}, {"n": "蔡旻杰", "pai": "一排", "hist": 97, "zero": false}, {"n": "趙翊辰", "pai": "一排", "hist": 97, "zero": false}, {"n": "杜庭緯", "pai": "一排", "hist": 95, "zero": false}, {"n": "張韶謙", "pai": "二排", "hist": 93, "zero": false}, {"n": "王麗雅", "pai": "二排", "hist": 93, "zero": false}, {"n": "黃新綸", "pai": "一排", "hist": 93, "zero": false}, {"n": "洪乙瑂", "pai": "二排", "hist": 92, "zero": false}, {"n": "劉牧愛", "pai": "二排", "hist": 90, "zero": false}, {"n": "謝子云", "pai": "二排", "hist": 75, "zero": false}, {"n": "陳聿恩", "pai": "一排", "hist": 62, "zero": false}, {"n": "陳怡如", "pai": "二排", "hist": 50, "zero": false}, {"n": "鍾寧", "pai": "一排", "hist": 18, "zero": false}, {"n": "邱聖智", "pai": "一排", "hist": 8, "zero": false}, {"n": "劉禹漢", "pai": "一排", "hist": 3, "zero": false}, {"n": "楊晟諺", "pai": "一排", "hist": 3, "zero": false}, {"n": "千瑄", "pai": "二排", "hist": 0, "zero": false}], "hs2": [{"n": "方厚民", "pai": "二排", "hist": 100, "zero": false}, {"n": "黃梓昀", "pai": "二排", "hist": 100, "zero": false}, {"n": "簡欣樂", "pai": "二排", "hist": 100, "zero": false}, {"n": "李國禎", "pai": "一排", "hist": 100, "zero": false}, {"n": "陳柏安", "pai": "一排", "hist": 100, "zero": false}, {"n": "呂德鈞", "pai": "一排", "hist": 98, "zero": false}, {"n": "張宏恩", "pai": "一排", "hist": 98, "zero": false}, {"n": "莊芮甄", "pai": "二排", "hist": 98, "zero": false}, {"n": "藍聿晅", "pai": "二排", "hist": 98, "zero": false}, {"n": "許奕呈", "pai": "一排", "hist": 98, "zero": false}, {"n": "何建佑", "pai": "一排", "hist": 97, "zero": false}, {"n": "林耀新", "pai": "一排", "hist": 97, "zero": false}, {"n": "鄧常紘", "pai": "一排", "hist": 95, "zero": false}, {"n": "陳鈴郁", "pai": "二排", "hist": 92, "zero": false}, {"n": "林沛儒", "pai": "二排", "hist": 72, "zero": false}, {"n": "楊英琪", "pai": "二排", "hist": 68, "zero": false}, {"n": "余佩恩", "pai": "二排", "hist": 50, "zero": false}, {"n": "劉倢妤", "pai": "二排", "hist": 42, "zero": false}, {"n": "洪瀅捷", "pai": "二排", "hist": 42, "zero": false}, {"n": "李存軒", "pai": "一排", "hist": 38, "zero": false}, {"n": "林政澤", "pai": "一排", "hist": 37, "zero": false}, {"n": "魏苡樂", "pai": "二排", "hist": 35, "zero": false}, {"n": "林嘉宥", "pai": "一排", "hist": 17, "zero": false}, {"n": "金沐薰", "pai": "一排", "hist": 3, "zero": false}, {"n": "王若臨", "pai": "二排", "hist": 0, "zero": false}], "hs3": [{"n": "黃梓恆", "pai": "一排", "hist": 98, "zero": true}, {"n": "謝全一", "pai": "一排", "hist": 98, "zero": true}, {"n": "黃治熙", "pai": "一排", "hist": 97, "zero": true}, {"n": "張少軒", "pai": "一排", "hist": 50, "zero": true}, {"n": "蔡溢恩", "pai": "一排", "hist": 43, "zero": true}, {"n": "趙心樂", "pai": "二排", "hist": 100, "zero": false}, {"n": "陸佳依", "pai": "二排", "hist": 100, "zero": false}, {"n": "吳昕芸", "pai": "二排", "hist": 100, "zero": false}, {"n": "蔡云齊", "pai": "二排", "hist": 95, "zero": false}, {"n": "劉牧心", "pai": "二排", "hist": 93, "zero": false}, {"n": "郭語珊", "pai": "二排", "hist": 83, "zero": false}, {"n": "金雨卉", "pai": "二排", "hist": 62, "zero": false}, {"n": "葉庭驊", "pai": "未分排", "hist": 47, "zero": false}], "ms1": [{"n": "吳均和", "pai": "八年級", "hist": 100, "zero": false}, {"n": "張怡東", "pai": "八年級", "hist": 100, "zero": false}, {"n": "陳信維", "pai": "九年級", "hist": 100, "zero": false}, {"n": "張祈恩", "pai": "九年級", "hist": 100, "zero": false}, {"n": "李國瑞", "pai": "八年級", "hist": 100, "zero": false}, {"n": "谷定", "pai": "八年級", "hist": 100, "zero": false}, {"n": "陳道恩", "pai": "九年級", "hist": 100, "zero": false}, {"n": "黃翊綸", "pai": "八年級", "hist": 100, "zero": false}, {"n": "曾紘緯", "pai": "八年級", "hist": 100, "zero": false}, {"n": "林奕涵", "pai": "八年級", "hist": 100, "zero": false}, {"n": "莊閔童", "pai": "八年級", "hist": 100, "zero": false}, {"n": "雷嗣益", "pai": "九年級", "hist": 98, "zero": false}, {"n": "黃主業", "pai": "九年級", "hist": 98, "zero": false}, {"n": "劉書亞", "pai": "九年級", "hist": 98, "zero": false}, {"n": "林希米", "pai": "九年級", "hist": 98, "zero": false}, {"n": "白語恩", "pai": "九年級", "hist": 98, "zero": false}, {"n": "簡若安", "pai": "八年級", "hist": 98, "zero": false}, {"n": "于詮暐", "pai": "九年級", "hist": 97, "zero": false}, {"n": "柯新力", "pai": "八年級", "hist": 97, "zero": false}, {"n": "戴昀庭", "pai": "九年級", "hist": 97, "zero": false}, {"n": "汪佩蒂", "pai": "八年級", "hist": 97, "zero": false}, {"n": "程琳", "pai": "九年級", "hist": 97, "zero": false}, {"n": "柯新翎", "pai": "九年級", "hist": 97, "zero": false}, {"n": "簡愛欣", "pai": "九年級", "hist": 97, "zero": false}, {"n": "陳馨", "pai": "八年級", "hist": 97, "zero": false}, {"n": "高星慧", "pai": "九年級", "hist": 97, "zero": false}, {"n": "杜若齊", "pai": "八年級", "hist": 95, "zero": false}, {"n": "陳道璇", "pai": "九年級", "hist": 95, "zero": false}, {"n": "吳昀樺", "pai": "八年級", "hist": 95, "zero": false}, {"n": "李采璇", "pai": "八年級", "hist": 95, "zero": false}, {"n": "楊芽比", "pai": "八年級", "hist": 95, "zero": false}, {"n": "呂德安", "pai": "八年級", "hist": 93, "zero": false}, {"n": "何建恩", "pai": "八年級", "hist": 93, "zero": false}, {"n": "楊書雅", "pai": "八年級", "hist": 93, "zero": false}, {"n": "陳姸安", "pai": "九年級", "hist": 93, "zero": false}, {"n": "劉一鴻", "pai": "八年級", "hist": 92, "zero": false}, {"n": "王晨宇", "pai": "八年級", "hist": 92, "zero": false}, {"n": "陳仕僑", "pai": "九年級", "hist": 92, "zero": false}, {"n": "楊媃伊", "pai": "八年級", "hist": 92, "zero": false}, {"n": "謝可芳", "pai": "九年級", "hist": 92, "zero": false}, {"n": "林奕瑜", "pai": "八年級", "hist": 87, "zero": false}, {"n": "高琦恩", "pai": "九年級", "hist": 87, "zero": false}, {"n": "王麒淏", "pai": "八年級", "hist": 82, "zero": false}, {"n": "周利恩", "pai": "八年級", "hist": 82, "zero": false}, {"n": "吳宇晨", "pai": "九年級", "hist": 80, "zero": false}, {"n": "許佈恩", "pai": "八年級", "hist": 80, "zero": false}, {"n": "李其蓁", "pai": "八年級", "hist": 80, "zero": false}, {"n": "陳亭羽", "pai": "八年級", "hist": 78, "zero": false}, {"n": "蕭慈意", "pai": "九年級", "hist": 73, "zero": false}, {"n": "林晨恩", "pai": "九年級", "hist": 68, "zero": false}, {"n": "林晨惠", "pai": "九年級", "hist": 68, "zero": false}, {"n": "林恆毅", "pai": "九年級", "hist": 67, "zero": false}, {"n": "吳沐恩", "pai": "八年級", "hist": 67, "zero": false}, {"n": "黃立揚", "pai": "八年級", "hist": 58, "zero": false}, {"n": "吳丞寓", "pai": "九年級", "hist": 42, "zero": false}, {"n": "林靖桀", "pai": "八年級", "hist": 33, "zero": false}, {"n": "徐丞靖", "pai": "八年級", "hist": 20, "zero": false}], "ms2": [{"n": "呂士成", "pai": "七年級", "hist": 100, "zero": false}, {"n": "陸承光", "pai": "六年級", "hist": 100, "zero": false}, {"n": "顏惟倚", "pai": "七年級", "hist": 100, "zero": false}, {"n": "程旭弘", "pai": "六年級", "hist": 98, "zero": false}, {"n": "高星榮", "pai": "七年級", "hist": 98, "zero": false}, {"n": "莊丹萱", "pai": "六年級", "hist": 98, "zero": false}, {"n": "江成聖", "pai": "七年級", "hist": 97, "zero": false}, {"n": "陳楷翔", "pai": "七年級", "hist": 97, "zero": false}, {"n": "廖智柔", "pai": "七年級", "hist": 97, "zero": false}, {"n": "戴采寧", "pai": "六年級", "hist": 97, "zero": false}, {"n": "許憶棻", "pai": "七年級", "hist": 97, "zero": false}, {"n": "顏惟聆", "pai": "六年級", "hist": 95, "zero": false}, {"n": "吳宇星", "pai": "七年級", "hist": 93, "zero": false}, {"n": "鍾禹鋒", "pai": "七年級", "hist": 93, "zero": false}, {"n": "陳祈因", "pai": "七年級", "hist": 93, "zero": false}, {"n": "吳源宸", "pai": "七年級", "hist": 88, "zero": false}, {"n": "林恆樂", "pai": "七年級", "hist": 88, "zero": false}, {"n": "呂以撒", "pai": "六年級", "hist": 87, "zero": false}, {"n": "強承安", "pai": "七年級", "hist": 87, "zero": false}, {"n": "歐陽因悅", "pai": "七年級", "hist": 87, "zero": false}, {"n": "廖宜人", "pai": "六年級", "hist": 85, "zero": false}, {"n": "吳宇愛", "pai": "七年級", "hist": 73, "zero": false}, {"n": "林靖侑", "pai": "七年級", "hist": 67, "zero": false}, {"n": "蔡云睿", "pai": "六年級", "hist": 58, "zero": false}, {"n": "谷策", "pai": "六年級", "hist": 58, "zero": false}, {"n": "黃翊恩", "pai": "六年級", "hist": 58, "zero": false}, {"n": "曾美靜", "pai": "六年級", "hist": 58, "zero": false}, {"n": "洪艾萱", "pai": "六年級", "hist": 58, "zero": false}, {"n": "李承哲", "pai": "六年級", "hist": 57, "zero": false}, {"n": "白語新", "pai": "六年級", "hist": 57, "zero": false}, {"n": "穆傳翰", "pai": "六年級", "hist": 57, "zero": false}, {"n": "張信潔", "pai": "六年級", "hist": 57, "zero": false}, {"n": "林歆庭", "pai": "六年級", "hist": 57, "zero": false}, {"n": "洪婕兮", "pai": "六年級", "hist": 57, "zero": false}, {"n": "林承昊", "pai": "六年級", "hist": 53, "zero": false}, {"n": "楊雨樵", "pai": "六年級", "hist": 53, "zero": false}, {"n": "王筱菲60", "pai": "六年級", "hist": 53, "zero": false}, {"n": "高柔葉", "pai": "六年級", "hist": 53, "zero": false}, {"n": "楊晨昕", "pai": "六年級", "hist": 52, "zero": false}, {"n": "許紜瑄", "pai": "六年級", "hist": 50, "zero": false}, {"n": "陳姿穎", "pai": "六年級", "hist": 48, "zero": false}, {"n": "陳芃蓁", "pai": "六年級", "hist": 47, "zero": false}, {"n": "劉以樂", "pai": "六年級", "hist": 43, "zero": false}, {"n": "楊羿筬", "pai": "六年級", "hist": 42, "zero": false}, {"n": "李育安", "pai": "七年級", "hist": 40, "zero": false}, {"n": "陳聿真", "pai": "六年級", "hist": 40, "zero": false}, {"n": "謝嘉芯", "pai": "六年級", "hist": 40, "zero": false}, {"n": "林靖哲", "pai": "七年級", "hist": 37, "zero": false}, {"n": "周萸帆", "pai": "六年級", "hist": 35, "zero": false}, {"n": "季欣妍", "pai": "六年級", "hist": 33, "zero": false}, {"n": "黃子禔", "pai": "七年級", "hist": 32, "zero": false}, {"n": "吳以樂", "pai": "六年級", "hist": 23, "zero": false}, {"n": "臻華•尤命", "pai": "六年級", "hist": 23, "zero": false}, {"n": "祁若言", "pai": "六年級", "hist": 8, "zero": false}]};
+
+function statusBadge(status) {
+  if (status === 'unsubmitted') return '<span class="status-badge badge-unsubmitted">🔴 未提交</span>';
+  if (status === 'low') return '<span class="status-badge badge-low">🟡 偏低</span>';
+  return '<span class="status-badge badge-ok">🟢 正常</span>';
+}
+
+function renderDistrict(d) {
+  const members = MEMBERS[d.id] || [];
+  const pctStr = d.pct.toFixed(1);
+  const marchDiff = d.total - d.march_avg;
+  const diffLabel = marchDiff >= 0
+    ? '<span class="up">▲' + marchDiff + '</span>'
+    : '<span class="down">▼' + Math.abs(marchDiff) + '</span>';
+
+  // Row table rows
+  const rowsHtml = d.rows.map(r => {
+    const isZero = r.count === 0;
+    return `<tr class="${isZero ? 'zero-row' : ''}">
+      <td>${r.name}</td>
+      <td>${r.count} 人</td>
+    </tr>`;
+  }).join('');
+
+  // Extra stats
+  const extraHtml = Object.entries(d.extra).map(([k,v]) =>
+    `<div class="extra-chip">${k}<span>${v}</span></div>`
+  ).join('');
+
+  // Member chips
+  const chipsHtml = members.map(m => {
+    if (m.zero) {
+      return `<span class="member-chip chip-zero">❓ ${m.n} ${m.pai}</span>`;
+    } else {
+      return `<span class="member-chip chip-normal">${m.n} ${m.pai}</span>`;
+    }
+  }).join('');
+
+  const cardClass = d.status === 'unsubmitted' ? 'unsubmitted' : (d.status === 'low' ? 'low' : '');
+  const fillPct = Math.min(d.pct, 100);
+
+  return `
+  <div class="district-card group-${d.group} ${cardClass}" id="card-${d.id}">
+    <div class="card-header">
+      <div class="district-name">${d.name}</div>
+      ${statusBadge(d.status)}
+    </div>
+    <div class="card-body">
+      <div class="attendance-row">
+        <span class="attendance-label">主日出席</span>
+        <span class="attendance-val">${d.total} / ${d.base} 人（${pctStr}%）</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${fillPct}%"></div>
+      </div>
+      <div class="march-compare">三月平均：${d.march_avg} 人，本週 ${diffLabel} vs 上月均值</div>
+      <table class="row-table">
+        <thead><tr><th>排組</th><th>人數</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="extra-stats">${extraHtml}</div>
+      <button class="toggle-btn" onclick="toggleMembers('${d.id}', this)">
+        <span>展開成員名單</span>
+        <span>▼</span>
+      </button>
+    </div>
+    <div class="member-list" id="members-${d.id}">
+      ${chipsHtml}
+    </div>
+  </div>`;
+}
+
+function toggleMembers(id, btn) {
+  const el = document.getElementById('members-' + id);
+  const isOpen = el.classList.toggle('open');
+  const arrow = btn.querySelector('span:last-child');
+  const label = btn.querySelector('span:first-child');
+  arrow.textContent = isOpen ? '▲' : '▼';
+  label.textContent = isOpen ? '收合成員名單' : '展開成員名單';
+}
+
+const grid = document.getElementById('districtGrid');
+DISTRICTS.forEach(d => {
+  grid.innerHTML += renderDistrict(d);
+});
+</script>
+</body>
+</html>
