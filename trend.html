@@ -261,11 +261,9 @@ function getSegData(dk, act) {
 
 function renderAll() { renderChart(); renderStats(); renderMembers(); }
 
-const SMALL_DKS = new Set(['y1','y2','y3','hs1','hs2','hs3','ms1','ms2']);
-
 function renderMembers() {
   const el = document.getElementById('memberList');
-  if (!SMALL_DKS.has(currentDk)) { el.innerHTML = ''; return; }
+  if (!['y1','y2','y3','hs1','hs2','hs3','ms1','ms2'].includes(currentDk)) { el.innerHTML = ''; return; }
 
   let members = (MEMBER_DATA[currentDk] || []).filter(m => {
     if (genderFilter === 'male'   && m.g !== 'm') return false;
