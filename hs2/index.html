@@ -120,19 +120,17 @@
     gap: 12px;
     user-select: none;
   }
-  .avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
+  .person-badge {
+    width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 14px; color: white; flex-shrink: 0;
-    overflow: hidden;
-    background: #eee;
+    flex-shrink: 0; font-size: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
   }
-  .avatar img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-  }
+  .badge-gold    { background: linear-gradient(135deg, #f7d060, #f4a32a); }
+  .badge-blue    { background: linear-gradient(135deg, #5b9cf6, #2f80ed); }
+  .badge-green   { background: linear-gradient(135deg, #55d98d, #27ae60); }
+  .badge-orange  { background: linear-gradient(135deg, #ffb347, #e67e22); color: white; font-size: 15px; font-weight: 800; }
+  .badge-gray    { background: #e8e8e8; color: #aaa; font-size: 13px; font-weight: 700; }
   .person-info { flex: 1; }
   .person-name { font-size: 15px; font-weight: 600; }
   .person-meta { font-size: 12px; color: #888; margin-top: 2px; }
@@ -421,20 +419,16 @@ function inferGender(name) {
   }
   return 'male';
 }
-function getAvatarUrl(person) {
-  const name = person['姓名'];
-  const group = person['羣組'] || '';
-  const gender = inferGender(name);
-  const seed = encodeURIComponent(name);
-  // Style selection: 中學/小學 → lorelei/adventurer, 大專/青職 → personas
-  let style;
-  if (group === '中學' || group === '小學' || group === '學齡前') {
-    style = gender === 'female' ? 'adventurer' : 'adventurer-neutral';
-  } else {
-    // 大專, 青職, 青壯, etc.
-    style = gender === 'female' ? 'lorelei' : 'notionists-neutral';
-  }
-  return `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}`;
+function getBadge(person) {
+  const march = (person.activities['主日'] || {}).march || [];
+  const n = march.reduce((a,b) => a+b, 0);
+  const total = march.length;
+  if (total === 0) return { cls:'badge-gray', icon:'—' };
+  if (n === total)  return { cls:'badge-gold',   icon:'🏆' };
+  if (n >= total-1) return { cls:'badge-blue',   icon:'⭐' };
+  if (n >= total-2) return { cls:'badge-green',  icon:'✅' };
+  if (n > 0)        return { cls:'badge-orange', icon: String(n) };
+  return { cls:'badge-gray', icon:'·' };
 }
 const COLORS = ['#3498db','#9b59b6','#e67e22','#1abc9c','#e74c3c','#f39c12','#2c3e50','#16a085'];
 function getColor(name) {
@@ -560,10 +554,7 @@ function renderCard(person) {
   return `
     <div class="card ${flagCount > 0 ? '' : ''}">
       <div class="card-header">
-        <div class="avatar">
-          <img src="${getAvatarUrl(person)}" alt="${name}" loading="lazy"
-            onerror="this.parentNode.style.background=getColor(name);this.style.display='none'">
-        </div>
+        <div class="person-badge ${getBadge(person).cls}">${getBadge(person).icon}</div>
         <div class="person-info">
           <div class="person-name">${name} <span style="font-size:12px;color:#aaa;font-weight:400">主日歷史 ${mainRate}%</span></div>
           <div class="person-meta">${person['排'] || '未分排'}</div>
