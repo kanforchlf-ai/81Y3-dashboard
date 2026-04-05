@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>出席趨勢 — 81會所</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif;
+         background: #f0f2f5; min-height: 100vh; }
+
+  .top-bar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    text-decoration: none; color: rgba(255,255,255,0.7);
+    font-size: 14px; padding: 5px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.1); transition: background 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.2); }
+  .top-title { font-size: 17px; font-weight: 700; }
+  .top-sub { font-size: 12px; opacity: 0.6; margin-left: auto; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 16px; }
+
+  /* District selector */
+  .selector-section { margin-bottom: 16px; }
+  .section-label { font-size: 12px; color: #888; font-weight: 600;
+                   text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .group-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .group-tab {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    border: 2px solid transparent; cursor: pointer; transition: all 0.2s;
+    background: white; color: #666;
+  }
+  .group-tab.active { color: white; }
+  .group-tab[data-group="youth"].active  { background: #e8522a; border-color: #e8522a; }
+  .group-tab[data-group="hs"].active     { background: #c0392b; border-color: #c0392b; }
+  .group-tab[data-group="ms"].active     { background: #27ae60; border-color: #27ae60; }
+  .group-tab:not(.active):hover          { border-color: #ccc; }
+
+  .district-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .district-btn {
+    padding: 7px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    border: 2px solid #ddd; cursor: pointer; transition: all 0.2s;
+    background: white; color: #555;
+  }
+  .district-btn.active { color: white; border-color: transparent; }
+  .district-btn[data-dk^="y"].active  { background: #e8522a; }
+  .district-btn[data-dk^="hs"].active { background: #c0392b; }
+  .district-btn[data-dk^="ms"].active { background: #27ae60; }
+  .district-btn:not(.active):hover    { border-color: #aaa; }
+
+  /* Chart card */
+  .chart-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 14px;
+  }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .chart-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+  .chart-subtitle { font-size: 12px; color: #999; margin-top: 2px; }
+  .chart-wrap { position: relative; height: 280px; }
+  @media (max-width: 500px) { .chart-wrap { height: 220px; } }
+
+  /* Stats row */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: white; border-radius: 10px; padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center;
+  }
+  .stat-val { font-size: 20px; font-weight: 700; }
+  .stat-lbl { font-size: 11px; color: #999; margin-top: 2px; }
+  .stat-trend { font-size: 11px; margin-top: 3px; font-weight: 600; }
+  .trend-up   { color: #27ae60; }
+  .trend-down { color: #e74c3c; }
+  .trend-flat { color: #999; }
+
+  /* Month band legend */
+  .month-bands {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .band {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .band-dot { width: 8px; height: 8px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn">← 首頁</a>
+  <div>
+    <div class="top-title">📈 出席趨勢</div>
+  </div>
+  <div class="top-sub">2025年12月 — 2026年3月</div>
+</div>
+
+<div class="container">
+
+  <div class="selector-section">
+    <div class="section-label">選擇大區</div>
+    <div class="group-tabs">
+      <div class="group-tab active" data-group="youth" onclick="selectGroup('youth')">⚡ 青年大區</div>
+      <div class="group-tab" data-group="hs" onclick="selectGroup('hs')">🔥 高中大區</div>
+      <div class="group-tab" data-group="ms" onclick="selectGroup('ms')">🌱 國中大區</div>
+    </div>
+
+    <div class="section-label">選擇小區</div>
+    <div class="district-btns" id="districtBtns"></div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title" id="chartTitle">青年三區 — 各項出席人數</div>
+        <div class="chart-subtitle">每週實際到場人數（不含福音朋友）</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="month-bands" id="monthBands"></div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const WEEK_META = [
+  {label:'W1',month:'12月',first:true},{label:'W2',month:'12月',first:false},
+  {label:'W3',month:'12月',first:false},{label:'W4',month:'12月',first:false},{label:'W5',month:'12月',first:false},
+  {label:'W1',month:'1月',first:true},{label:'W2',month:'1月',first:false},
+  {label:'W3',month:'1月',first:false},{label:'W4',month:'1月',first:false},
+  {label:'W1',month:'2月',first:true},{label:'W2',month:'2月',first:false},
+  {label:'W3',month:'2月',first:false},{label:'W4',month:'2月',first:false},
+  {label:'W1',month:'3月',first:true},{label:'W2',month:'3月',first:false},
+  {label:'W3',month:'3月',first:false},{label:'W4',month:'3月',first:false},{label:'W5',month:'3月',first:false},
+];
+const LABELS = WEEK_META.map(w => w.first ? `${w.month}${w.label}` : w.label);
+
+const TREND_DATA = {"districts": {"ms1": {"主日": [55, 61, 53, 54, 56, 52, 50, 55, 53, 42, 53, 34, 58, 49, 53, 54, 52, 51], "小排": [45, 49, 51, 52, 42, 48, 47, 50, 32, 34, 46, 32, 0, 37, 46, 41, 50, 47], "晨興": [48, 46, 47, 47, 42, 44, 38, 47, 45, 36, 46, 34, 39, 36, 46, 48, 43, 45], "禱告": [32, 32, 35, 35, 35, 31, 29, 36, 29, 25, 35, 26, 0, 29, 33, 34, 32, 31]}, "ms2": {"主日": [49, 53, 52, 50, 49, 46, 51, 47, 47, 48, 45, 33, 41, 50, 47, 43, 46, 49], "小排": [55, 51, 48, 49, 49, 51, 51, 42, 28, 48, 42, 19, 0, 43, 43, 47, 42, 53], "晨興": [49, 51, 49, 39, 50, 47, 51, 50, 49, 48, 46, 37, 37, 48, 47, 38, 50, 49], "禱告": [34, 36, 32, 32, 35, 35, 33, 28, 31, 31, 25, 26, 0, 26, 32, 30, 32, 34]}, "y1": {"主日": [22, 24, 23, 22, 24, 21, 19, 20, 23, 22, 25, 18, 20, 20, 19, 24, 22, 25], "小排": [19, 17, 20, 21, 16, 12, 16, 17, 25, 14, 19, 15, 0, 17, 18, 20, 19, 20], "晨興": [14, 16, 14, 16, 11, 9, 11, 14, 12, 12, 13, 8, 2, 5, 12, 14, 10, 11], "禱告": [15, 13, 15, 14, 15, 11, 12, 13, 15, 12, 15, 11, 0, 11, 12, 13, 14, 15]}, "y3": {"主日": [29, 24, 23, 22, 27, 26, 26, 25, 23, 31, 28, 20, 24, 30, 26, 26, 25, 24], "小排": [17, 13, 18, 16, 12, 15, 12, 15, 13, 14, 11, 11, 1, 14, 20, 16, 15, 17], "晨興": [13, 13, 12, 15, 14, 9, 15, 14, 9, 8, 9, 10, 8, 14, 18, 15, 12, 13], "禱告": [9, 9, 9, 12, 12, 10, 10, 13, 7, 6, 7, 9, 1, 7, 15, 10, 9, 6]}, "y2": {"主日": [25, 26, 24, 24, 21, 20, 22, 23, 15, 20, 19, 18, 16, 24, 23, 23, 21, 19], "小排": [18, 13, 12, 14, 18, 24, 11, 16, 11, 11, 11, 15, 1, 13, 18, 16, 12, 15], "晨興": [16, 17, 15, 12, 10, 14, 9, 11, 6, 12, 8, 15, 2, 8, 10, 10, 12, 15], "禱告": [11, 13, 11, 11, 10, 11, 10, 10, 10, 7, 10, 10, 0, 7, 12, 11, 6, 11]}, "hs1": {"主日": [18, 18, 18, 19, 27, 19, 19, 18, 15, 17, 17, 15, 18, 19, 21, 20, 20, 17], "小排": [13, 14, 15, 12, 16, 12, 14, 13, 5, 14, 15, 10, 1, 14, 12, 11, 13, 12], "晨興": [14, 15, 11, 11, 11, 12, 12, 13, 11, 12, 12, 10, 9, 13, 13, 11, 13, 13], "禱告": [10, 11, 12, 13, 12, 13, 10, 11, 11, 11, 11, 10, 1, 9, 12, 10, 10, 11]}, "hs3": {"主日": [13, 11, 13, 12, 12, 12, 9, 11, 11, 11, 9, 8, 11, 13, 13, 12, 12, 10], "小排": [5, 8, 9, 9, 8, 8, 6, 7, 1, 8, 7, 6, 0, 7, 7, 8, 7, 6], "晨興": [10, 10, 9, 7, 9, 8, 9, 8, 8, 9, 8, 5, 5, 7, 10, 8, 8, 8], "禱告": [7, 7, 7, 7, 6, 7, 6, 6, 7, 7, 7, 6, 0, 7, 6, 5, 6, 6]}, "hs2": {"主日": [19, 18, 17, 17, 28, 19, 18, 19, 18, 18, 18, 16, 17, 20, 19, 20, 19, 20], "小排": [12, 13, 13, 12, 13, 15, 11, 11, 6, 14, 13, 12, 4, 11, 13, 13, 13, 13], "晨興": [14, 13, 14, 13, 15, 12, 13, 13, 14, 14, 15, 15, 15, 14, 17, 15, 16, 17], "禱告": [11, 10, 11, 12, 11, 13, 11, 10, 11, 12, 10, 11, 4, 9, 13, 14, 12, 13]}}};
+
+const DISTRICT_CONFIG = {
+  youth: [
+    {dk:'y1', name:'青年一區'},
+    {dk:'y2', name:'青年二區'},
+    {dk:'y3', name:'青年三區'},
+  ],
+  hs: [
+    {dk:'hs1', name:'高中一區'},
+    {dk:'hs2', name:'高中二區'},
+    {dk:'hs3', name:'高中三區'},
+  ],
+  ms: [
+    {dk:'ms1', name:'國中一區'},
+    {dk:'ms2', name:'國中二區'},
+  ],
+};
+
+const ACT_COLORS = {
+  '主日': {border:'#2f80ed', bg:'rgba(47,128,237,0.08)'},
+  '小排': {border:'#27ae60', bg:'rgba(39,174,96,0.08)'},
+  '晨興': {border:'#f39c12', bg:'rgba(243,156,18,0.08)'},
+  '禱告': {border:'#9b59b6', bg:'rgba(155,89,182,0.08)'},
+};
+const MONTH_COLORS = {'12月':'#e8f4fd','1月':'#fef9e7','2月':'#f0fff4','3月':'#fdf2f8'};
+
+// ── STATE ─────────────────────────────────────────────────────────
+let currentGroup = 'youth';
+let currentDk = 'y3';
+let chartInstance = null;
+
+// ── INIT ──────────────────────────────────────────────────────────
+(function() {
+  if (sessionStorage.getItem('auth_81y3') !== '5281') {
+    location.replace('index.html');
+    return;
+  }
+  renderGroupDistricts();
+  renderChart();
+  renderStats();
+  renderMonthBands();
+})();
+
+function selectGroup(group) {
+  currentGroup = group;
+  document.querySelectorAll('.group-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.group === group);
+  });
+  // Select first district in group
+  currentDk = DISTRICT_CONFIG[group][0].dk;
+  renderGroupDistricts();
+  renderChart();
+  renderStats();
+}
+
+function selectDistrict(dk) {
+  currentDk = dk;
+  renderGroupDistricts();
+  renderChart();
+  renderStats();
+}
+
+function renderGroupDistricts() {
+  const btns = DISTRICT_CONFIG[currentGroup].map(d =>
+    `<button class="district-btn ${d.dk===currentDk?'active':''}" data-dk="${d.dk}"
+      onclick="selectDistrict('${d.dk}')">${d.name}</button>`
+  ).join('');
+  document.getElementById('districtBtns').innerHTML = btns;
+}
+
+function renderChart() {
+  const data = TREND_DATA.districts[currentDk];
+  if (!data) return;
+
+  const districtNames = {
+    y1:'青年一區',y2:'青年二區',y3:'青年三區',
+    hs1:'高中一區',hs2:'高中二區',hs3:'高中三區',
+    ms1:'國中一區',ms2:'國中二區',
+  };
+  document.getElementById('chartTitle').textContent =
+    `${districtNames[currentDk]} — 各項出席人數`;
+
+  const datasets = Object.entries(ACT_COLORS).map(([act, clr]) => ({
+    label: act,
+    data: data[act],
+    borderColor: clr.border,
+    backgroundColor: clr.bg,
+    borderWidth: 2.5,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    tension: 0.3,
+    fill: false,
+  }));
+
+  // Month background plugin
+  const monthBgPlugin = {
+    id: 'monthBg',
+    beforeDraw(chart) {
+      const {ctx, chartArea: {left, right, top, bottom}, scales: {x}} = chart;
+      if (!x) return;
+      const months = ['12月','1月','2月','3月'];
+      const monthColors = {'12月':'rgba(232,244,253,0.45)','1月':'rgba(254,249,231,0.45)',
+                           '2月':'rgba(240,255,244,0.45)','3月':'rgba(253,242,248,0.45)'};
+      // Find start/end x for each month
+      months.forEach(m => {
+        const indices = WEEK_META.map((w,i) => w.month===m ? i : -1).filter(i=>i>=0);
+        if (!indices.length) return;
+        const xStart = x.getPixelForValue(indices[0]);
+        const xEnd   = x.getPixelForValue(indices[indices.length-1]);
+        ctx.fillStyle = monthColors[m];
+        ctx.fillRect(xStart - (x.getPixelForValue(1)-x.getPixelForValue(0))/2,
+                     top, xEnd - xStart + (x.getPixelForValue(1)-x.getPixelForValue(0)),
+                     bottom - top);
+      });
+    }
+  };
+
+  const cfg = {
+    type: 'line',
+    data: {labels: LABELS, datasets},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {font: {size: 12, family: '-apple-system'}, boxWidth: 12, padding: 12},
+        },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const i = items[0].dataIndex;
+              const w = WEEK_META[i];
+              return `${w.month} 第${w.label.replace('W','')}週`;
+            },
+            label: (item) => ` ${item.dataset.label}：${item.parsed.y} 人`,
+          }
+        },
+      },
+      scales: {
+        x: {
+          grid: {display: false},
+          ticks: {
+            font: {size: 11},
+            color: (ctx) => WEEK_META[ctx.index]?.first ? '#333' : '#aaa',
+            maxRotation: 0,
+            callback: function(val, idx) { return LABELS[idx]; },
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {color: 'rgba(0,0,0,0.05)'},
+          ticks: {font: {size: 11}, precision: 0},
+        }
+      }
+    },
+    plugins: [monthBgPlugin],
+  };
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(document.getElementById('trendChart'), cfg);
+}
+
+function renderStats() {
+  const data = TREND_DATA.districts[currentDk];
+  if (!data) return;
+
+  // Last 4 weeks vs previous 4 weeks for each activity
+  const statsHtml = Object.entries(ACT_COLORS).map(([act, clr]) => {
+    const vals = data[act];
+    const last4  = vals.slice(-4);
+    const prev4  = vals.slice(-8, -4);
+    const avg4   = (last4.reduce((a,b)=>a+b,0)/last4.length).toFixed(1);
+    const avgPrev= prev4.length ? (prev4.reduce((a,b)=>a+b,0)/prev4.length).toFixed(1) : avg4;
+    const diff   = (parseFloat(avg4) - parseFloat(avgPrev)).toFixed(1);
+    const trendCls = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-flat';
+    const trendStr = diff > 0 ? `▲ ${diff}` : diff < 0 ? `▼ ${Math.abs(diff)}` : '— 持平';
+    return `<div class="stat-card">
+      <div class="stat-val" style="color:${clr.border}">${avg4}</div>
+      <div class="stat-lbl">${act} 近4週均</div>
+      <div class="stat-trend ${trendCls}">${trendStr}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('statsRow').innerHTML = statsHtml;
+}
+
+function renderMonthBands() {
+  const months = ['12月','1月','2月','3月'];
+  const clrs = ['#2f80ed','#f39c12','#27ae60','#e8522a'];
+  const html = months.map((m,i) =>
+    `<div class="band"><div class="band-dot" style="background:${clrs[i]}40;border:1px solid ${clrs[i]}80"></div>
+    <span style="color:#666">2025年12月</span>`.replace('2025年12月', m==='12月'?'2025年12月':`2026年${m}`)
+    + '</div>'
+  ).join('');
+  document.getElementById('monthBands').innerHTML = months.map((m,i) =>
+    `<div class="band">
+      <div class="band-dot" style="background:${['#e8f4fd','#fef9e7','#f0fff4','#fdf2f8'][i]};border:1px solid ${clrs[i]}60"></div>
+      <span style="color:#666;font-size:11px">${m==='12月'?'2025年12月':'2026年'+m}</span>
+    </div>`
+  ).join('');
+}
+</script>
+</body>
+</html>
