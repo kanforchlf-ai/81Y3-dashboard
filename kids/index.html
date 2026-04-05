@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兒童專區 — 81會所</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif;
+         background: #f5f7fa; min-height: 100vh; }
+  .top-bar {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffa07a 100%);
+    color: white; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn { text-decoration: none; color: rgba(255,255,255,0.85);
+    font-size: 14px; padding: 5px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.2); }
+  .top-title { font-size: 18px; font-weight: 800; }
+  .top-sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 16px; }
+  .summary-banner {
+    background: white; border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .sum-stat { flex: 1; min-width: 80px; text-align: center;
+    padding: 8px; border-radius: 8px; background: #f8f9fa; }
+  .sum-num { font-size: 22px; font-weight: 800; }
+  .sum-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .weekly-bar {
+    background: white; border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+  }
+  .wb-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
+  .wb-weeks { display: flex; gap: 8px; }
+  .wb-week { flex: 1; text-align: center;
+    background: #fff5f5; border-radius: 8px; padding: 10px 6px; }
+  .wb-num { font-size: 22px; font-weight: 800; color: #ff6b6b; }
+  .wb-lbl { font-size: 11px; color: #aaa; margin-top: 3px; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    border: 2px solid #eee; background: white; color: #666; cursor: pointer;
+  }
+  .filter-btn.active { background: #ff6b6b; border-color: #ff6b6b; color: white; }
+  .district-section { margin-bottom: 20px; }
+  .district-header { font-size: 13px; font-weight: 700; color: #666;
+    letter-spacing: 0.5px; margin-bottom: 8px; padding: 0 4px;
+    display: flex; align-items: center; gap: 8px; }
+  .district-count { font-size: 11px; background: #f0f0f0; color: #888;
+    padding: 2px 7px; border-radius: 10px; }
+  .card { background: white; border-radius: 10px; margin-bottom: 8px;
+    overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+  .card-header { display: flex; align-items: center; padding: 12px 16px;
+    cursor: pointer; gap: 12px; user-select: none; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: white; flex-shrink: 0;
+    overflow: hidden; background: #eee; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .person-info { flex: 1; }
+  .person-name { font-size: 15px; font-weight: 700; }
+  .person-meta { font-size: 12px; color: #999; margin-top: 2px; }
+  .attendance-dots { display: flex; gap: 4px; align-items: center; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-present { background: #2ecc71; }
+  .dot-absent  { background: #ecf0f1; border: 1px solid #ddd; }
+  .chevron { color: #bbb; font-size: 16px; transition: transform 0.2s; }
+  .card.open .chevron { transform: rotate(90deg); }
+  .card-body { display: none; padding: 0 16px 14px; }
+  .card.open .card-body { display: block; }
+  .act-row { display: grid; grid-template-columns: 70px 1fr;
+    align-items: center; gap: 8px; margin-bottom: 8px; }
+  .act-name { font-size: 12px; color: #888; font-weight: 600; }
+  .week-dots { display: flex; gap: 4px; }
+  .week-dot { width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; }
+  .wd-present { background: #d1f0e0; color: #1a7a42; }
+  .wd-absent  { background: #f5f5f5; color: #bbb; border: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../index.html" class="back-btn">← 首頁</a>
+  <div>
+    <div class="top-title">🎈 兒童專區</div>
+    <div class="top-sub">12歲以下 · 已從各小區分離統計</div>
+  </div>
+</div>
+<div class="container">
+  <div class="summary-banner" id="summaryBanner"></div>
+  <div class="weekly-bar">
+    <div class="wb-title">📅 2026年3月 主日每週出席</div>
+    <div class="wb-weeks" id="weeklyBar"></div>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+    <button class="filter-btn" onclick="setFilter('active',this)">有出席</button>
+    <button class="filter-btn" onclick="setFilter('inactive',this)">未出席</button>
+    <button class="filter-btn" onclick="setFilter('學齡前',this)">學齡前</button>
+    <button class="filter-btn" onclick="setFilter('小學',this)">小學</button>
+  </div>
+  <div id="cardContainer"></div>
+</div>
+<script>
+const ACTIVITIES = ['主日','小排','晨興','禱告'];
+const RAW_DATA = [{"姓名":"何雨軒","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"張倚恆","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":1.0,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.8333,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"張純芯","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":1.0,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.7778,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"洪子甯","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"洪蜜婍","小區":"青年一區","dk":"y1","羣組":"小學","排":"一排","activities":{"主日":{"historical":0.0556,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"游安柏","小區":"青年一區","dk":"y1","羣組":"小學","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"鍾雨洋","小區":"青年一區","dk":"y1","羣組":"小學","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"陳彥劭","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"陳書宇","小區":"青年一區","dk":"y1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"吳樂予","小區":"青年二區","dk":"y2","羣組":"學齡前","排":"","activities":{"主日":{"historical":1.0,"march":[1,1,1,0,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6111,"march":[1,1,1,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["主日第四週","小排第四週","小排第五週"]},{"姓名":"甘語安","小區":"青年三區","dk":"y3","羣組":"學齡前","排":"","activities":{"主日":{"historical":0.8333,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.5556,"march":[0,1,0,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第一週","小排第三週"]},{"姓名":"甘語行","小區":"青年三區","dk":"y3","羣組":"學齡前","排":"","activities":{"主日":{"historical":0.8333,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6667,"march":[0,1,0,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第一週","小排第三週"]},{"姓名":"石光","小區":"高中一區","dk":"hs1","羣組":"學齡前","排":"一排","activities":{"主日":{"historical":0.1667,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.1667,"march":[1,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"石玥","小區":"高中一區","dk":"hs1","羣組":"學齡前","排":"二排","activities":{"主日":{"historical":1.0,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.9444,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"劉品欣","小區":"高中二區","dk":"hs2","羣組":"小學","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"黃以靜","小區":"高中二區","dk":"hs2","羣組":"小學","排":"二排","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"朱梓豪","小區":"國中一區","dk":"ms1","羣組":"小學","排":"","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"胡承昊","小區":"國中一區","dk":"ms1","羣組":"小學","排":"八年級","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"雷依","小區":"國中一區","dk":"ms1","羣組":"小學","排":"九年級","activities":{"主日":{"historical":0.9444,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6111,"march":[1,1,0,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第三週"]},{"姓名":"雷安","小區":"國中一區","dk":"ms1","羣組":"學齡前","排":"九年級","activities":{"主日":{"historical":0.9444,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6111,"march":[1,1,0,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第三週"]},{"姓名":"雷新","小區":"國中一區","dk":"ms1","羣組":"學齡前","排":"九年級","activities":{"主日":{"historical":0.9444,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.5556,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"高子謙","小區":"國中一區","dk":"ms1","羣組":"小學","排":"九年級","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"千慧","小區":"國中二區","dk":"ms2","羣組":"學齡前","排":"七年級","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]},{"姓名":"呂牧千","小區":"國中二區","dk":"ms2","羣組":"學齡前","排":"七年級","activities":{"主日":{"historical":1.0,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6111,"march":[0,0,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第一週","小排第二週"]},{"姓名":"呂牧言","小區":"國中二區","dk":"ms2","羣組":"學齡前","排":"七年級","activities":{"主日":{"historical":1.0,"march":[1,1,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.6111,"march":[0,0,1,1,1],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":["小排第一週","小排第二週"]},{"姓名":"汪賢亞","小區":"國中二區","dk":"ms2","羣組":"小學","排":"","activities":{"主日":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"小排":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"晨興":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]},"禱告":{"historical":0.0,"march":[0,0,0,0,0],"weeks":["第一週","第二週","第三週","第四週","第五週"]}},"flags":[]}];
+const DISTRICT_NAMES = {
+  y1:'青年一區',y2:'青年二區',y3:'青年三區',
+  hs1:'高中一區',hs2:'高中二區',hs3:'高中三區',
+  ms1:'國中一區',ms2:'國中二區',
+};
+const DISTRICT_ORDER = ['y1','y2','y3','hs1','hs2','hs3','ms1','ms2'];
+
+const FEMALE_CHARS = new Set('婷玲美麗慧芸芳娟蓉珍萍筠柔嫻婉淑怡欣佳雅靜瑩琪琳瑜穎儀蕙蕾菁菊茵茜荷葵蓮妍妮姝妤姿娜嬌妙如涵薰蒨媛心桐穗惠珊雪純宜儂貞嫣芬玟妙妗妘');
+function inferGender(name) {
+  for (let i = name.length-1; i >= Math.max(0,name.length-2); i--)
+    if (FEMALE_CHARS.has(name[i])) return 'female';
+  return 'male';
+}
+function getAvatarUrl(person) {
+  const seed = encodeURIComponent(person['姓名']);
+  return inferGender(person['姓名']) === 'female'
+    ? `https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}`
+    : `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${seed}`;
+}
+const COLORS = ['#ff6b6b','#ffa07a','#ffce54','#a0d468','#48cfad','#4fc1e9','#ac92ec','#ec87c0'];
+function getColor(name) {
+  let h = 0; for (let c of name) h = (h*31+c.charCodeAt(0))%COLORS.length;
+  return COLORS[h];
+}
+
+let currentFilter = 'all';
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function isActive(p) { return p.activities['主日'].march.some(v => v===1); }
+
+function renderCards() {
+  let data = [...RAW_DATA];
+  if (currentFilter==='active')   data = data.filter(isActive);
+  if (currentFilter==='inactive') data = data.filter(p => !isActive(p));
+  if (currentFilter==='學齡前')   data = data.filter(p => p['羣組']==='學齡前');
+  if (currentFilter==='小學')     data = data.filter(p => p['羣組']==='小學');
+
+  // Summary
+  const total = RAW_DATA.length;
+  const active = RAW_DATA.filter(isActive).length;
+  const lastSun = RAW_DATA.filter(p => p.activities['主日'].march[4]===1).length;
+  document.getElementById('summaryBanner').innerHTML =
+    `<div class="sum-stat"><div class="sum-num" style="color:#ff6b6b">${total}</div><div class="sum-lbl">兒童總人數</div></div>
+     <div class="sum-stat"><div class="sum-num" style="color:#2ecc71">${active}</div><div class="sum-lbl">三月有出席</div></div>
+     <div class="sum-stat"><div class="sum-num" style="color:#3498db">${lastSun}</div><div class="sum-lbl">最近主日</div></div>
+     <div class="sum-stat"><div class="sum-num" style="color:#e67e22">${total-active}</div><div class="sum-lbl">三月未出席</div></div>`;
+
+  const weekly = [0,1,2,3,4].map(i => RAW_DATA.filter(p => p.activities['主日'].march[i]===1).length);
+  document.getElementById('weeklyBar').innerHTML = weekly.map((n,i) =>
+    `<div class="wb-week"><div class="wb-num">${n}</div><div class="wb-lbl">第${i+1}週</div></div>`
+  ).join('');
+
+  // Group by district
+  const byDk = {};
+  data.forEach(p => { byDk[p.dk] = byDk[p.dk] || []; byDk[p.dk].push(p); });
+
+  let html = '';
+  DISTRICT_ORDER.forEach(dk => {
+    if (!byDk[dk] || !byDk[dk].length) return;
+    const kids = byDk[dk];
+    html += `<div class="district-section">
+      <div class="district-header">${DISTRICT_NAMES[dk]}<span class="district-count">${kids.length} 人</span></div>`;
+    kids.forEach(p => { html += renderCard(p); });
+    html += '</div>';
+  });
+  document.getElementById('cardContainer').innerHTML = html || '<div style="text-align:center;color:#aaa;padding:40px">沒有符合條件</div>';
+}
+
+function renderCard(person) {
+  const name = person['姓名'];
+  const active = isActive(person);
+  const marchDots = person.activities['主日'].march.map((v,i) =>
+    `<div class="dot ${v===1?'dot-present':'dot-absent'}" title="第${i+1}週"></div>`
+  ).join('');
+  const groupTag = person['羣組']==='學齡前' ? '🧒 學齡前' : '📚 小學';
+  const distName = DISTRICT_NAMES[person.dk] || person.dk;
+  const actRows = ACTIVITIES.map(act => {
+    const dots = person.activities[act].march.map((v,i) =>
+      `<div class="week-dot ${v===1?'wd-present':'wd-absent'}">${v===1?'✓':''}</div>`
+    ).join('');
+    return `<div class="act-row"><div class="act-name">${act}</div><div class="week-dots">${dots}</div></div>`;
+  }).join('');
+  return `<div class="card" onclick="this.classList.toggle('open')">
+    <div class="card-header">
+      <div class="avatar">
+        <img src="${getAvatarUrl(person)}" alt="${name}" loading="lazy"
+          onerror="this.parentNode.style.background=getColor('${name}');this.style.display='none'">
+      </div>
+      <div class="person-info">
+        <div class="person-name">${name}</div>
+        <div class="person-meta">${groupTag} · ${distName}</div>
+      </div>
+      ${active ? `<div class="attendance-dots">${marchDots}</div>` : '<span style="font-size:12px;color:#ccc">三月未出席</span>'}
+      <div class="chevron">›</div>
+    </div>
+    <div class="card-body">
+      <div style="margin-bottom:8px;font-size:12px;color:#888;font-weight:600">各項出席記錄（2026年3月）</div>
+      ${actRows}
+    </div>
+  </div>`;
+}
+
+if (sessionStorage.getItem('auth_81y3') !== '5281') {
+  location.replace('../index.html');
+} else { renderCards(); }
+</script>
+</body>
+</html>
