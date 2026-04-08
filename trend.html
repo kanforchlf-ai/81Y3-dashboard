@@ -206,15 +206,15 @@
 
 <script>
 const WEEK_META = [
-  {label:'W1',month:'12月',first:true},{label:'W2',month:'12月',first:false},
-  {label:'W3',month:'12月',first:false},{label:'W4',month:'12月',first:false},{label:'W5',month:'12月',first:false},
-  {label:'W1',month:'1月',first:true},{label:'W2',month:'1月',first:false},
-  {label:'W3',month:'1月',first:false},{label:'W4',month:'1月',first:false},
-  {label:'W1',month:'2月',first:true},{label:'W2',month:'2月',first:false},
-  {label:'W3',month:'2月',first:false},{label:'W4',month:'2月',first:false},
-  {label:'W1',month:'3月',first:true},{label:'W2',month:'3月',first:false},
-  {label:'W3',month:'3月',first:false},{label:'W4',month:'3月',first:false},{label:'W5',month:'3月',first:false},
-  {label:'W1',month:'4月',first:true},
+  {label:'W1',month:'12月',first:true, date:'11/30'},{label:'W2',month:'12月',first:false,date:'12/7'},
+  {label:'W3',month:'12月',first:false,date:'12/14'},{label:'W4',month:'12月',first:false,date:'12/21'},{label:'W5',month:'12月',first:false,date:'12/28'},
+  {label:'W1',month:'1月',first:true, date:'1/4'},{label:'W2',month:'1月',first:false,date:'1/11'},
+  {label:'W3',month:'1月',first:false,date:'1/18'},{label:'W4',month:'1月',first:false,date:'1/25'},
+  {label:'W1',month:'2月',first:true, date:'2/1'},{label:'W2',month:'2月',first:false,date:'2/8'},
+  {label:'W3',month:'2月',first:false,date:'2/15'},{label:'W4',month:'2月',first:false,date:'2/22'},
+  {label:'W1',month:'3月',first:true, date:'3/1'},{label:'W2',month:'3月',first:false,date:'3/8'},
+  {label:'W3',month:'3月',first:false,date:'3/15'},{label:'W4',month:'3月',first:false,date:'3/22'},{label:'W5',month:'3月',first:false,date:'3/29'},
+  {label:'W1',month:'4月',first:true, date:'4/5'},
 ];
 const LABELS = WEEK_META.map(w => w.first ? `${w.month}${w.label}` : w.label);
 
@@ -447,7 +447,7 @@ function renderChart() {
           callbacks: {
             title: items => {
               const w = WEEK_META[items[0].dataIndex];
-              return `${w.month} 第${w.label.replace('W','')}週`;
+              return `${w.month} 第${w.label.replace('W','')}週（${w.date}）`;
             },
             label: item => ` ${item.dataset.label}：${item.parsed.y} 人`,
           }
@@ -460,7 +460,12 @@ function renderChart() {
             font:{size:11},
             color: ctx => WEEK_META[ctx.index]?.first ? '#333' : '#aaa',
             maxRotation: 0,
-            callback: (val,idx) => LABELS[idx],
+            callback: (val,idx) => {
+              const w = WEEK_META[idx];
+              if (!w) return '';
+              const line1 = w.first ? w.month + w.label : w.label;
+              return [line1, w.date];
+            },
           }
         },
         y: {
