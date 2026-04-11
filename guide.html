@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>出席統計系統 · 使用說明</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
+    background: #0f0f1a;
+    color: rgba(255,255,255,0.85);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+
+  .back-link {
+    display: inline-block;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+  }
+  .back-link:hover { color: rgba(255,255,255,0.65); }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 48px;
+  }
+
+  /* Section card */
+  .section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    margin-bottom: 20px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .section-icon {
+    font-size: 32px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-youth  { background: linear-gradient(145deg, #6a1fb5, #9b59f7); }
+  .icon-hs     { background: linear-gradient(145deg, #c0392b, #e67e22); }
+  .icon-ms     { background: linear-gradient(145deg, #1a7a4a, #27ae60); }
+  .icon-trend  { background: linear-gradient(145deg, #1a4a7a, #2980b9); }
+  .icon-kids   { background: linear-gradient(145deg, #c0392b, #e74c3c); }
+  .icon-weekly { background: linear-gradient(145deg, #7a3a1a, #d35400); }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .section-en {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.8;
+    margin-bottom: 18px;
+  }
+
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .feature-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+  }
+  .feature-list li .bullet {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 14px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 14px 0;
+  }
+
+  .note {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    line-height: 1.7;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid rgba(255,255,255,0.12);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 14px;
+  }
+
+  .footer {
+    margin-top: 48px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a href="index.html" class="back-link">‹ 返回首頁</a>
+
+  <div class="page-title">使用說明</div>
+  <p class="page-sub">出席統計系統 · 81Y · 第一次使用請先閱讀</p>
+
+  <!-- 青年大區 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-youth">⚡</div>
+      <div>
+        <div class="section-title">青年大區 / 高中大區 / 國中大區</div>
+        <div class="section-en">District Overview</div>
+      </div>
+    </div>
+    <p class="section-desc">
+      點入大區後，可以選擇查看整個大區的合計，或切換到個別小區（一區、二區、三區）。每個大區底下包含以下幾個功能：
+    </p>
+    <ul class="feature-list">
+      <li>
+        <span class="bullet">①</span>
+        <span><strong>出席檢視（首頁）</strong>：列出這 6 週內有出席過的成員，以及每人在主日、小排、晨興、禱告的出席紀錄（綠色 = 有出席，灰色 = 缺席）。</span>
+      </li>
+      <li>
+        <span class="bullet">②</span>
+        <span><strong>排行榜（中流砥柱）</strong>：根據最近 4 週的出席積分排名。主日出席 ×3 分，小排 / 晨興 / 禱告各 ×1 分，滿分 24 分。</span>
+      </li>
+      <li>
+        <span class="bullet">③</span>
+        <span><strong>邀請追蹤（invite）</strong>：記錄各成員邀請福音朋友的進度（如有設定）。</span>
+      </li>
+    </ul>
+    <div class="tag-row">
+      <span class="tag">青年一區 / 二區 / 三區</span>
+      <span class="tag">高中一區 / 二區 / 三區</span>
+      <span class="tag">國中一區 / 二區</span>
+    </div>
+    <div class="note">
+      ⚠ 出席紀錄顯示的是「有登記出席」的成員。若成員歷史出席率 ≥ 50% 但本週未出席，會以紅色標示提醒需關心。
+    </div>
+  </div>
+
+  <!-- 出席趨勢 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-trend">📈</div>
+      <div>
+        <div class="section-title">出席趨勢</div>
+        <div class="section-en">Trend Chart</div>
+      </div>
+    </div>
+    <p class="section-desc">
+      以折線圖呈現近 4 個月（12月到目前）各週的出席人數變化，可同時查看主日、小排、晨興、禱告四項活動。
+    </p>
+    <ul class="feature-list">
+      <li>
+        <span class="bullet">①</span>
+        <span><strong>範圍切換</strong>：上方可選擇整個會所、青年大區、高中大區、國中大區，也可以切換到各小區。</span>
+      </li>
+      <li>
+        <span class="bullet">②</span>
+        <span><strong>性別 / 身份篩選</strong>：可篩選「弟兄 / 姊妹」或「大學 / 青職」，分母會自動調整為符合條件的人數，方便橫向比較。</span>
+      </li>
+      <li>
+        <span class="bullet">③</span>
+        <span><strong>出席率卡片</strong>：顯示近 4 週平均出席率，綠色 ≥ 80%、黃色 ≥ 60%、紅色 &lt; 60%。</span>
+      </li>
+      <li>
+        <span class="bullet">④</span>
+        <span><strong>成員名單</strong>：選擇小區後，下方會顯示符合篩選條件的成員清單。</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 兒童專區 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-kids">🎈</div>
+      <div>
+        <div class="section-title">兒童專區</div>
+        <div class="section-en">Children</div>
+      </div>
+    </div>
+    <p class="section-desc">
+      追蹤 12 歲以下兒童的出席狀況，按所屬小區分組顯示，格式與青年出席檢視相同。
+    </p>
+    <ul class="feature-list">
+      <li>
+        <span class="bullet">①</span>
+        <span>每位兒童的主日、小排、晨興、禱告出席紀錄（6 週 0/1 點狀顯示）。</span>
+      </li>
+      <li>
+        <span class="bullet">②</span>
+        <span>顯示所屬小區與群組（學齡前 / 小學 / 中學）。</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 本週點名 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-weekly">📋</div>
+      <div>
+        <div class="section-title">本週點名</div>
+        <div class="section-en">Weekly Alert</div>
+      </div>
+    </div>
+    <p class="section-desc">
+      快速瀏覽本週（最新一週）各區的主日出席情況，方便同工在聚會後或週間追蹤。
+    </p>
+    <ul class="feature-list">
+      <li>
+        <span class="bullet">①</span>
+        <span><strong>出席率 &amp; 狀態</strong>：顯示本週人數 / 基數，以及「正常 / 偏低」狀態徽章（出席率 &lt; 70% 標示偏低）。</span>
+      </li>
+      <li>
+        <span class="bullet">②</span>
+        <span><strong>三月平均比較</strong>：顯示本週與上月平均的差距（▲ 進步 / ▼ 下降）。</span>
+      </li>
+      <li>
+        <span class="bullet">③</span>
+        <span><strong>排組人數</strong>：以表格列出各排（一排 / 二排 / 年級）的出席人數。</span>
+      </li>
+      <li>
+        <span class="bullet">④</span>
+        <span><strong>小排 / 晨興 / 禱告</strong>：顯示本週其他活動的出席人數。</span>
+      </li>
+      <li>
+        <span class="bullet">⑤</span>
+        <span><strong>成員名單</strong>：點「展開成員名單」可看到每位成員本週出席與否。紅色標示（⚠）代表本週未出席但歷史出席率 ≥ 50%，需要主動關心。</span>
+      </li>
+    </ul>
+    <div class="note">
+      💡 紅色成員不代表問題，只是提醒同工可以主動打個招呼或確認狀況。
+    </div>
+  </div>
+
+  <hr class="divider" style="margin: 32px 0;">
+
+  <!-- FAQ -->
+  <div class="section">
+    <div class="section-header">
+      <div style="font-size: 28px;">❓</div>
+      <div>
+        <div class="section-title">常見問題</div>
+      </div>
+    </div>
+    <ul class="feature-list">
+      <li>
+        <span class="bullet">Q</span>
+        <span><strong>資料多久更新一次？</strong><br>由負責同工手動上傳最新資料後更新，通常每月更新一次，或有新資料時更新。</span>
+      </li>
+      <li>
+        <span class="bullet">Q</span>
+        <span><strong>基數是什麼？</strong><br>各小區的登記人數（不含兒童），作為出席率的分母。例如青年一區基數 20，本週來 18 人就是 90%。</span>
+      </li>
+      <li>
+        <span class="bullet">Q</span>
+        <span><strong>為什麼有些人不在名單上？</strong><br>出席檢視頁只顯示這 6 週內至少出席過一次的成員，從未出席者不列入。</span>
+      </li>
+      <li>
+        <span class="bullet">Q</span>
+        <span><strong>排行榜怎麼計分？</strong><br>計算最近 4 週：主日出席 ×3 分，小排 / 晨興 / 禱告各 ×1 分，每週最高 6 分，4 週滿分 24 分。</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="footer">81Y · 出席統計系統 · 台北市召會第八十一會所</div>
+
+</div>
+</body>
+</html>
