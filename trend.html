@@ -271,8 +271,39 @@ function getSegKey() {
 }
 function getSegData(dk, act) {
   const d = TREND_DATA.districts[dk];
-  if (!d) return Array(18).fill(0);
-  return d[act][getSegKey()] || d[act]['all'] || Array(18).fill(0);
+  if (!d) return Array(19).fill(0);
+  return d[act][getSegKey()] || d[act]['all'] || Array(19).fill(0);
+}
+
+// 計算目前篩選條件下的基數（從 MEMBER_DATA 計算）
+const DK_TO_SUBS = {
+  y1:['y1'], y2:['y2'], y3:['y3'],
+  hs1:['hs1'], hs2:['hs2'], hs3:['hs3'],
+  ms1:['ms1'], ms2:['ms2'],
+  youth:['y1','y2','y3'], hs:['hs1','hs2','hs3'], ms:['ms1','ms2'],
+  church:['y1','y2','y3','hs1','hs2','hs3','ms1','ms2'],
+};
+function getFilteredBase() {
+  if (genderFilter === 'all' && ageFilter === 'all') return BASE_DATA[currentDk];
+  const subs = DK_TO_SUBS[currentDk] || [];
+  let count = 0;
+  subs.forEach(dk => {
+    (MEMBER_DATA[dk] || []).forEach(m => {
+      if (genderFilter === 'male'   && m.g !== 'm') return;
+      if (genderFilter === 'female' && m.g !== 'f') return;
+      if (ageFilter === 'daxue'   && m.a !== 'd') return;
+      if (ageFilter === 'qingzhi' && m.a !== 'q') return;
+      count++;
+    });
+  });
+  return count || 1;
+}
+function getFilteredBaseLabel() {
+  if (genderFilter === 'all' && ageFilter === 'all') return `${DK_NAME[currentDk]}基數`;
+  const parts = [];
+  if (genderFilter !== 'all') parts.push(SEG_LABELS[genderFilter]);
+  if (ageFilter !== 'all') parts.push(SEG_LABELS[ageFilter]);
+  return `篩選後（${parts.join('·')}）`;
 }
 
 // ── Init ───────────────────────────────────────────────────────────
@@ -288,8 +319,9 @@ function getSegData(dk, act) {
 function renderAll() { renderChart(); renderRates(); renderStats(); renderMembers(); }
 
 function renderRates() {
-  const base = BASE_DATA[currentDk];
-  if (!base) { document.getElementById('rateRow').innerHTML = ''; return; }
+  const base = getFilteredBase();
+  const baseLabel = getFilteredBaseLabel();
+  if (!BASE_DATA[currentDk]) { document.getElementById('rateRow').innerHTML = ''; return; }
 
   document.getElementById('rateRow').innerHTML =
     Object.entries(ACT_COLORS).map(([act, clr]) => {
@@ -306,7 +338,7 @@ function renderRates() {
         <div class="rate-lbl">${act} 比率</div>
         <div class="rate-base">${avg.toFixed(1)} / ${base} 人</div>
         <div class="rate-bar-wrap"><div class="rate-bar" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
-        <div class="rate-note">分子：近4週出席人數平均${nonZero.length < 4 ? '（排除 '+(4-nonZero.length)+' 個停辦週）' : ''}<br>分母：${DK_NAME[currentDk]}基數 ${base} 人</div>
+        <div class="rate-note">分子：近4週出席人數平均${nonZero.length < 4 ? '（排除 '+(4-nonZero.length)+' 個停辦週）' : ''}<br>分母：${baseLabel} ${base} 人</div>
       </div>`;
     }).join('');
 }
