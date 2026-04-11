@@ -286,18 +286,51 @@ body {
 /* Member chips */
 .member-list {
   display: none;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 7px;
   padding: 12px 18px 16px 18px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 .member-list.open { display: flex; }
 
+.chip-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-normal { background: rgba(255,255,255,0.4); }
+.dot-zero   { background: #ff6b6b; }
+
+.chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
 .member-chip {
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 20px;
   white-space: nowrap;
+}
+.chip-pai {
+  opacity: 0.55;
+  font-size: 11px;
+  margin-left: 3px;
 }
 .chip-zero {
   background: rgba(192,57,43,0.25);
@@ -396,25 +429,34 @@ function renderDistrict(d) {
   // Row table rows
   const rowsHtml = d.rows.map(r => {
     const isZero = r.count === 0;
+    const rowName = r.name || '未分排';
     return `<tr class="${isZero ? 'zero-row' : ''}">
-      <td>${r.name}</td>
+      <td>${rowName}</td>
       <td>${r.count} 人</td>
     </tr>`;
   }).join('');
 
   // Extra stats
   const extraHtml = Object.entries(d.extra).map(([k,v]) =>
-    `<div class="extra-chip">${k}<span>${v}</span></div>`
+    `<div class="extra-chip">${k} 出席<span>${v} 人</span></div>`
   ).join('');
 
   // Member chips
-  const chipsHtml = members.map(m => {
-    if (m.zero) {
-      return `<span class="member-chip chip-zero">❓ ${m.n} ${m.pai}</span>`;
-    } else {
-      return `<span class="member-chip chip-normal">${m.n} ${m.pai}</span>`;
-    }
-  }).join('');
+  const chipsHtml =
+    `<div class="chip-legend">
+      <span class="legend-item"><span class="legend-dot dot-normal"></span>本週有出席</span>
+      <span class="legend-item"><span class="legend-dot dot-zero"></span>本週未出席（歷史出席率 ≥ 50%，需關心）</span>
+    </div>
+    <div class="chips-wrap">` +
+    members.map(m => {
+      const paiLabel = m.pai ? `<span class="chip-pai">${m.pai}</span>` : '';
+      if (m.zero) {
+        return `<span class="member-chip chip-zero" title="本週未出席">⚠ ${m.n} ${paiLabel}</span>`;
+      } else {
+        return `<span class="member-chip chip-normal">${m.n} ${paiLabel}</span>`;
+      }
+    }).join('') +
+    `</div>`;
 
   const cardClass = d.status === 'unsubmitted' ? 'unsubmitted' : (d.status === 'low' ? 'low' : '');
   const fillPct = Math.min(d.pct, 100);
