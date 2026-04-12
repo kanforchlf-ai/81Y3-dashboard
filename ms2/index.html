@@ -380,6 +380,66 @@
     .cowork-section { padding: 14px 16px 16px; }
     .cowork-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── 關心名單區 ── */
+  .care-section {
+    background: linear-gradient(135deg, #1a0808, #250d0d);
+    border-top: 2px solid rgba(231,76,60,0.35);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 18px 32px 20px;
+  }
+  .care-inner { max-width: 1100px; margin: 0 auto; }
+  .care-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .care-title { font-size: 14px; font-weight: 800; color: #e74c3c; letter-spacing: 0.4px; }
+  .care-ok { font-size: 13px; color: #2ecc71; font-weight: 700; }
+  .care-count { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
+  .care-copy-btn {
+    margin-left: auto;
+    background: rgba(231,76,60,0.15);
+    border: 1px solid rgba(231,76,60,0.35);
+    color: #e74c3c; border-radius: 7px;
+    padding: 4px 12px; font-size: 11px;
+    cursor: pointer; font-weight: 700;
+    transition: background 0.15s;
+  }
+  .care-copy-btn:hover { background: rgba(231,76,60,0.3); }
+  .care-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 8px;
+  }
+  .care-card {
+    border-radius: 10px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .care-card.sev-2 {
+    background: rgba(243,156,18,0.07);
+    border: 1px solid rgba(243,156,18,0.35);
+  }
+  .care-card.sev-3 {
+    background: rgba(231,76,60,0.07);
+    border: 1px solid rgba(231,76,60,0.35);
+  }
+  .care-card.sev-4 {
+    background: rgba(231,76,60,0.13);
+    border: 1px solid rgba(231,76,60,0.55);
+  }
+  .care-badge {
+    font-size: 17px; font-weight: 900;
+    min-width: 30px; text-align: center; line-height: 1;
+  }
+  .care-badge.sev-2 { color: #f39c12; }
+  .care-badge.sev-3 { color: #e67e22; }
+  .care-badge.sev-4 { color: #e74c3c; }
+  .care-info { flex: 1; min-width: 0; }
+  .care-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .care-meta { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 3px; }
+  @media (max-width: 600px) {
+    .care-section { padding: 14px 16px 16px; }
+    .care-grid { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -495,6 +555,7 @@
     <div class="legend-item"><div class="legend-dot" style="background:#ecf0f1;border:1px solid #ddd"></div> 未出席</div>
     <div class="legend-item"><div class="legend-dot" style="background:#f5f5f5;border:1px dashed #ccc"></div> 空白（未填）</div>
   </div>
+  <div id="careSection"></div>
   <div id="coworkSection"></div>
   <div id="cardContainer"></div>
 </div>
@@ -736,6 +797,87 @@ function renderCowork() {
   </div>`;
 }
 
+
+function renderCare() {
+  const el = document.getElementById('careSection');
+  if (!el) return;
+
+  const absentees = [];
+  RAW_DATA.forEach(p => {
+    const march = (p.activities?.['主日']?.march) || [];
+    const weeks = (p.activities?.['主日']?.weeks) || [];
+    if (march.length === 0) return;
+
+    // 從最後一週往前數連續 0
+    let consecutive = 0;
+    for (let i = march.length - 1; i >= 0; i--) {
+      if (march[i] === 0) consecutive++;
+      else break;
+    }
+    if (consecutive < 2) return;
+
+    // 找上次出席週次
+    let lastWeek = null;
+    for (let i = march.length - 1; i >= 0; i--) {
+      if (march[i] === 1) { lastWeek = weeks[i]; break; }
+    }
+
+    absentees.push({
+      name: p['姓名'] || '',
+      pai:  p['排']  || '未分排',
+      consecutive,
+      lastWeek: lastWeek || '本期未出席'
+    });
+  });
+
+  absentees.sort((a, b) => b.consecutive - a.consecutive);
+
+  if (absentees.length === 0) {
+    el.innerHTML = `<div class="care-section"><div class="care-inner">
+      <div class="care-header">
+        <div class="care-title">🙏 關心名單</div>
+        <div class="care-ok">✅ 本週全員出席正常，無須特別追蹤</div>
+      </div>
+    </div></div>`;
+    return;
+  }
+
+  function sevCls(n) {
+    if (n >= 4) return 'sev-4';
+    if (n >= 3) return 'sev-3';
+    return 'sev-2';
+  }
+
+  const cards = absentees.map(a => {
+    const sc = sevCls(a.consecutive);
+    return `<div class="care-card ${sc}">
+      <div class="care-badge ${sc}">${a.consecutive}週</div>
+      <div class="care-info">
+        <div class="care-name">${a.name}</div>
+        <div class="care-meta">${a.pai} · 上次：${a.lastWeek}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const listText = absentees.map(a =>
+    `${a.name}（${a.pai}，缺席 ${a.consecutive} 週，上次：${a.lastWeek}）`
+  ).join('\n');
+
+  el.innerHTML = `<div class="care-section"><div class="care-inner">
+    <div class="care-header">
+      <div class="care-title">🚨 關心名單</div>
+      <span class="care-count">${absentees.length} 人連續缺席主日</span>
+      <button class="care-copy-btn" onclick="
+        navigator.clipboard.writeText(\`${'${listText}'}\`)
+          .then(() => { this.textContent = '✓ 已複製'; setTimeout(()=>this.textContent='📋 複製名單',2000); })
+          .catch(() => this.textContent='請手動複製');
+      ">📋 複製名單</button>
+    </div>
+    <div class="care-grid">${cards}</div>
+  </div></div>`;
+}
+
+renderCare();
 renderCowork();
 renderCards();
 </script>
