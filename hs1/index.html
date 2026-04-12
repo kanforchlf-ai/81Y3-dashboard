@@ -8,7 +8,7 @@
   if (sessionStorage.getItem('auth_81y3') !== '5281') { location.replace('../hs.html'); }
 })();
 </script>
-<title>高中一區 出席漏填警示 — 2026年3月</title>
+<title>高中一區 出席漏填警示 — 2026年4月</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; }
@@ -329,7 +329,7 @@
     <a href="../hs.html" style="color:#aaa;text-decoration:none;font-size:20px;line-height:1" title="返回區選擇">‹</a>
     <div>
       <h1>高中一區點名提醒</h1>
-      <div class="subtitle">高中一區 · 2026年3月 · 歷史出席率 ≥ 50% 但當週記錄為 0</div>
+      <div class="subtitle">高中一區 · 2026年4月· 歷史出席率 ≥ 50% 但當週記錄為 0</div>
     </div>
   </div>
   <div class="badge-count" id="flagCount">— 人待確認</div>
@@ -500,7 +500,7 @@ function renderSummary(data) {
 
   document.getElementById('flagCount').textContent = `${flagged} 人待確認`;
   document.getElementById('summaryBar').innerHTML = `
-    <div class="stat-box"><div class="stat-num" style="color:#333;font-size:18px">2026/04/05</div><div class="stat-label">最新統計日期 <span class="tip-icon" data-tip="資料最後一週為 2026年4月第一週（4/5），請回溯此日期的出席記錄">?</span></div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#333;font-size:18px">2026/04/13</div><div class="stat-label">最新統計日期 <span class="tip-icon" data-tip="資料最後一週為 年4月第二週（4/13），請回溯此日期的出席記錄">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#333">${total}</div><div class="stat-label">顯示人數 <span class="tip-icon" data-tip="目前篩選條件下的成員總數">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#e74c3c">${flagged}</div><div class="stat-label">疑似漏填 <span class="tip-icon" data-tip="歷史出席率 ≥50%，但本月至少有一週記錄為 0 的人數">?</span></div></div>
     <div class="stat-box"><div class="stat-num" style="color:#27ae60">${clean}</div><div class="stat-label">記錄正常 <span class="tip-icon" data-tip="本月沒有疑似漏填情況的人數">?</span></div></div>
