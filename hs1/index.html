@@ -320,6 +320,66 @@
     font-size: 13px; flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12);
   }
+
+  /* 配搭檢視區 */
+  .cowork-section {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-top: 2px solid rgba(247,208,96,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 18px 32px 20px;
+  }
+  .cowork-inner { max-width: 1100px; margin: 0 auto; }
+  .cowork-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .cowork-title {
+    font-size: 14px; font-weight: 800; color: #f7d060;
+    letter-spacing: 0.5px;
+  }
+  .cowork-subtitle {
+    font-size: 11px; color: rgba(255,255,255,0.35);
+    margin-left: auto;
+  }
+  .cowork-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .cowork-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: border-color 0.2s;
+  }
+  .cowork-card.has-missing {
+    border-color: rgba(231,76,60,0.45);
+    background: rgba(231,76,60,0.06);
+  }
+  .cowork-card.all-ok {
+    border-color: rgba(46,204,113,0.3);
+  }
+  .cowork-name {
+    font-size: 13px; font-weight: 700; color: #fff;
+    margin-bottom: 8px;
+  }
+  .cowork-acts { display: flex; gap: 5px; flex-wrap: wrap; }
+  .act-pip {
+    font-size: 11px; padding: 2px 7px;
+    border-radius: 6px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .act-ok   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+  .act-miss { background: rgba(231,76,60,0.18); color: #e74c3c; border: 1px solid rgba(231,76,60,0.35); }
+  .cowork-warn {
+    font-size: 10px; color: #e74c3c; margin-top: 6px;
+    font-weight: 600; letter-spacing: 0.3px;
+  }
+  @media (max-width: 600px) {
+    .cowork-section { padding: 14px 16px 16px; }
+    .cowork-grid { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -435,6 +495,7 @@
     <div class="legend-item"><div class="legend-dot" style="background:#ecf0f1;border:1px solid #ddd"></div> 未出席</div>
     <div class="legend-item"><div class="legend-dot" style="background:#f5f5f5;border:1px dashed #ccc"></div> 空白（未填）</div>
   </div>
+  <div id="coworkSection"></div>
   <div id="cardContainer"></div>
 </div>
 
@@ -475,7 +536,71 @@ function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
-  renderCards();
+  
+const COWORKERS = ['石錄','吳均平','陳昱廷','吳秉佳','張韶謙'];
+const ACTS = ['主日','小排','晨興','禱告'];
+
+function renderCowork() {
+  const byName = {};
+  RAW_DATA.forEach(p => { byName[p['姓名']] = p; });
+
+  // dynamic: use last available week
+  const march0 = RAW_DATA[0]?.activities?.['主日']?.march || [];
+  const latestWeekIdx = march0.length - 1;
+  const latestLabel = RAW_DATA[0]?.activities?.['主日']?.weeks?.[latestWeekIdx] || '最新週';
+
+  const cards = COWORKERS.map(name => {
+    const p = byName[name];
+    if (!p) return `<div class="cowork-card has-missing"><div class="cowork-name">⚠️ ${name}（資料缺失）</div></div>`;
+
+    const missing = [];
+    const actHtml = ACTS.map(act => {
+      const march = (p.activities[act] || {}).march || [];
+      const v = march[latestWeekIdx];
+      if (v === 1) {
+        return `<span class="act-pip act-ok">${act} ✓</span>`;
+      } else {
+        missing.push(act);
+        return `<span class="act-pip act-miss">${act} ✗</span>`;
+      }
+    }).join('');
+
+    const cls = missing.length === 0 ? 'all-ok' : 'has-missing';
+    const warn = missing.length > 0
+      ? `<div class="cowork-warn">⚠️ 請補填：${missing.join('、')}</div>`
+      : '';
+
+    return `<div class="cowork-card ${cls}">
+      <div class="cowork-name">${name}</div>
+      <div class="cowork-acts">${actHtml}</div>
+      ${warn}
+    </div>`;
+  }).join('');
+
+  const allOk = COWORKERS.every(name => {
+    const p = byName[name];
+    if (!p) return false;
+    return ACTS.every(act => ((p.activities[act] || {}).march || [])[latestWeekIdx] === 1);
+  });
+
+  const statusLine = allOk
+    ? '<span style="color:#2ecc71;font-size:12px;font-weight:700;">✅ 本週全員填寫完整</span>'
+    : '<span style="color:#e74c3c;font-size:12px;font-weight:700;">⚠️ 有項目尚未填寫，請提醒補填</span>';
+
+  document.getElementById('coworkSection').innerHTML = `
+  <div class="cowork-section">
+    <div class="cowork-inner">
+      <div class="cowork-header">
+        <div class="cowork-title">⭐ 高一配搭 · ${latestLabel} 出席檢視</div>
+        <div class="cowork-subtitle">${statusLine}</div>
+      </div>
+      <div class="cowork-grid">${cards}</div>
+    </div>
+  </div>`;
+}
+
+renderCowork();
+renderCards();
 }
 
 function flagKey(activity, weekLabel) {

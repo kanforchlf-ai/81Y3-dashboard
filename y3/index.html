@@ -673,7 +673,7 @@ function renderCard(person) {
     </div>`;
 }
 
-const COWORKERS = ['林書丞','甘順基','王新恩','蔡旻翰','沈以恩','朱璟軒','戴采薰','張若筠','呂柔蒨','葉倢妤','吳汶靜'];
+const COWORKERS = ['彭柏愷','甘順基','沈以恩','朱璟軒','林書丞','王新恩','張若筠','吳汶靜','呂柔蒨','葉倢妤','戴采薰'];
 const ACTS = ['主日','小排','晨興','禱告'];
 
 function renderCowork() {
@@ -681,8 +681,9 @@ function renderCowork() {
   RAW_DATA.forEach(p => { byName[p['姓名']] = p; });
 
   // latest week index = last element of march array
-  const latestWeekIdx = 5; // AprW1
-  const latestLabel = '4月第一週';
+  const march0 = RAW_DATA[0]?.activities?.['主日']?.march || [];
+  const latestWeekIdx = march0.length - 1;
+  const latestLabel = RAW_DATA[0]?.activities?.['主日']?.weeks?.[latestWeekIdx] || '最新週';
 
   const cards = COWORKERS.map(name => {
     const p = byName[name];
