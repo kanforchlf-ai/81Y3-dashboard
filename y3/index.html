@@ -826,139 +826,131 @@ function renderCowork() {
 
 
 function renderCare() {
-  const el = document.getElementById('careSection');
+  var el = document.getElementById('careSection');
   if (!el) return;
 
-  const OTHER_ACTS = ['小排','晨興','禱告'];
-  const latestLabel = RAW_DATA[0]?.activities?.['主日']?.weeks?.slice(-1)[0];
+  var OTHER_ACTS = ['小排','晨興','禱告'];
+  var acts0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日'];
+  var latestLabel = acts0 ? (acts0.weeks || []).slice(-1)[0] : '';
 
-  const absentees = [];
-  RAW_DATA.forEach(p => {
-    const march = (p.activities?.['主日']?.march) || [];
-    const weeks = (p.activities?.['主日']?.weeks) || [];
-    if (march.length === 0) return;
+  var absentees = [];
+  RAW_DATA.forEach(function(p) {
+    var info = p.activities && p.activities['主日'];
+    var march = (info && info.march) || [];
+    var weeks = (info && info.weeks) || [];
+    if (!march.length) return;
 
-    let consecutive = 0;
-    for (let i = march.length - 1; i >= 0; i--) {
-      if (march[i] === 0) consecutive++;
-      else break;
+    var consecutive = 0;
+    for (var i = march.length - 1; i >= 0; i--) {
+      if (march[i] === 0) consecutive++; else break;
     }
     if (consecutive < 2) return;
 
-    let lastWeek = null;
-    for (let i = march.length - 1; i >= 0; i--) {
-      if (march[i] === 1) { lastWeek = weeks[i]; break; }
+    var lastWeek = null;
+    for (var j = march.length - 1; j >= 0; j--) {
+      if (march[j] === 1) { lastWeek = weeks[j]; break; }
     }
 
-    // 查其他活動最新週出席
-    const otherStatus = {};
-    OTHER_ACTS.forEach(act => {
-      const actData = p.activities?.[act];
-      if (!actData) { otherStatus[act] = null; return; }
-      const wIdx = (actData.weeks || []).indexOf(latestLabel);
-      otherStatus[act] = wIdx >= 0 ? actData.march[wIdx] : null;
+    var os = {};
+    OTHER_ACTS.forEach(function(act) {
+      var ad = p.activities && p.activities[act];
+      if (!ad) { os[act] = null; return; }
+      var wi = (ad.weeks || []).indexOf(latestLabel);
+      os[act] = wi >= 0 ? ad.march[wi] : null;
     });
-
-    const hasOtherLife = OTHER_ACTS.some(a => otherStatus[a] === 1);
 
     absentees.push({
       name: p['姓名'] || '',
       pai:  p['排']  || '未分排',
-      consecutive,
+      consecutive: consecutive,
       lastWeek: lastWeek || '本期未出席',
-      otherStatus,
-      hasOtherLife
+      os: os,
+      hasOther: OTHER_ACTS.some(function(a){ return os[a] === 1; })
     });
   });
 
-  absentees.sort((a, b) => b.consecutive - a.consecutive);
+  absentees.sort(function(a,b){ return b.consecutive - a.consecutive; });
 
-  if (absentees.length === 0) {
-    el.innerHTML = `<div class="care-section"><div class="care-inner">
-      <div class="care-header">
-        <div class="care-title">🙏 關心名單</div>
-        <div class="care-ok">✅ 本週全員出席正常，無須特別追蹤</div>
-      </div>
-    </div></div>`;
+  if (!absentees.length) {
+    el.innerHTML = '<div class="care-section"><div class="care-inner"><div class="care-header">'
+      + '<div class="care-title">關心名單</div>'
+      + '<div class="care-ok">✅ 本週全員出席正常，無須特別追蹤</div>'
+      + '</div></div></div>';
     return;
   }
 
-  function sevCls(n) {
-    return n >= 4 ? 'sev-4' : (n >= 3 ? 'sev-3' : 'sev-2');
-  }
+  function sevCls(n){ return n>=4?'sev-4':n>=3?'sev-3':'sev-2'; }
 
-  function actPips(os) {
-    return OTHER_ACTS.map(act => {
-      const v = os[act];
-      const cls = v === 1 ? 'ok' : (v === 0 ? 'miss' : 'na');
-      const icon = v === 1 ? '✓' : (v === 0 ? '✗' : '–');
-      return `<span class="ca-pip ${cls}">${act} ${icon}</span>`;
+  function pips(os) {
+    return OTHER_ACTS.map(function(act){
+      var v = os[act];
+      var c = v===1?'ok':v===0?'miss':'na';
+      var ico = v===1?'✓':v===0?'✗':'–';
+      return '<span class="ca-pip '+c+'">'+act+' '+ico+'</span>';
     }).join('');
   }
 
-  function makeCard(a, type) {
-    const sc = sevCls(a.consecutive);
-    const attended = OTHER_ACTS.filter(act => a.otherStatus[act] === 1);
-    const actionCls = type === 'urgent' ? 'urgent-action' : '';
-    const actionTxt = type === 'urgent'
+  function card(a, type) {
+    var sc = sevCls(a.consecutive);
+    var attended = OTHER_ACTS.filter(function(act){ return a.os[act]===1; });
+    var acls = type==='urgent'?'urgent-action':'';
+    var atxt = type==='urgent'
       ? '📞 建議主動電話 / 訊息聯繫'
-      : `可在 ${attended.join(' / ')} 時關心提醒`;
-    return `<div class="care-card ${sc}">
-      <div class="care-badge ${sc}">${a.consecutive}週</div>
-      <div class="care-info">
-        <div class="care-name">${a.name}</div>
-        <div class="care-meta">${a.pai} · 上次主日：${a.lastWeek}</div>
-        <div class="care-acts">${actPips(a.otherStatus)}</div>
-        <div class="care-action ${actionCls}">${actionTxt}</div>
-      </div>
-    </div>`;
+      : '可在 '+attended.join(' / ')+' 時關心提醒';
+    return '<div class="care-card '+sc+'">'
+      +'<div class="care-badge '+sc+'">'+a.consecutive+'週</div>'
+      +'<div class="care-info">'
+      +'<div class="care-name">'+a.name+'</div>'
+      +'<div class="care-meta">'+a.pai+' · 上次主日：'+a.lastWeek+'</div>'
+      +'<div class="care-acts">'+pips(a.os)+'</div>'
+      +'<div class="care-action '+acls+'">'+atxt+'</div>'
+      +'</div></div>';
   }
 
-  const urgent   = absentees.filter(a => !a.hasOtherLife);
-  const encourage= absentees.filter(a =>  a.hasOtherLife);
+  var urgent    = absentees.filter(function(a){ return !a.hasOther; });
+  var encourage = absentees.filter(function(a){ return  a.hasOther; });
 
-  let sections = '';
-  if (urgent.length > 0) {
-    sections += `<div class="care-group-label urgent">🔴 需主動聯繫（${urgent.length} 人）<span class="care-group-sub">主日及其他活動皆未出席</span></div>
-    <div class="care-grid">${urgent.map(a => makeCard(a,'urgent')).join('')}</div>`;
+  var lines = [];
+  if (urgent.length) {
+    lines.push('【需主動聯繫】');
+    urgent.forEach(function(a){ lines.push(a.name+'（'+a.pai+'，缺席'+a.consecutive+'週）'); });
   }
-  if (encourage.length > 0) {
-    if (urgent.length > 0) sections += '<div class="care-divider"></div>';
-    sections += `<div class="care-group-label encourage">🟡 鼓勵回來主日（${encourage.length} 人）<span class="care-group-sub">召會生活仍在，其他活動有出席</span></div>
-    <div class="care-grid">${encourage.map(a => makeCard(a,'encourage')).join('')}</div>`;
+  if (encourage.length) {
+    if (lines.length) lines.push('');
+    lines.push('【鼓勵回來主日】');
+    encourage.forEach(function(a){
+      var at = OTHER_ACTS.filter(function(x){ return a.os[x]===1; }).join('、');
+      lines.push(a.name+'（'+a.pai+'，缺席'+a.consecutive+'週，'+at+'有出席）');
+    });
+  }
+  window._careListText = lines.join('\n');
+
+  var secs = '';
+  if (urgent.length) {
+    secs += '<div class="care-group-label urgent">🔴 需主動聯繫（'+urgent.length+' 人）'
+      +'<span class="care-group-sub">主日及其他活動皆未出席</span></div>'
+      +'<div class="care-grid">'+urgent.map(function(a){return card(a,'urgent');}).join('')+'</div>';
+  }
+  if (encourage.length) {
+    if (urgent.length) secs += '<div class="care-divider"></div>';
+    secs += '<div class="care-group-label encourage">🟡 鼓勵回來主日（'+encourage.length+' 人）'
+      +'<span class="care-group-sub">召會生活仍在，其他活動有出席</span></div>'
+      +'<div class="care-grid">'+encourage.map(function(a){return card(a,'encourage');}).join('')+'</div>';
   }
 
-  const copyLines = [
-    urgent.length > 0
-      ? '【需主動聯繫】
-' + urgent.map(a => `${a.name}（${a.pai}，缺席${a.consecutive}週）`).join('
-')
-      : '',
-    encourage.length > 0
-      ? '【鼓勵回來主日】
-' + encourage.map(a => {
-          const at = OTHER_ACTS.filter(act => a.otherStatus[act] === 1).join('、');
-          return `${a.name}（${a.pai}，缺席${a.consecutive}週，${at}有出席）`;
-        }).join('
-')
-      : ''
-  ].filter(Boolean).join('
-
-');
-
-  el.innerHTML = `<div class="care-section"><div class="care-inner">
-    <div class="care-header">
-      <div class="care-title">🚨 關心名單</div>
-      <span class="care-count">${absentees.length} 人需關心</span>
-      <button class="care-copy-btn" onclick="
-        navigator.clipboard.writeText(this.dataset.text)
-          .then(()=>{this.textContent='✓ 已複製';setTimeout(()=>this.textContent='📋 複製名單',2000);})
-          .catch(()=>this.textContent='請手動複製');
-      " data-text="${copyLines.replace(/\/g,'\\').replace(/"/g,'&quot;').replace(/
-/g,'&#10;')}">📋 複製名單</button>
-    </div>
-    ${sections}
-  </div></div>`;
+  el.innerHTML = '<div class="care-section"><div class="care-inner">'
+    +'<div class="care-header">'
+    +'<div class="care-title">🚨 關心名單</div>'
+    +'<span class="care-count">'+absentees.length+' 人需關心</span>'
+    +'<button class="care-copy-btn" onclick="'
+    +"navigator.clipboard.writeText(window._careListText||'')"
+    +".then(function(){var b=this;b.textContent='✓ 已複製';"
+    +"setTimeout(function(){b.textContent='📋 複製名單';},2000);"
+    +"}.bind(this)).catch(function(){this.textContent='請手動複製';}.bind(this))"
+    +'">📋 複製名單</button>'
+    +'</div>'
+    +secs
+    +'</div></div>';
 }
 
 renderCare();
