@@ -440,6 +440,34 @@
     .care-section { padding: 14px 16px 16px; }
     .care-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  .care-group-label {
+    font-size: 12px; font-weight: 800; margin: 12px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .care-group-label.urgent   { color: #e74c3c; }
+  .care-group-label.encourage{ color: #f39c12; }
+  .care-group-sub {
+    font-size: 10px; font-weight: 400;
+    color: rgba(255,255,255,0.35);
+  }
+  .care-divider {
+    height: 1px; background: rgba(255,255,255,0.07);
+    margin: 14px 0;
+  }
+  .care-acts { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+  .ca-pip {
+    font-size: 10px; padding: 1px 6px; border-radius: 5px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .ca-pip.ok   { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+  .ca-pip.miss { background: rgba(231,76,60,0.13);  color: #e74c3c; border: 1px solid rgba(231,76,60,0.25); }
+  .ca-pip.na   { background: rgba(255,255,255,0.05); color: #666;   border: 1px solid rgba(255,255,255,0.1); }
+  .care-action {
+    font-size: 10px; color: rgba(255,255,255,0.5);
+    margin-top: 4px; font-style: italic;
+  }
+  .care-action.urgent-action { color: #e74c3c; font-style: normal; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -802,13 +830,15 @@ function renderCare() {
   const el = document.getElementById('careSection');
   if (!el) return;
 
+  const OTHER_ACTS = ['小排','晨興','禱告'];
+  const latestLabel = RAW_DATA[0]?.activities?.['主日']?.weeks?.slice(-1)[0];
+
   const absentees = [];
   RAW_DATA.forEach(p => {
     const march = (p.activities?.['主日']?.march) || [];
     const weeks = (p.activities?.['主日']?.weeks) || [];
     if (march.length === 0) return;
 
-    // 從最後一週往前數連續 0
     let consecutive = 0;
     for (let i = march.length - 1; i >= 0; i--) {
       if (march[i] === 0) consecutive++;
@@ -816,17 +846,29 @@ function renderCare() {
     }
     if (consecutive < 2) return;
 
-    // 找上次出席週次
     let lastWeek = null;
     for (let i = march.length - 1; i >= 0; i--) {
       if (march[i] === 1) { lastWeek = weeks[i]; break; }
     }
 
+    // 查其他活動最新週出席
+    const otherStatus = {};
+    OTHER_ACTS.forEach(act => {
+      const actData = p.activities?.[act];
+      if (!actData) { otherStatus[act] = null; return; }
+      const wIdx = (actData.weeks || []).indexOf(latestLabel);
+      otherStatus[act] = wIdx >= 0 ? actData.march[wIdx] : null;
+    });
+
+    const hasOtherLife = OTHER_ACTS.some(a => otherStatus[a] === 1);
+
     absentees.push({
       name: p['姓名'] || '',
       pai:  p['排']  || '未分排',
       consecutive,
-      lastWeek: lastWeek || '本期未出席'
+      lastWeek: lastWeek || '本期未出席',
+      otherStatus,
+      hasOtherLife
     });
   });
 
@@ -843,41 +885,83 @@ function renderCare() {
   }
 
   function sevCls(n) {
-    if (n >= 4) return 'sev-4';
-    if (n >= 3) return 'sev-3';
-    return 'sev-2';
+    return n >= 4 ? 'sev-4' : (n >= 3 ? 'sev-3' : 'sev-2');
   }
 
-  const cards = absentees.map(a => {
+  function actPips(os) {
+    return OTHER_ACTS.map(act => {
+      const v = os[act];
+      const cls = v === 1 ? 'ok' : (v === 0 ? 'miss' : 'na');
+      const icon = v === 1 ? '✓' : (v === 0 ? '✗' : '–');
+      return `<span class="ca-pip ${cls}">${act} ${icon}</span>`;
+    }).join('');
+  }
+
+  function makeCard(a, type) {
     const sc = sevCls(a.consecutive);
+    const attended = OTHER_ACTS.filter(act => a.otherStatus[act] === 1);
+    const actionCls = type === 'urgent' ? 'urgent-action' : '';
+    const actionTxt = type === 'urgent'
+      ? '📞 建議主動電話 / 訊息聯繫'
+      : `可在 ${attended.join(' / ')} 時關心提醒`;
     return `<div class="care-card ${sc}">
       <div class="care-badge ${sc}">${a.consecutive}週</div>
       <div class="care-info">
         <div class="care-name">${a.name}</div>
-        <div class="care-meta">${a.pai} · 上次：${a.lastWeek}</div>
+        <div class="care-meta">${a.pai} · 上次主日：${a.lastWeek}</div>
+        <div class="care-acts">${actPips(a.otherStatus)}</div>
+        <div class="care-action ${actionCls}">${actionTxt}</div>
       </div>
     </div>`;
-  }).join('');
+  }
 
-  const listText = absentees.map(a =>
-    `${a.name}（${a.pai}，缺席 ${a.consecutive} 週，上次：${a.lastWeek}）`
-  ).join('\n');
+  const urgent   = absentees.filter(a => !a.hasOtherLife);
+  const encourage= absentees.filter(a =>  a.hasOtherLife);
+
+  let sections = '';
+  if (urgent.length > 0) {
+    sections += `<div class="care-group-label urgent">🔴 需主動聯繫（${urgent.length} 人）<span class="care-group-sub">主日及其他活動皆未出席</span></div>
+    <div class="care-grid">${urgent.map(a => makeCard(a,'urgent')).join('')}</div>`;
+  }
+  if (encourage.length > 0) {
+    if (urgent.length > 0) sections += '<div class="care-divider"></div>';
+    sections += `<div class="care-group-label encourage">🟡 鼓勵回來主日（${encourage.length} 人）<span class="care-group-sub">召會生活仍在，其他活動有出席</span></div>
+    <div class="care-grid">${encourage.map(a => makeCard(a,'encourage')).join('')}</div>`;
+  }
+
+  const copyLines = [
+    urgent.length > 0
+      ? '【需主動聯繫】
+' + urgent.map(a => `${a.name}（${a.pai}，缺席${a.consecutive}週）`).join('
+')
+      : '',
+    encourage.length > 0
+      ? '【鼓勵回來主日】
+' + encourage.map(a => {
+          const at = OTHER_ACTS.filter(act => a.otherStatus[act] === 1).join('、');
+          return `${a.name}（${a.pai}，缺席${a.consecutive}週，${at}有出席）`;
+        }).join('
+')
+      : ''
+  ].filter(Boolean).join('
+
+');
 
   el.innerHTML = `<div class="care-section"><div class="care-inner">
     <div class="care-header">
       <div class="care-title">🚨 關心名單</div>
-      <span class="care-count">${absentees.length} 人連續缺席主日</span>
+      <span class="care-count">${absentees.length} 人需關心</span>
       <button class="care-copy-btn" onclick="
-        navigator.clipboard.writeText(\`${'${listText}'}\`)
-          .then(() => { this.textContent = '✓ 已複製'; setTimeout(()=>this.textContent='📋 複製名單',2000); })
-          .catch(() => this.textContent='請手動複製');
-      ">📋 複製名單</button>
+        navigator.clipboard.writeText(this.dataset.text)
+          .then(()=>{this.textContent='✓ 已複製';setTimeout(()=>this.textContent='📋 複製名單',2000);})
+          .catch(()=>this.textContent='請手動複製');
+      " data-text="${copyLines.replace(/\/g,'\\').replace(/"/g,'&quot;').replace(/
+/g,'&#10;')}">📋 複製名單</button>
     </div>
-    <div class="care-grid">${cards}</div>
+    ${sections}
   </div></div>`;
 }
 
-renderCowork();
 renderCare();
 renderCards();
 </script>
