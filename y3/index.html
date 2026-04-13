@@ -1080,7 +1080,9 @@ function openAttendModal() {
   var latestLabel = latestIdx >= 0 ? march0.weeks[latestIdx] : '';
 
   var attended = [];
+  var KIDS = {'學齡前': true, '小學': true};
   RAW_DATA.forEach(function(p) {
+    if (KIDS[p['羣組']]) return;
     var m = p.activities && p.activities['主日'];
     if (m && m.march[latestIdx] === 1) {
       attended.push({ name: p['姓名'] || '', pai: p['排'] || '未分排', group: p['羣組'] || '' });
