@@ -1084,7 +1084,7 @@ function openAttendModal() {
   RAW_DATA.forEach(function(p) {
     var m = p.activities && p.activities['主日'];
     if (m && m.march[latestIdx] === 1) {
-      attended.push({ name: p['姓名'] || '', pai: p['排'] || '未分排', group: p['群組'] || '' });
+      attended.push({ name: p['姓名'] || '', pai: p['排'] || '未分排', group: p['羣組'] || '' });
     }
   });
 
@@ -1125,7 +1125,7 @@ function renderHero() {
   var KIDS_GROUPS = {'學齡前': true, '小學': true};
   var total = 0;
   RAW_DATA.forEach(function(p) {
-    if (KIDS_GROUPS[p['群組']]) return;
+    if (KIDS_GROUPS[p['羣組']]) return;
     var m = p.activities && p.activities['主日'];
     if (m && m.march[latestIdx] === 1) total++;
   });
@@ -1133,7 +1133,7 @@ function renderHero() {
   // 上月平均（所有週的平均，排除兒童）
   var weekSums = {};
   RAW_DATA.forEach(function(p) {
-    if (KIDS_GROUPS[p['群組']]) return;
+    if (KIDS_GROUPS[p['羣組']]) return;
     var m = p.activities && p.activities['主日'];
     if (!m) return;
     m.weeks.forEach(function(w, i) {
