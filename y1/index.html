@@ -942,6 +942,74 @@ function renderCare() {
     +'</div></div>';
 }
 
+var HERO_GOAL = 24;
+function renderHero() {
+  // 最新週主日出席數
+  var march0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日'];
+  var latestIdx = march0 ? march0.march.length - 1 : -1;
+  var latestLabel = latestIdx >= 0 ? march0.weeks[latestIdx] : '';
+
+  var total = 0;
+  RAW_DATA.forEach(function(p) {
+    var m = p.activities && p.activities['主日'];
+    if (m && m.march[latestIdx] === 1) total++;
+  });
+
+  // 上月平均（所有週的平均）
+  var weekSums = {};
+  RAW_DATA.forEach(function(p) {
+    var m = p.activities && p.activities['主日'];
+    if (!m) return;
+    m.weeks.forEach(function(w, i) {
+      weekSums[w] = (weekSums[w] || 0) + (m.march[i] === 1 ? 1 : 0);
+    });
+  });
+  var weekKeys = Object.keys(weekSums);
+  var prevWeeks = weekKeys.filter(function(w){ return w !== latestLabel; });
+  var prevAvg = prevWeeks.length
+    ? (prevWeeks.reduce(function(s,w){ return s + weekSums[w]; }, 0) / prevWeeks.length)
+    : total;
+  prevAvg = Math.round(prevAvg * 10) / 10;
+
+  var diff = Math.round((total - prevAvg) * 10) / 10;
+  var goal = HERO_GOAL;
+  var gap = goal - total;
+  var pct = Math.min(100, Math.round(total / goal * 100));
+
+  // 更新 DOM
+  var numEl = document.querySelector('.ah-num');
+  var subEl = document.querySelector('.ah-sub');
+  var vsEl  = document.querySelector('.ah-stat-num.ah-down, .ah-stat-num.ah-up, .ah-stat-num.ah-even');
+  var vsLbl = vsEl && vsEl.nextElementSibling;
+  var gapEl = document.querySelector('.ah-stat-num.ah-gap');
+  var gapLbl = gapEl && gapEl.nextElementSibling;
+  var fill  = document.querySelector('.ah-progress-fill');
+  var plbl  = document.querySelector('.ah-progress-label');
+
+  if (numEl) numEl.textContent = total;
+  if (subEl) subEl.textContent = '2026年' + latestLabel;
+
+  if (vsEl) {
+    vsEl.className = 'ah-stat-num ' + (diff > 0 ? 'ah-up' : diff < 0 ? 'ah-down' : 'ah-even');
+    vsEl.textContent = (diff > 0 ? '▲ ' : diff < 0 ? '▼ ' : '') + Math.abs(diff);
+  }
+  if (vsLbl) vsLbl.textContent = 'vs 上月平均（' + prevAvg + '人）';
+
+  if (gapEl) {
+    if (gap <= 0) {
+      gapEl.className = 'ah-stat-num ah-up';
+      gapEl.textContent = '達標✅';
+    } else {
+      gapEl.className = 'ah-stat-num ah-gap';
+      gapEl.textContent = '還差 ' + gap + ' 人';
+    }
+  }
+  if (gapLbl) gapLbl.textContent = '距離目標 ' + goal + ' 人';
+  if (fill)  fill.style.width = pct + '%';
+  if (plbl)  plbl.textContent = total + ' / ' + goal;
+}
+
+renderHero();
 renderCowork();
 renderCare();
 renderCards();
