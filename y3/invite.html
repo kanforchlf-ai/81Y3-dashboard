@@ -142,7 +142,120 @@
 <div class="container" id="app"></div>
 
 <script>
-const RECOVERABLE = [{"姓名": "鍾悅", "受浸日期": "2013-07-06", "last_active_month": "2026年3月", "attendance_since_sep": 3, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "王晨薰", "受浸日期": "2020-06-07", "last_active_month": "2026年4月", "attendance_since_sep": 6, "recent_4weeks": 1, "sep_to_feb": 5}, {"姓名": "徐靖城", "受浸日期": "2017-07-08", "last_active_month": "2026年2月", "attendance_since_sep": 7, "recent_4weeks": 0, "sep_to_feb": 7}, {"姓名": "謝全真", "受浸日期": "2016-07-09", "last_active_month": "2026年2月", "attendance_since_sep": 7, "recent_4weeks": 0, "sep_to_feb": 7}, {"姓名": "董怡萱", "受浸日期": "2021-03", "last_active_month": "2026年2月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "陳利益", "受浸日期": "2024-11-23", "last_active_month": "2026年1月", "attendance_since_sep": 5, "recent_4weeks": 0, "sep_to_feb": 5}, {"姓名": "陳實頡", "受浸日期": "2017-07-08", "last_active_month": "2026年4月", "attendance_since_sep": 4, "recent_4weeks": 1, "sep_to_feb": 4}, {"姓名": "吳尚謙", "受浸日期": "2011-07-09", "last_active_month": "2025年12月", "attendance_since_sep": 3, "recent_4weeks": 0, "sep_to_feb": 3}, {"姓名": "何語心", "受浸日期": "2018-07-07", "last_active_month": "2025年12月", "attendance_since_sep": 6, "recent_4weeks": 0, "sep_to_feb": 6}, {"姓名": "林宗佐", "受浸日期": "2005-08", "last_active_month": "2025年12月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "張紘嘉", "受浸日期": "—", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "彭芊妘", "受浸日期": "2024-04-04", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "陳紀橖", "受浸日期": "—", "last_active_month": "2025年11月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "黃玉燕", "受浸日期": "2005-12", "last_active_month": "2025年11月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "管錫廷", "受浸日期": "2016", "last_active_month": "2025年10月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "徐平安", "受浸日期": "2012-07-07", "last_active_month": "2025年10月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "楊宜潔", "受浸日期": "2016", "last_active_month": "2025年10月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "張舒涵", "受浸日期": "2012-11-06", "last_active_month": "2025年9月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}]n>
+const RECOVERABLE = [{"姓名": "鍾悅", "受浸日期": "2013-07-06", "last_active_month": "2026年3月", "attendance_since_sep": 3, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "王晨薰", "受浸日期": "2020-06-07", "last_active_month": "2026年4月", "attendance_since_sep": 6, "recent_4weeks": 1, "sep_to_feb": 5}, {"姓名": "徐靖城", "受浸日期": "2017-07-08", "last_active_month": "2026年2月", "attendance_since_sep": 7, "recent_4weeks": 0, "sep_to_feb": 7}, {"姓名": "謝全真", "受浸日期": "2016-07-09", "last_active_month": "2026年2月", "attendance_since_sep": 7, "recent_4weeks": 0, "sep_to_feb": 7}, {"姓名": "董怡萱", "受浸日期": "2021-03", "last_active_month": "2026年2月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "陳利益", "受浸日期": "2024-11-23", "last_active_month": "2026年1月", "attendance_since_sep": 5, "recent_4weeks": 0, "sep_to_feb": 5}, {"姓名": "陳實頡", "受浸日期": "2017-07-08", "last_active_month": "2026年4月", "attendance_since_sep": 4, "recent_4weeks": 1, "sep_to_feb": 4}, {"姓名": "吳尚謙", "受浸日期": "2011-07-09", "last_active_month": "2025年12月", "attendance_since_sep": 3, "recent_4weeks": 0, "sep_to_feb": 3}, {"姓名": "何語心", "受浸日期": "2018-07-07", "last_active_month": "2025年12月", "attendance_since_sep": 6, "recent_4weeks": 0, "sep_to_feb": 6}, {"姓名": "林宗佐", "受浸日期": "2005-08", "last_active_month": "2025年12月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "張紘嘉", "受浸日期": "—", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "彭芊妘", "受浸日期": "2024-04-04", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "陳紀橖", "受浸日期": "—", "last_active_month": "2025年11月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "黃玉燕", "受浸日期": "2005-12", "last_active_month": "2025年11月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "管錫廷", "受浸日期": "2016", "last_active_month": "2025年10月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "徐平安", "受浸日期": "2012-07-07", "last_active_month": "2025年10月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}, {"姓名": "楊宜潔", "受浸日期": "2016", "last_active_month": "2025年10月", "attendance_since_sep": 2, "recent_4weeks": 0, "sep_to_feb": 2}, {"姓名": "張舒涵", "受浸日期": "2012-11-06", "last_active_month": "2025年9月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}];
+
+const IRREGULAR = [{"姓名": "朱璟軒", "受浸日期": "2006-10", "recent_4weeks": 2, "attendance_since_sep": 28, "sep_to_feb": 25, "last_active_month": "2026年4月"}, {"姓名": "葉宛瑄", "受浸日期": "2017-01-01", "recent_4weeks": 0, "attendance_since_sep": 17, "sep_to_feb": 15, "last_active_month": "2026年3月"}, {"姓名": "江至美", "受浸日期": "2016-07-09", "recent_4weeks": 1, "attendance_since_sep": 15, "sep_to_feb": 12, "last_active_month": "2026年4月"}, {"姓名": "吳呈峻", "受浸日期": "2013-07-06", "recent_4weeks": 1, "attendance_since_sep": 14, "sep_to_feb": 12, "last_active_month": "2026年3月"}, {"姓名": "王麒竣", "受浸日期": "2016-07-09", "recent_4weeks": 3, "attendance_since_sep": 14, "sep_to_feb": 11, "last_active_month": "2026年4月"}, {"姓名": "高瑞謙", "受浸日期": "2016-07-09", "recent_4weeks": 0, "attendance_since_sep": 12, "sep_to_feb": 10, "last_active_month": "2026年3月"}, {"姓名": "張皓雅", "受浸日期": "2013-07-06", "recent_4weeks": 0, "attendance_since_sep": 11, "sep_to_feb": 9, "last_active_month": "2026年3月"}, {"姓名": "彭彥博", "受浸日期": "2014", "recent_4weeks": 2, "attendance_since_sep": 8, "sep_to_feb": 6, "last_active_month": "2026年4月"}, {"姓名": "蔡宇涵", "受浸日期": "2013-07-06", "recent_4weeks": 2, "attendance_since_sep": 6, "sep_to_feb": 3, "last_active_month": "2026年4月"}, {"姓名": "陳佳莉", "受浸日期": "2023-10", "recent_4weeks": 1, "attendance_since_sep": 5, "sep_to_feb": 3, "last_active_month": "2026年3月"}, {"姓名": "劉庭伃", "受浸日期": "2016-07-09", "recent_4weeks": 1, "attendance_since_sep": 4, "sep_to_feb": 3, "last_active_month": "2026年3月"}];
+
+const COLORS = ['#3498db','#9b59b6','#e67e22','#1abc9c','#e74c3c','#f39c12','#2c3e50','#16a085'];
+function getColor(name) {
+  let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % COLORS.length;
+  return COLORS[h];
+}
+
+function priority(p) {
+  if (p.sep_to_feb >= 5) return 'high';
+  if (p.sep_to_feb >= 3) return 'med';
+  return 'low';
+}
+
+function priorityLabel(p) {
+  if (p.sep_to_feb >= 5) return '優先聯繫';
+  if (p.sep_to_feb >= 3) return '可聯繫';
+  return '曾到訪';
+}
+
+function renderRecoverable(p) {
+  const pr = priority(p);
+  const color = getColor(p.姓名);
+  const baptism = p.受浸日期 && p.受浸日期 !== '—' && p.受浸日期 !== '0000-00-00' ? p.受浸日期.replace(/-00/g,'').replace(/-0$/,'') : '—';
+  return `
+    <div class="person-card priority-${pr}">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:${color}">${p.姓名[0]}</div>
+        <div>
+          <div class="pc-name">${p.姓名}</div>
+          <div class="pc-baptism">受浸 ${baptism}</div>
+        </div>
+        <div class="pc-last">
+          <div class="pc-last-label">最後出席</div>
+          <div class="pc-last-val">${p.last_active_month}</div>
+        </div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat">
+          <div class="pc-stat-num ${p.sep_to_feb>=5?'green':p.sep_to_feb>=3?'orange':'red'}">${p.sep_to_feb}</div>
+          <div class="pc-stat-label">Sep~Feb 出席</div>
+        </div>
+        <div class="pc-stat">
+          <div class="pc-stat-num red">0</div>
+          <div class="pc-stat-label">近 4 週</div>
+        </div>
+        <div class="pc-stat" style="background:${pr==='high'?'#fef0f0':pr==='med'?'#fff8f0':'#f8f9fa'}">
+          <div class="pc-stat-num" style="font-size:12px;color:${pr==='high'?'#e74c3c':pr==='med'?'#e67e22':'#aaa'}">${priorityLabel(p)}</div>
+          <div class="pc-stat-label">建議</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderIrregular(p) {
+  const color = getColor(p.姓名);
+  const baptism = p.受浸日期 && p.受浸日期 !== '—' && p.受浸日期 !== '0000-00-00' ? p.受浸日期.replace(/-00/g,'').replace(/-0$/,'') : '—';
+  return `
+    <div class="person-card priority-med">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:${color}">${p.姓名[0]}</div>
+        <div>
+          <div class="pc-name">${p.姓名}</div>
+          <div class="pc-baptism">受浸 ${baptism}</div>
+        </div>
+        <div class="pc-last">
+          <div class="pc-last-label">近 4 週出席</div>
+          <div class="pc-last-val" style="color:#e67e22">${p.recent_4weeks} / 4 次</div>
+        </div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat">
+          <div class="pc-stat-num green">${p.attendance_since_sep}</div>
+          <div class="pc-stat-label">Sep 至今出席</div>
+        </div>
+        <div class="pc-stat">
+          <div class="pc-stat-num orange">${p.recent_4weeks}</div>
+          <div class="pc-stat-label">近 4 週</div>
+        </div>
+        <div class="pc-stat" style="background:#fff8f0">
+          <div class="pc-stat-num" style="font-size:12px;color:#e67e22">鼓勵出席</div>
+          <div class="pc-stat-label">建議</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+const high = RECOVERABLE.filter(p => p.sep_to_feb >= 5);
+const med = RECOVERABLE.filter(p => p.sep_to_feb >= 3 && p.sep_to_feb < 5);
+const low = RECOVERABLE.filter(p => p.sep_to_feb < 3);
+
+document.getElementById('app').innerHTML = `
+  <div class="section-header">
+    <span class="section-icon">🔴</span>
+    <span class="section-title">優先挽回</span>
+    <span class="section-badge badge-red">${high.length} 人</span>
+    <span class="section-desc">曾穩定出席，近期消失</span>
+  </div>
+  <div class="card-grid">${high.map(renderRecoverable).join('')}</div>
+
+  <div class="section-header">
+    <span class="section-icon">🟠</span>
+    <span class="section-title">可聯繫邀請</span>
+    <span class="section-badge badge-orange">${med.length} 人</span>
+    <span class="section-desc">偶爾出席，值得邀請</span>
+  </div>
+  <div class="card-grid">${med.map(renderRecoverable).join('')}</div>
+
+  <div class="section-header">
+    <span class="section-icon">⚪</span>
+    <span class="section-title">曾到訪</span>
+    <span class="section-badge" style="background:#aaa;color:white">${low.length} 人</span>
     <span class="section-desc">出席次數少，仍可嘗試聯繫</span>
   </div>
   <div class="card-grid">${low.map(renderRecoverable).join('')}</div>
