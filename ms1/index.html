@@ -512,6 +512,46 @@
   @media (max-width: 500px) {
     .modal-list { grid-template-columns: 1fr; }
   }
+
+  /* ── 閱讀說明 ── */
+  .card-guide {
+    margin: 0 0 8px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    font-size: 12px;
+  }
+  .card-guide-toggle {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; cursor: pointer;
+    color: #888; font-weight: 600;
+    user-select: none;
+  }
+  .card-guide-toggle:hover { color: #555; }
+  .card-guide-arrow {
+    margin-left: auto; font-size: 11px;
+    transition: transform 0.2s;
+  }
+  .card-guide.open .card-guide-arrow { transform: rotate(90deg); }
+  .card-guide-body {
+    display: none; padding: 0 14px 12px;
+    color: #555; line-height: 1.7;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .card-guide.open .card-guide-body { display: block; }
+  .guide-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; }
+  .guide-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .guide-text { flex: 1; }
+  .guide-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 1px 7px; border-radius: 5px; margin-right: 4px;
+  }
+  .gb-flag { background: #fef9e7; color: #b7950b; border: 1px solid #f9e79f; }
+  .gb-ok   { background: rgba(46,204,113,0.15); color: #1e8449; border: 1px solid rgba(46,204,113,0.3); }
+  .gb-miss { background: rgba(231,76,60,0.1); color: #c0392b; border: 1px solid rgba(231,76,60,0.25); }
+  .gb-abs  { background: #f0f0f0; color: #888; border: 1px solid #ddd; }
+  .gb-num  { background: #eaf2ff; color: #2471a3; border: 1px solid #aed6f1; }
 </style>
 </head>
 <body>
@@ -621,7 +661,43 @@
 
 <div class="container">
   <div class="summary-bar" id="summaryBar"></div>
-  <div class="legend">
+  <div class="card-guide" id="cardGuide">
+  <div class="card-guide-toggle" onclick="document.getElementById('cardGuide').classList.toggle('open')">
+    <span>ℹ️</span> 如何閱讀出席卡片？
+    <span class="card-guide-arrow">›</span>
+  </div>
+  <div class="card-guide-body">
+    <div class="guide-row">
+      <div class="guide-icon">🔢</div>
+      <div class="guide-text">
+        每個格子上的 <span class="guide-badge gb-num">一</span><span class="guide-badge gb-num">二</span><span class="guide-badge gb-num">三</span>…
+        代表本月<strong>第幾週</strong>的出席記錄（從資料最早週次開始依序排列）
+      </div>
+    </div>
+    <div class="guide-row">
+      <div class="guide-icon">✅</div>
+      <div class="guide-text">
+        <span class="guide-badge gb-ok">✓ 綠色</span> 有出席 &nbsp;
+        <span class="guide-badge gb-abs">— 灰色</span> 未出席 &nbsp;
+        <span class="guide-badge gb-miss">✗ 紅色</span> 疑似漏填
+      </div>
+    </div>
+    <div class="guide-row">
+      <div class="guide-icon">🟡</div>
+      <div class="guide-text">
+        <span class="guide-badge gb-flag">晨興3月第二週</span> 這類<strong>黃色標籤</strong>代表「疑似漏填」
+        ——該成員歷史出席率 ≥50%，但那週記錄為 0，請確認是否忘記填寫
+      </div>
+    </div>
+    <div class="guide-row">
+      <div class="guide-icon">📊</div>
+      <div class="guide-text">
+        右上角的 <span class="guide-badge gb-flag">歷史 83%</span> 是該成員這項活動的<strong>歷史出席率</strong>，反映平時的出席習慣
+      </div>
+    </div>
+  </div>
+</div>
+<div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div> 有出席</div>
     <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div> 疑似漏填（歷史≥50%但為0）</div>
     <div class="legend-item"><div class="legend-dot" style="background:#ecf0f1;border:1px solid #ddd"></div> 未出席</div>
