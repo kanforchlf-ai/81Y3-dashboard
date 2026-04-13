@@ -1110,15 +1110,18 @@ function renderHero() {
   var latestIdx = march0 ? march0.march.length - 1 : -1;
   var latestLabel = latestIdx >= 0 ? march0.weeks[latestIdx] : '';
 
+  var KIDS_GROUPS = {'學齡前': true, '小學': true};
   var total = 0;
   RAW_DATA.forEach(function(p) {
+    if (KIDS_GROUPS[p['群組']]) return;
     var m = p.activities && p.activities['主日'];
     if (m && m.march[latestIdx] === 1) total++;
   });
 
-  // 上月平均（所有週的平均）
+  // 上月平均（所有週的平均，排除兒童）
   var weekSums = {};
   RAW_DATA.forEach(function(p) {
+    if (KIDS_GROUPS[p['群組']]) return;
     var m = p.activities && p.activities['主日'];
     if (!m) return;
     m.weeks.forEach(function(w, i) {
