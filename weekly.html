@@ -297,9 +297,16 @@ body {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
+  align-items: center;
   margin-bottom: 6px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.legend-rule {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  font-style: italic;
 }
 .legend-item {
   display: flex;
@@ -479,6 +486,7 @@ function renderDistrict(d) {
     <div class="chip-legend">
       <span class="legend-item"><span class="legend-dot dot-normal"></span>本週有出席</span>
       <span class="legend-item"><span class="legend-dot dot-zero"></span>本週未出席</span>
+      <span class="legend-rule">顯示近 6 週內任一活動有出席的成員（不含兒童）</span>
     </div>
     <div class="chips-wrap" id="chips-${d.id}"></div>`;
 
