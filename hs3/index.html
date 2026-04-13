@@ -692,7 +692,7 @@
     <div class="guide-row">
       <div class="guide-icon">📊</div>
       <div class="guide-text">
-        右上角的 <span class="guide-badge gb-flag">歷史 83%</span> 是該成員這項活動的<strong>歷史出席率</strong>，反映平時的出席習慣
+        右上角的 <span class="guide-badge gb-flag">歷史 83%</span> 是該成員這項活動在 <strong><span id="guideHistRange">資料期間</span></strong> 內的<strong>出席率</strong>（出席週數 ÷ 總週數），反映平時的出席習慣
       </div>
     </div>
   </div>
@@ -1110,6 +1110,13 @@ function closeModal() {
 }
 
 function renderHero() {
+  // 填入說明欄的歷史資料範圍
+  var weeks0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日']
+    ? RAW_DATA[0].activities['主日'].weeks : [];
+  if (weeks0.length >= 2) {
+    var rangeEl = document.getElementById('guideHistRange');
+    if (rangeEl) rangeEl.textContent = weeks0[0] + ' ～ ' + weeks0[weeks0.length-1] + '（共 ' + weeks0.length + ' 週）';
+  }
   // 最新週主日出席數
   var march0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日'];
   var latestIdx = march0 ? march0.march.length - 1 : -1;
