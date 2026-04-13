@@ -468,6 +468,50 @@
     margin-top: 4px; font-style: italic;
   }
   .care-action.urgent-action { color: #e74c3c; font-style: normal; font-weight: 700; }
+
+  /* ── 出席名單 Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px; padding: 24px;
+    width: 90%; max-width: 480px; max-height: 80vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-header {
+    display: flex; align-items: center; margin-bottom: 16px;
+  }
+  .modal-title {
+    font-size: 15px; font-weight: 800; color: #f7d060; flex: 1;
+  }
+  .modal-close {
+    background: none; border: none; color: #aaa;
+    font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px;
+  }
+  .modal-close:hover { color: #fff; }
+  .modal-list {
+    overflow-y: auto; flex: 1;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px; padding-right: 4px;
+  }
+  .modal-person {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 8px 12px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .mp-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .mp-meta { font-size: 10px; color: rgba(255,255,255,0.4); }
+  .ah-num { cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.3); }
+  .ah-num:hover { color: #f7d060; }
+  @media (max-width: 500px) {
+    .modal-list { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -955,6 +999,40 @@ function renderCare() {
 }
 
 var HERO_GOAL = 24;
+function openAttendModal() {
+  var march0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日'];
+  var latestIdx = march0 ? march0.march.length - 1 : -1;
+  var latestLabel = latestIdx >= 0 ? march0.weeks[latestIdx] : '';
+
+  var attended = [];
+  RAW_DATA.forEach(function(p) {
+    var m = p.activities && p.activities['主日'];
+    if (m && m.march[latestIdx] === 1) {
+      attended.push({ name: p['姓名'] || '', pai: p['排'] || '未分排', group: p['群組'] || '' });
+    }
+  });
+
+  attended.sort(function(a, b) {
+    if (a.pai < b.pai) return -1;
+    if (a.pai > b.pai) return 1;
+    return a.name.localeCompare(b.name, 'zh-TW');
+  });
+
+  document.getElementById('modalTitle').textContent = latestLabel + ' 出席名單（' + attended.length + ' 人）';
+  document.getElementById('modalList').innerHTML = attended.map(function(p) {
+    return '<div class="modal-person">'
+      + '<div class="mp-name">' + p.name + '</div>'
+      + '<div class="mp-meta">' + p.pai + (p.group ? ' · ' + p.group : '') + '</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('attendModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('attendModal').classList.remove('open');
+}
+
 function renderHero() {
   // 最新週主日出席數
   var march0 = RAW_DATA[0] && RAW_DATA[0].activities && RAW_DATA[0].activities['主日'];
@@ -998,7 +1076,7 @@ function renderHero() {
   var fill  = document.querySelector('.ah-progress-fill');
   var plbl  = document.querySelector('.ah-progress-label');
 
-  if (numEl) numEl.textContent = total;
+  if (numEl) { numEl.textContent = total; numEl.setAttribute('onclick','openAttendModal()'); numEl.title='點擊看名單'; }
   if (subEl) subEl.textContent = '2026年' + latestLabel;
 
   if (vsEl) {
@@ -1026,5 +1104,15 @@ renderCowork();
 renderCare();
 renderCards();
 </script>
+
+<div class="modal-overlay" id="attendModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">本週出席名單</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-list" id="modalList"></div>
+  </div>
+</div>
 </body>
 </html>
