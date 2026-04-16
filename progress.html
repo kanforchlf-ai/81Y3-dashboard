@@ -77,7 +77,13 @@ header {
 .zone-pct { font-size: 22px; font-weight: 900; }
 .bar-bg { background: rgba(255,255,255,0.08); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 10px; }
 .bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; }
-.miss-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
+.zone-denom { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.zone-denom strong { color: #fff; }
+.zone-detail-row {
+  display: flex; gap: 14px; font-size: 12px;
+  color: rgba(255,255,255,0.5); margin-bottom: 4px;
+}
+.zone-detail-row strong { color: #fff; }
 .no-miss { font-size: 12px; color: #4ade80; }
 
 @media (max-width: 600px) {
@@ -89,7 +95,7 @@ header {
 <body>
 <header>
   <div class="header-title">📊 資料填寫競賽</div>
-  <div class="header-sub">出生年月 & 群組完整度 · 更新於 2026/04/16 23:05</div>
+  <div class="header-sub">出生年月 & 群組完整度 · 更新於 2026/04/16 23:10</div>
 </header>
 <div class="main">
 
@@ -171,49 +177,61 @@ header {
       <div class="zone-top">
         <div>
           <div class="zone-name">青年二區</div>
-          <div class="zone-sub-stats">
-            出生年月 36/43 ·
-            群組 43/43
-          </div>
+          <div class="zone-denom">共 <strong>43</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#f59e0b">84%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:84%;background:#f59e0b"></div>
       </div>
-      <div class="miss-label">缺漏 7 人 · 完整 36/43 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>36</strong> 人</span>
+        <span>❌ 缺漏 <strong>7</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 36/43 · 群組 43/43
+      </div>
     </div>
     <div class="zone-card" data-pct="66">
       <div class="zone-top">
         <div>
           <div class="zone-name">青年三區</div>
-          <div class="zone-sub-stats">
-            出生年月 39/59 ·
-            群組 59/59
-          </div>
+          <div class="zone-denom">共 <strong>59</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#f59e0b">66%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:66%;background:#f59e0b"></div>
       </div>
-      <div class="miss-label">缺漏 20 人 · 完整 39/59 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>39</strong> 人</span>
+        <span>❌ 缺漏 <strong>20</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 39/59 · 群組 59/59
+      </div>
     </div>
     <div class="zone-card" data-pct="45">
       <div class="zone-top">
         <div>
           <div class="zone-name">青年一區</div>
-          <div class="zone-sub-stats">
-            出生年月 18/40 ·
-            群組 40/40
-          </div>
+          <div class="zone-denom">共 <strong>40</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#ef4444">45%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:45%;background:#ef4444"></div>
       </div>
-      <div class="miss-label">缺漏 22 人 · 完整 18/40 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>18</strong> 人</span>
+        <span>❌ 缺漏 <strong>22</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 18/40 · 群組 40/40
+      </div>
     </div></div>
   </section>
   <section class="daqv" style="--dq-color:#d97706">
@@ -227,49 +245,61 @@ header {
       <div class="zone-top">
         <div>
           <div class="zone-name">高中三區</div>
-          <div class="zone-sub-stats">
-            出生年月 9/14 ·
-            群組 14/14
-          </div>
+          <div class="zone-denom">共 <strong>14</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#f59e0b">64%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:64%;background:#f59e0b"></div>
       </div>
-      <div class="miss-label">缺漏 5 人 · 完整 9/14 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>9</strong> 人</span>
+        <span>❌ 缺漏 <strong>5</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 9/14 · 群組 14/14
+      </div>
     </div>
     <div class="zone-card" data-pct="54">
       <div class="zone-top">
         <div>
           <div class="zone-name">高中二區</div>
-          <div class="zone-sub-stats">
-            出生年月 26/48 ·
-            群組 48/48
-          </div>
+          <div class="zone-denom">共 <strong>48</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#ef4444">54%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:54%;background:#ef4444"></div>
       </div>
-      <div class="miss-label">缺漏 22 人 · 完整 26/48 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>26</strong> 人</span>
+        <span>❌ 缺漏 <strong>22</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 26/48 · 群組 48/48
+      </div>
     </div>
     <div class="zone-card" data-pct="45">
       <div class="zone-top">
         <div>
           <div class="zone-name">高中一區</div>
-          <div class="zone-sub-stats">
-            出生年月 19/42 ·
-            群組 42/42
-          </div>
+          <div class="zone-denom">共 <strong>42</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#ef4444">45%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:45%;background:#ef4444"></div>
       </div>
-      <div class="miss-label">缺漏 23 人 · 完整 19/42 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>19</strong> 人</span>
+        <span>❌ 缺漏 <strong>23</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 19/42 · 群組 42/42
+      </div>
     </div></div>
   </section>
   <section class="daqv" style="--dq-color:#059669">
@@ -283,33 +313,41 @@ header {
       <div class="zone-top">
         <div>
           <div class="zone-name">國中二區</div>
-          <div class="zone-sub-stats">
-            出生年月 21/73 ·
-            群組 73/73
-          </div>
+          <div class="zone-denom">共 <strong>73</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#ef4444">29%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:29%;background:#ef4444"></div>
       </div>
-      <div class="miss-label">缺漏 52 人 · 完整 21/73 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>21</strong> 人</span>
+        <span>❌ 缺漏 <strong>52</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 21/73 · 群組 73/73
+      </div>
     </div>
     <div class="zone-card" data-pct="28">
       <div class="zone-top">
         <div>
           <div class="zone-name">國中一區</div>
-          <div class="zone-sub-stats">
-            出生年月 23/81 ·
-            群組 81/81
-          </div>
+          <div class="zone-denom">共 <strong>81</strong> 人</div>
         </div>
         <div class="zone-pct" style="color:#ef4444">28%</div>
       </div>
       <div class="bar-bg">
         <div class="bar-fill" style="width:28%;background:#ef4444"></div>
       </div>
-      <div class="miss-label">缺漏 58 人 · 完整 23/81 人 </div>
+      <div class="zone-detail-row">
+        <span>✅ 完整 <strong>23</strong> 人</span>
+        <span>❌ 缺漏 <strong>58</strong> 人</span>
+        
+      </div>
+      <div class="zone-sub-stats">
+        出生年月 23/81 · 群組 81/81
+      </div>
     </div></div>
   </section>
 </div>
