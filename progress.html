@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料填寫競賽 · 81會所</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #0a0a14; color: #fff;
+  min-height: 100vh; padding-bottom: 48px;
+}
+header {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  border-bottom: 2px solid rgba(247,208,96,0.2);
+  padding: 18px 24px 16px;
+}
+.header-title { font-size: 18px; font-weight: 800; color: #f7d060; }
+.header-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
+
+/* 全會所進度 */
+.total-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 20px 24px; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 24px;
+}
+.total-num { font-size: 48px; font-weight: 900; color: #f7d060; line-height: 1; }
+.total-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.total-bar-wrap { flex: 1; }
+.total-bar-bg { background: rgba(255,255,255,0.08); border-radius: 8px; height: 12px; overflow: hidden; }
+.total-bar-fill { height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, #f7d060, #f59e0b);
+  transition: width 0.8s ease; }
+.total-detail { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 6px; }
+
+/* 排名 */
+.ranking {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 16px 20px; margin-bottom: 28px;
+}
+.ranking-title { font-size: 13px; font-weight: 700; color: #f7d060; margin-bottom: 12px; }
+.rank-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.rank-row:last-child { border-bottom: none; }
+.rank-medal { font-size: 18px; width: 28px; }
+.rank-name { flex: 1; font-size: 13px; font-weight: 700; }
+.rank-pct { font-size: 15px; font-weight: 800; color: #f7d060; width: 48px; text-align: right; }
+.rank-miss { font-size: 11px; color: rgba(255,255,255,0.35); width: 56px; text-align: right; }
+
+/* 大區 */
+.daqv { margin-bottom: 32px; }
+.daqv-header {
+  display: flex; align-items: center; gap: 10px;
+  border-left: 4px solid var(--dq-color);
+  padding-left: 12px; margin-bottom: 14px;
+}
+.daqv-icon { font-size: 20px; }
+.daqv-name { font-size: 15px; font-weight: 800; }
+.daqv-total { font-size: 12px; color: rgba(255,255,255,0.4); margin-left: auto; }
+
+/* 小區卡 */
+.zone-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.zone-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 16px;
+}
+.zone-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.zone-name { font-size: 14px; font-weight: 700; }
+.zone-sub-stats { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; }
+.zone-pct { font-size: 22px; font-weight: 900; }
+.bar-bg { background: rgba(255,255,255,0.08); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 10px; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; }
+.miss-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
+.no-miss { font-size: 12px; color: #4ade80; }
+
+@media (max-width: 600px) {
+  .total-card { flex-direction: column; align-items: flex-start; }
+  .total-bar-wrap { width: 100%; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-title">📊 資料填寫競賽</div>
+  <div class="header-sub">出生年月 & 群組完整度 · 更新於 2026/04/16 23:05</div>
+</header>
+<div class="main">
+
+  <div class="total-card">
+    <div>
+      <div class="total-num">48%</div>
+      <div class="total-label">全會所完整度</div>
+    </div>
+    <div class="total-bar-wrap">
+      <div class="total-bar-bg">
+        <div class="total-bar-fill" style="width:48%"></div>
+      </div>
+      <div class="total-detail">191 / 400 人已完整 · 缺 209 人</div>
+    </div>
+  </div>
+
+  <div class="ranking">
+    <div class="ranking-title">🏆 小區排名</div>
+    
+      <div class="rank-row">
+        <span class="rank-medal">🥇</span>
+        <span class="rank-name" style="color:#7c3aed">青年二區</span>
+        <span class="rank-pct">84%</span>
+        <span class="rank-miss">缺 7 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">🥈</span>
+        <span class="rank-name" style="color:#7c3aed">青年三區</span>
+        <span class="rank-pct">66%</span>
+        <span class="rank-miss">缺 20 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">🥉</span>
+        <span class="rank-name" style="color:#d97706">高中三區</span>
+        <span class="rank-pct">64%</span>
+        <span class="rank-miss">缺 5 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">4.</span>
+        <span class="rank-name" style="color:#d97706">高中二區</span>
+        <span class="rank-pct">54%</span>
+        <span class="rank-miss">缺 22 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">5.</span>
+        <span class="rank-name" style="color:#7c3aed">青年一區</span>
+        <span class="rank-pct">45%</span>
+        <span class="rank-miss">缺 22 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">6.</span>
+        <span class="rank-name" style="color:#d97706">高中一區</span>
+        <span class="rank-pct">45%</span>
+        <span class="rank-miss">缺 23 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">7.</span>
+        <span class="rank-name" style="color:#059669">國中二區</span>
+        <span class="rank-pct">29%</span>
+        <span class="rank-miss">缺 52 人</span>
+      </div>
+      <div class="rank-row">
+        <span class="rank-medal">8.</span>
+        <span class="rank-name" style="color:#059669">國中一區</span>
+        <span class="rank-pct">28%</span>
+        <span class="rank-miss">缺 58 人</span>
+      </div>
+  </div>
+
+  
+  <section class="daqv" style="--dq-color:#7c3aed">
+    <div class="daqv-header">
+      <span class="daqv-icon">⚡</span>
+      <span class="daqv-name">青年大區</span>
+      <span class="daqv-total">93/142 人完整（65%）</span>
+    </div>
+    <div class="zone-grid">
+    <div class="zone-card" data-pct="84">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">青年二區</div>
+          <div class="zone-sub-stats">
+            出生年月 36/43 ·
+            群組 43/43
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#f59e0b">84%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:84%;background:#f59e0b"></div>
+      </div>
+      <div class="miss-label">缺漏 7 人 · 完整 36/43 人 </div>
+    </div>
+    <div class="zone-card" data-pct="66">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">青年三區</div>
+          <div class="zone-sub-stats">
+            出生年月 39/59 ·
+            群組 59/59
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#f59e0b">66%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:66%;background:#f59e0b"></div>
+      </div>
+      <div class="miss-label">缺漏 20 人 · 完整 39/59 人 </div>
+    </div>
+    <div class="zone-card" data-pct="45">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">青年一區</div>
+          <div class="zone-sub-stats">
+            出生年月 18/40 ·
+            群組 40/40
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#ef4444">45%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:45%;background:#ef4444"></div>
+      </div>
+      <div class="miss-label">缺漏 22 人 · 完整 18/40 人 </div>
+    </div></div>
+  </section>
+  <section class="daqv" style="--dq-color:#d97706">
+    <div class="daqv-header">
+      <span class="daqv-icon">🔥</span>
+      <span class="daqv-name">高中大區</span>
+      <span class="daqv-total">54/104 人完整（52%）</span>
+    </div>
+    <div class="zone-grid">
+    <div class="zone-card" data-pct="64">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">高中三區</div>
+          <div class="zone-sub-stats">
+            出生年月 9/14 ·
+            群組 14/14
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#f59e0b">64%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:64%;background:#f59e0b"></div>
+      </div>
+      <div class="miss-label">缺漏 5 人 · 完整 9/14 人 </div>
+    </div>
+    <div class="zone-card" data-pct="54">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">高中二區</div>
+          <div class="zone-sub-stats">
+            出生年月 26/48 ·
+            群組 48/48
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#ef4444">54%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:54%;background:#ef4444"></div>
+      </div>
+      <div class="miss-label">缺漏 22 人 · 完整 26/48 人 </div>
+    </div>
+    <div class="zone-card" data-pct="45">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">高中一區</div>
+          <div class="zone-sub-stats">
+            出生年月 19/42 ·
+            群組 42/42
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#ef4444">45%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:45%;background:#ef4444"></div>
+      </div>
+      <div class="miss-label">缺漏 23 人 · 完整 19/42 人 </div>
+    </div></div>
+  </section>
+  <section class="daqv" style="--dq-color:#059669">
+    <div class="daqv-header">
+      <span class="daqv-icon">🌱</span>
+      <span class="daqv-name">國中大區</span>
+      <span class="daqv-total">44/154 人完整（29%）</span>
+    </div>
+    <div class="zone-grid">
+    <div class="zone-card" data-pct="29">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">國中二區</div>
+          <div class="zone-sub-stats">
+            出生年月 21/73 ·
+            群組 73/73
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#ef4444">29%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:29%;background:#ef4444"></div>
+      </div>
+      <div class="miss-label">缺漏 52 人 · 完整 21/73 人 </div>
+    </div>
+    <div class="zone-card" data-pct="28">
+      <div class="zone-top">
+        <div>
+          <div class="zone-name">國中一區</div>
+          <div class="zone-sub-stats">
+            出生年月 23/81 ·
+            群組 81/81
+          </div>
+        </div>
+        <div class="zone-pct" style="color:#ef4444">28%</div>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:28%;background:#ef4444"></div>
+      </div>
+      <div class="miss-label">缺漏 58 人 · 完整 23/81 人 </div>
+    </div></div>
+  </section>
+</div>
+</body>
+</html>
