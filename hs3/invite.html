@@ -144,7 +144,7 @@
 <script>
 const RECOVERABLE = [{"姓名": "沈芮恩", "受浸日期": "2019-07-06", "last_active_month": "2025年12月", "attendance_since_sep": 1, "recent_4weeks": 0, "sep_to_feb": 1}];
 
-const IRREGULAR = [{"姓名": "張少軒", "受浸日期": "2020-07-11", "recent_4weeks": 1, "attendance_since_sep": 19, "sep_to_feb": 17}];
+const IRREGULAR = [{"姓名": "張少軒", "受浸日期": "2020-07-11", "recent_4weeks": 2, "attendance_since_sep": 19, "sep_to_feb": 17, "last_active_month": "2026年4月"}];
 
 const COLORS = ['#3498db','#9b59b6','#e67e22','#1abc9c','#e74c3c','#f39c12','#2c3e50','#16a085'];
 function getColor(name) {
@@ -187,7 +187,7 @@ function renderRecoverable(p) {
           <div class="pc-stat-label">Sep~Feb 出席</div>
         </div>
         <div class="pc-stat">
-          <div class="pc-stat-num red">0</div>
+          <div class="pc-stat-num red">${p.recent_4weeks}</div>
           <div class="pc-stat-label">近 4 週</div>
         </div>
         <div class="pc-stat" style="background:${pr==='high'?'#fef0f0':pr==='med'?'#fff8f0':'#f8f9fa'}">
