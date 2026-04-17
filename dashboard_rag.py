@@ -320,6 +320,26 @@ def load_district_json_data(dashboard_dir: str) -> Dict[str, Dict]:
                     data[district]['leaderboard'] = json.load(f)
             except Exception as e:
                 print(f"⚠️ 讀取 {district}/leaderboard.json 失敗: {e}")
+        else:
+            # 從 leaderboard.html 提取排行榜資料（如果沒有 JSON 檔案）
+            leaderboard_html = os.path.join(district_dir, 'leaderboard.html')
+            if os.path.exists(leaderboard_html):
+                try:
+                    with open(leaderboard_html, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                    
+                    # 提取 DATA 資料
+                    data_match = re.search(r'const DATA = (\{.*?\});', html_content, re.DOTALL)
+                    if data_match:
+                        try:
+                            data_json = data_match.group(1)
+                            leaderboard_data = json.loads(data_json)
+                            data[district]['leaderboard'] = leaderboard_data
+                            print(f"✅ 從 {district}/leaderboard.html 提取排行榜資料 ({len(leaderboard_data.get('rankings', []))} 人)")
+                        except:
+                            pass
+                except Exception as e:
+                    print(f"⚠️ 讀取 {district}/leaderboard.html 失敗: {e}")
         
         # 載入 invite_data.json
         invite_file = os.path.join(district_dir, 'invite_data.json')
@@ -338,6 +358,29 @@ def load_district_json_data(dashboard_dir: str) -> Dict[str, Dict]:
                     data[district]['recoverable'] = json.load(f)
             except Exception as e:
                 print(f"⚠️ 讀取 {district}/recoverable.json 失敗: {e}")
+        
+        # 從 invite.html 提取 RECOVERABLE 資料（如果沒有 JSON 檔案）
+        if 'invite' not in data[district] or 'recoverable' not in data[district]:
+            invite_html = os.path.join(district_dir, 'invite.html')
+            if os.path.exists(invite_html):
+                try:
+                    with open(invite_html, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                    
+                    # 提取 RECOVERABLE 資料
+                    recoverable_match = re.search(r'const RECOVERABLE = (\[.*?\]);', html_content, re.DOTALL)
+                    if recoverable_match:
+                        try:
+                            recoverable_json = recoverable_match.group(1).replace("'", '"')
+                            recoverable_data = json.loads(recoverable_json)
+                            if 'invite' not in data[district]:
+                                data[district]['invite'] = {}
+                            data[district]['invite']['recoverable'] = recoverable_data
+                            print(f"✅ 從 {district}/invite.html 提取 RECOVERABLE 資料 ({len(recoverable_data)} 人)")
+                        except:
+                            pass
+                except Exception as e:
+                    print(f"⚠️ 讀取 {district}/invite.html 失敗: {e}")
     
     print(f"✅ 成功載入 {len(data)} 個小區的 JSON 資料")
     return data
@@ -684,4 +727,4 @@ if __name__ == "__main__":
     # print("\n" + "="*80)
     # print("測試查詢：青年一區在3月參加主日聚會的有多少人？")
     # print("="*80)
-    print(generate_response("高中區最近一週的主日出席人數為多少？"))
+    print(generate_response("甘順基目前的分數為何？"))
