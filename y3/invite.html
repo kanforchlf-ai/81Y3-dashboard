@@ -104,6 +104,14 @@
   .trend-dot { flex: 1; border-radius: 2px; }
 
   .empty { text-align: center; color: #aaa; padding: 30px; }
+
+  .rule-legend {
+    background: #f8f9fa; border-left: 3px solid #bdc3c7;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px; margin: 12px 16px 0;
+    font-size: 12px; color: #888; line-height: 1.8;
+  }
+  .rule-legend strong { color: #555; }
 </style>
 </head>
 <body>
@@ -139,6 +147,11 @@
   <div class="goal-cta">👥 以下 29 人都是潛在人選</div>
 </div>
 
+<div class="rule-legend">
+  <strong>名單計算規則（每週自動更新）</strong><br>
+  🔴 <strong>優先挽回</strong>：近 4 週主日・小排・晨興・禱告全部缺席，但近 6 週內曾出席過<br>
+  🟡 <strong>出席不穩定</strong>：近 4 週仍有任一活動出席，但近 6 週主日 ≤ 3 次
+</div>
 <div class="container" id="app"></div>
 
 <script>
