@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" data-theme="dark">
 <head>
+<script>
+(function(){var t=localStorage.getItem('theme_81y3');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
@@ -84,6 +87,7 @@
 
   .footer { margin-top: 52px; font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 1px; }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -142,6 +146,24 @@
 </div>
 
 <div class="footer">81Y · 出席統計系統 · <a href="guide.html" style="color:rgba(255,255,255,0.35);text-decoration:none;">使用說明</a></div>
+
+<button id="theme-toggle" title="切換閱讀模式" aria-label="切換亮色/暗色模式">🌙</button>
+<script>
+(function(){
+  var btn = document.getElementById('theme-toggle');
+  var html = document.documentElement;
+  function apply(theme){
+    html.setAttribute('data-theme', theme);
+    btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('theme_81y3', theme);
+  }
+  // Init icon from current state
+  apply(html.getAttribute('data-theme') || 'dark');
+  btn.addEventListener('click', function(){
+    apply(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+})();
+</script>
 
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "4f3cb39a7afd4a679c01ced3bfb90e0c"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

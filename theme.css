@@ -1,0 +1,580 @@
+/*
+ * 81Y3-Dashboard — Light / Dark Theme Override
+ * Applied via [data-theme="light"] on <html>.
+ * Default is dark; this file only overrides when light is active.
+ * Linked after each page's own <style>, so same-specificity rules win here.
+ * Where inline style="" attributes exist for semantic colors (red/green/amber),
+ * we leave them as-is — they're data-driven and readable on both themes.
+ */
+
+/* ═══════════════════════════════════════════════
+   BASE — body, text, links
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] body {
+  background: #F4F4F0 !important;
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] a {
+  color: inherit;
+}
+
+/* ═══════════════════════════════════════════════
+   TOPBAR (.topbar — weekly, cowork, progress)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .topbar {
+  background: #FFFFFF !important;
+  border-bottom-color: #E2E2EC !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .back-btn {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .back-btn:hover {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .topbar-title {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .topbar-date {
+  color: #6B6B8A !important;
+}
+
+/* TOP-BAR (.top-bar — trend.html) */
+[data-theme="light"] .top-bar {
+  background: #1A1A2E !important; /* keep dark for brand feel; adjust text */
+}
+
+[data-theme="light"] .top-bar .back-btn {
+  color: rgba(255,255,255,0.7) !important;
+  background: rgba(255,255,255,0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   ALERT BANNER (weekly)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .alert-banner {
+  /* keep red — it's a semantic warning */
+}
+
+/* ═══════════════════════════════════════════════
+   STAT CARDS (weekly)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .stat-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E2EC !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .stat-card .label {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .stat-card .val {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .stat-card.alert .val {
+  color: #DC2626 !important;
+}
+
+[data-theme="light"] .stat-card.highlight .val {
+  color: #B45309 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   DISTRICT CARDS (weekly)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .district-card {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .district-card.unsubmitted {
+  border-color: rgba(192,57,43,0.45) !important;
+}
+
+[data-theme="light"] .district-card.low {
+  border-color: rgba(180,83,9,0.4) !important;
+}
+
+[data-theme="light"] .district-name {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .card-sub {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .attendance-label {
+  color: #6B6B8A !important;
+}
+
+/* Progress bar tracks */
+[data-theme="light"] .progress-bg {
+  background: rgba(0,0,0,0.1) !important;
+}
+
+/* Member roster dots */
+[data-theme="light"] .dot-normal {
+  background: rgba(0,0,0,0.18) !important;
+}
+
+/* Roster table rows */
+[data-theme="light"] .roster-header {
+  background: rgba(0,0,0,0.05) !important;
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .roster-row:nth-child(even) {
+  background: rgba(0,0,0,0.03) !important;
+}
+
+/* Tab buttons (weekly member list) */
+[data-theme="light"] .tab-btn {
+  background: #EBEBEB !important;
+  color: #6B6B8A !important;
+  border-color: #D0D0DC !important;
+}
+
+[data-theme="light"] .tab-btn.active {
+  background: #1A1A2E !important;
+  color: #FFFFFF !important;
+}
+
+/* Filter chips */
+[data-theme="light"] .filter-chip {
+  background: #EBEBEB !important;
+  color: #6B6B8A !important;
+  border-color: #D0D0DC !important;
+}
+
+[data-theme="light"] .filter-chip.active {
+  background: #1A1A2E !important;
+  color: #FFFFFF !important;
+}
+
+/* Member rows */
+[data-theme="light"] .member-row {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .member-name {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .member-sub {
+  color: #6B6B8A !important;
+}
+
+/* No-data row */
+[data-theme="light"] .no-data-row {
+  background: rgba(0,0,0,0.03) !important;
+  color: #6B6B8A !important;
+}
+
+/* ═══════════════════════════════════════════════
+   LEADERBOARD (leaderboard.html, y?/leaderboard.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] header {
+  background: linear-gradient(180deg, #EEF0F8 0%, #F4F4F0 100%) !important;
+  color: #1A1A2E !important;
+}
+
+/* Gradient title text: remove gradient clip, use solid color */
+[data-theme="light"] .title-main {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: #1A1A2E !important;
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .title-sub {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .info-block {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .info-label {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .info-value {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .period-badge {
+  background: #FFFFFF !important;
+  border-color: #D0D0DC !important;
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .score-pill-gray {
+  background: rgba(0,0,0,0.07) !important;
+  color: #555577 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+
+/* Rank list rows */
+[data-theme="light"] .rank-item {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+[data-theme="light"] .rank-name {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .rank-miss {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .rank-score {
+  color: #1D4ED8 !important;
+}
+
+/* Podium cards — keep their colored gradients; just fix text if needed */
+[data-theme="light"] .podium-2 .rank-name,
+[data-theme="light"] .podium-3 .rank-name {
+  color: #1A1A2E !important;
+}
+
+/* ═══════════════════════════════════════════════
+   COWORK (cowork.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .dk-card {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .dk-title {
+  color: #C94318 !important; /* amber → burnt orange for white bg */
+}
+
+[data-theme="light"] .all-ok-badge {
+  background: rgba(5,150,105,0.12) !important;
+}
+
+[data-theme="light"] .partial-badge {
+  background: rgba(220,38,38,0.1) !important;
+}
+
+[data-theme="light"] .cm {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .cm.no-data {
+  background: rgba(251,191,36,0.06) !important;
+  border-color: rgba(217,119,6,0.3) !important;
+}
+
+[data-theme="light"] .cm-name {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .cm-note {
+  color: #B45309 !important;
+}
+
+[data-theme="light"] .cp.na {
+  background: rgba(0,0,0,0.05) !important;
+  color: #888 !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   PROGRESS PAGE (progress.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .total-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E2EC !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .total-num {
+  color: #C94318 !important;
+}
+
+[data-theme="light"] .total-label {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .total-detail {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .total-bar-bg {
+  background: rgba(0,0,0,0.1) !important;
+}
+
+[data-theme="light"] .daqv {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E2EC !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+[data-theme="light"] .daqv-total {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .ranking-section {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E2EC !important;
+}
+
+[data-theme="light"] .ranking-title {
+  color: #C94318 !important;
+}
+
+[data-theme="light"] .bar-bg {
+  background: rgba(0,0,0,0.1) !important;
+}
+
+[data-theme="light"] .zone-sub-stats {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .zone-denom {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .zone-denom strong {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .zone-detail-row {
+  color: #555577 !important;
+}
+
+[data-theme="light"] .zone-detail-row strong {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .zone-detail-label {
+  color: #6B6B8A !important;
+}
+
+/* ═══════════════════════════════════════════════
+   SHARED HEADER TITLE (cowork, progress)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .header-title {
+  color: #C94318 !important;
+}
+
+[data-theme="light"] .header-sub {
+  color: #6B6B8A !important;
+}
+
+/* ═══════════════════════════════════════════════
+   GUIDE PAGE (guide.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .back-link {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .back-link:hover {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .section-card {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .section-title {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .section-sub {
+  color: #6B6B8A !important;
+}
+
+[data-theme="light"] .feature-tag {
+  background: rgba(0,0,0,0.07) !important;
+  color: #555577 !important;
+}
+
+[data-theme="light"] .step-num {
+  background: rgba(0,0,0,0.08) !important;
+  color: #555577 !important;
+}
+
+[data-theme="light"] .guide-footer {
+  color: rgba(0,0,0,0.25) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   INDEX PAGE (index.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .logo {
+  color: rgba(0,0,0,0.35) !important;
+}
+
+[data-theme="light"] h1 {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .tagline {
+  color: rgba(0,0,0,0.45) !important;
+}
+
+[data-theme="light"] .footer {
+  color: rgba(0,0,0,0.25) !important;
+}
+
+/* Keep group-card gradient text white (they have colored bg) */
+[data-theme="light"] .group-card {
+  color: white !important;
+}
+
+/* ═══════════════════════════════════════════════
+   YOUTH / HS / MS AREA PAGES (youth.html etc.)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .zone-section {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .zone-title {
+  color: #1A1A2E !important;
+}
+
+/* ═══════════════════════════════════════════════
+   SUBPAGE STATS HERO (y1/index.html etc.)
+   The .attendance-hero dark block intentionally kept dark for visual hierarchy.
+   Only adjust supporting text elements.
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .ah-progress-track {
+  background: rgba(255,255,255,0.15) !important;
+}
+
+/* Subpage filter bar (already light, minimal override) */
+[data-theme="light"] .filter-bar {
+  background: transparent !important;
+}
+
+[data-theme="light"] .filter-btn {
+  background: #FFFFFF !important;
+  color: #555577 !important;
+  border-color: #D0D0DC !important;
+}
+
+[data-theme="light"] .filter-btn:hover {
+  background: #F0F0F8 !important;
+}
+
+[data-theme="light"] .filter-btn.active {
+  background: #1A1A2E !important;
+  color: white !important;
+  border-color: #1A1A2E !important;
+}
+
+/* Navigation cards (subpages) */
+[data-theme="light"] .nav-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ═══════════════════════════════════════════════
+   TREND PAGE (trend.html)
+   Body is already #f0f2f5 (light). Only override dark UI elements.
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .scope-tab {
+  background: white !important;
+  color: #555 !important;
+}
+
+[data-theme="light"] .district-btn:not(.active) {
+  background: white !important;
+  color: #555 !important;
+}
+
+[data-theme="light"] .seg-btn:not(.active-gender):not(.active-age) {
+  background: #f8f8f8 !important;
+  color: #666 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   INVITEE / INVITE PAGES (invite.html, y?/invite.html)
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .invite-card {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .person-card {
+  background: #FFFFFF !important;
+  border-color: #E2E2EC !important;
+}
+
+[data-theme="light"] .person-name {
+  color: #1A1A2E !important;
+}
+
+[data-theme="light"] .person-meta {
+  color: #6B6B8A !important;
+}
+
+/* ═══════════════════════════════════════════════
+   THEME TOGGLE BUTTON (index.html only)
+   ═══════════════════════════════════════════════ */
+
+#theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.2s;
+  line-height: 1;
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.2);
+}
+
+[data-theme="light"] #theme-toggle {
+  background: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] #theme-toggle:hover {
+  background: rgba(0,0,0,0.15);
+}
