@@ -1,0 +1,216 @@
+/* === 配搭打卡互動樣式 === */
+
+/* 打卡列：sticky 在 header 下方 */
+#checkin-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-bottom: 1px solid rgba(247, 208, 96, 0.18);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#checkin-bar .ck-label {
+  font-size: 12px;
+  color: #f7d060;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+#checkin-bar select {
+  flex: 1;
+  min-width: 140px;
+  max-width: 280px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(247, 208, 96, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#checkin-bar select:focus {
+  outline: none;
+  border-color: #f7d060;
+}
+
+#checkin-bar select option,
+#checkin-bar select optgroup {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+#checkin-bar button {
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #f7d060, #e6b94a);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+#checkin-bar button:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+#checkin-bar button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#checkin-bar button:disabled {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.35);
+  cursor: not-allowed;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#checkin-bar button.btn-done {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+}
+
+#checkin-bar .ck-msg {
+  font-size: 11px;
+  color: #999;
+  width: 100%;
+  text-align: center;
+  min-height: 14px;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+#checkin-bar .ck-msg.success { color: #2ecc71; }
+#checkin-bar .ck-msg.error { color: #e74c3c; }
+
+/* 排行榜 */
+#leaderboard {
+  max-width: 1100px;
+  margin: 16px auto 0;
+  padding: 14px 18px;
+  background: rgba(247, 208, 96, 0.04);
+  border: 1px solid rgba(247, 208, 96, 0.18);
+  border-radius: 12px;
+}
+
+#leaderboard .lb-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f7d060;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#leaderboard .lb-stat {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  margin-left: auto;
+}
+
+#leaderboard .lb-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#leaderboard .lb-item {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  white-space: nowrap;
+  color: #ccc;
+}
+
+#leaderboard .lb-item.medal-gold {
+  background: rgba(247, 208, 96, 0.18);
+  border-color: rgba(247, 208, 96, 0.45);
+  color: #f7d060;
+  font-weight: 700;
+}
+
+#leaderboard .lb-item.medal-silver {
+  background: rgba(192, 192, 192, 0.10);
+  border-color: rgba(192, 192, 192, 0.35);
+  color: #ddd;
+  font-weight: 700;
+}
+
+#leaderboard .lb-item.medal-bronze {
+  background: rgba(205, 127, 50, 0.13);
+  border-color: rgba(205, 127, 50, 0.35);
+  color: #d4a373;
+  font-weight: 700;
+}
+
+#leaderboard .lb-empty {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+#leaderboard .lb-loading {
+  font-size: 11px;
+  color: #666;
+}
+
+/* 卡片打卡狀態（追加在 .cm 卡底下） */
+.cm-checkin {
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.3px;
+}
+
+.cm-checkin.done {
+  color: #2ecc71;
+}
+
+.cm-checkin.pending {
+  color: rgba(255, 255, 255, 0.30);
+}
+
+/* 卡片完成時加亮邊 */
+.cm.cm-done {
+  border-color: rgba(46, 204, 113, 0.45) !important;
+  background: rgba(46, 204, 113, 0.05) !important;
+}
+
+/* 行動版調整 */
+@media (max-width: 600px) {
+  #checkin-bar {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  #checkin-bar select {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  #checkin-bar button {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  #leaderboard {
+    margin: 12px 14px 0;
+    padding: 12px 14px;
+  }
+}
