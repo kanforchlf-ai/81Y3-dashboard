@@ -63,8 +63,8 @@
   // 之後讀 getUTCXxx() 等於讀台灣本地時刻
   function epochToTw(epoch) { return new Date(epoch + TW_OFFSET_MS); }
 
-  // 反向：台灣時間 Date 物件 → 真實 epoch
-  function twToEpoch(twDate) { return twDate.getTime() - TW_OFFSET_MS; }
+  // 反向：台灣時間「假裝是 UTC 的毫秒數」→ 真實 epoch
+  function twToEpoch(twMs) { return twMs - TW_OFFSET_MS; }
 
   function ymdOfTwDate(twDate) {
     return `${twDate.getUTCFullYear()}-${pad(twDate.getUTCMonth() + 1)}-${pad(twDate.getUTCDate())}`;
