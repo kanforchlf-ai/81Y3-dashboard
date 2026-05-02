@@ -95,6 +95,74 @@
 #checkin-bar .ck-msg.success { color: #2ecc71; }
 #checkin-bar .ck-msg.error { color: #e74c3c; }
 
+/* 倒數計時器 */
+#checkin-bar .ck-countdown {
+  font-size: 12px;
+  color: #f7d060;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  margin-left: auto;
+  padding: 4px 10px;
+  background: rgba(247, 208, 96, 0.08);
+  border: 1px solid rgba(247, 208, 96, 0.25);
+  border-radius: 14px;
+}
+
+#checkin-bar .ck-countdown.urgent {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.4);
+  animation: ck-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ck-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* INACTIVE 競賽休息中 */
+#checkin-bar.inactive {
+  background: linear-gradient(135deg, #2a2535, #1f1a30);
+  border-bottom-color: rgba(160, 160, 200, 0.18);
+}
+
+#checkin-bar.inactive .ck-label {
+  color: #aaa;
+  font-size: 13px;
+}
+
+#checkin-bar.inactive .ck-countdown {
+  color: #b8a9d9;
+  background: rgba(160, 160, 200, 0.08);
+  border-color: rgba(160, 160, 200, 0.25);
+  margin-left: 0;
+}
+
+#checkin-bar.inactive .ck-msg {
+  color: #888;
+}
+
+/* 撤回按鈕 */
+#ck-undo-btn {
+  background: rgba(231, 76, 60, 0.15) !important;
+  color: #e74c3c !important;
+  border: 1px solid rgba(231, 76, 60, 0.4) !important;
+  font-weight: 600 !important;
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+}
+
+#ck-undo-btn:hover:not(:disabled) {
+  background: rgba(231, 76, 60, 0.28) !important;
+  opacity: 1 !important;
+}
+
+#ck-undo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* 排行榜 */
 #leaderboard {
   max-width: 1100px;
