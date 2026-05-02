@@ -78,7 +78,12 @@
 
   function fmtTimeShort(iso) {
     const tw = epochToTw(new Date(iso).getTime());
-    return `${pad(tw.getUTCHours())}:${pad(tw.getUTCMinutes())}`;
+    const day = tw.getUTCDay();
+    const hh = pad(tw.getUTCHours());
+    const mm = pad(tw.getUTCMinutes());
+    // 競賽窗口跨週日週一；週一加前綴避免 HH:MM 看起來「比週日還早」
+    if (day === 1) return `週一 ${hh}:${mm}`;
+    return `${hh}:${mm}`;
   }
 
   function fmtDateRange(weekKey) {
@@ -222,6 +227,15 @@
     return `週${days[tw.getUTCDay()]}`;
   }
 
+  // Tier 分段：1-3 medal / 4-10 頂標 / 11-25 前標 / 26-40 中標 / 41+ 後段
+  const LEADERBOARD_TIERS = [
+    { name: 'medal',  range: [1, 3],         label: null,                    cls: '',            prefix: '' },
+    { name: 'top',    range: [4, 10],        label: '🌟 頂標 (4-10)',       cls: 'tier-top',    prefix: '🌟 ' },
+    { name: 'upper',  range: [11, 25],       label: '⭐ 前標 (11-25)',      cls: 'tier-upper',  prefix: '⭐ ' },
+    { name: 'median', range: [26, 40],       label: '✦ 中標 (26-40)',       cls: 'tier-median', prefix: '✦ ', folded: true },
+    { name: 'rest',   range: [41, Infinity], label: null,                    cls: '',            prefix: '',  folded: true },
+  ];
+
   function renderLeaderboard() {
     const $lb = document.getElementById('leaderboard');
     if (!$lb) return;
@@ -244,22 +258,59 @@
       html += '<div class="lb-empty">';
       html += competitionState.state === 'ACTIVE' ? '還沒有人打卡，搶頭香！' : '上週沒有人打卡';
       html += '</div>';
-    } else {
-      html += '<div class="lb-list">';
-      done.forEach((c, i) => {
-        let medal, cls;
-        if (i === 0) { medal = '🥇'; cls = 'medal-gold'; }
-        else if (i === 1) { medal = '🥈'; cls = 'medal-silver'; }
-        else if (i === 2) { medal = '🥉'; cls = 'medal-bronze'; }
-        else { medal = `${i + 1}.`; cls = ''; }
+      $lb.innerHTML = html;
+      return;
+    }
 
+    function renderTierGroup(tier) {
+      const start = tier.range[0] - 1;
+      const end = Math.min(tier.range[1], done.length);
+      if (start >= end) return '';
+      const slice = done.slice(start, end);
+      let h = '';
+      if (tier.label) h += `<div class="lb-tier-label">${escapeHtml(tier.label)}</div>`;
+      h += '<div class="lb-list">';
+      slice.forEach((c, j) => {
+        const rank = start + j + 1;
+        let medal, cls;
+        if (rank === 1)      { medal = '🥇'; cls = 'medal-gold'; }
+        else if (rank === 2) { medal = '🥈'; cls = 'medal-silver'; }
+        else if (rank === 3) { medal = '🥉'; cls = 'medal-bronze'; }
+        else { cls = tier.cls; medal = `${tier.prefix}${rank}.`; }
         const zoneLabel = ZONE_LABELS[c.zone] || c.zone;
-        html += `<span class="lb-item ${cls}">${medal} ${escapeHtml(fmtTimeShort(c.checked_at))} ${escapeHtml(c.member_name)}（${escapeHtml(zoneLabel)}）</span>`;
+        h += `<span class="lb-item ${cls}">${medal} ${escapeHtml(fmtTimeShort(c.checked_at))} ${escapeHtml(c.member_name)}（${escapeHtml(zoneLabel)}）</span>`;
       });
-      html += '</div>';
+      h += '</div>';
+      return h;
+    }
+
+    let visibleHtml = '', foldedHtml = '', foldedCount = 0;
+    for (const tier of LEADERBOARD_TIERS) {
+      const start = tier.range[0] - 1;
+      const end = Math.min(tier.range[1], done.length);
+      const len = Math.max(0, end - start);
+      if (len === 0) continue;
+      const h = renderTierGroup(tier);
+      if (tier.folded) { foldedHtml += h; foldedCount += len; }
+      else { visibleHtml += h; }
+    }
+
+    html += visibleHtml;
+    if (foldedCount > 0) {
+      html += `<button class="lb-toggle" id="lb-toggle-btn">⏬ 顯示其餘 ${foldedCount} 人（中標 + 後段）</button>`;
+      html += `<div id="lb-folded" style="display:none">${foldedHtml}</div>`;
     }
 
     $lb.innerHTML = html;
+
+    const tb = document.getElementById('lb-toggle-btn');
+    if (tb) {
+      tb.addEventListener('click', () => {
+        const folded = document.getElementById('lb-folded');
+        if (folded) folded.style.display = 'block';
+        tb.style.display = 'none';
+      });
+    }
   }
 
   function renderCards() {

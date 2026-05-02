@@ -238,6 +238,59 @@
   color: #666;
 }
 
+/* === 排行榜 Tier 分段 === */
+#leaderboard .lb-tier-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 14px 0 6px 0;
+  letter-spacing: 1.5px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.lb-item.tier-top {
+  background: rgba(255, 200, 87, 0.10);
+  border-color: rgba(255, 200, 87, 0.40);
+  color: #ffc857;
+  font-weight: 700;
+}
+
+.lb-item.tier-upper {
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.40);
+  color: #b09cff;
+  font-weight: 600;
+}
+
+.lb-item.tier-median {
+  background: rgba(94, 234, 212, 0.08);
+  border-color: rgba(94, 234, 212, 0.30);
+  color: #6ce19e;
+}
+
+/* 「顯示其餘 X 人」摺疊按鈕 */
+.lb-toggle {
+  display: block;
+  margin: 14px auto 4px;
+  padding: 7px 18px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+}
+
+.lb-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 /* 卡片打卡狀態（追加在 .cm 卡底下） */
 .cm-checkin {
   margin-top: 6px;
