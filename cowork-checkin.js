@@ -1,5 +1,5 @@
 /* ============================================================
- * 配搭打卡互動 (cowork-checkin.js)
+ * 配搭點名互動 (cowork-checkin.js)
  *
  * 競賽窗口（台灣時間）：
  *   開始：每週日 11:30
@@ -7,7 +7,7 @@
  *   循環：每週一次
  *
  * 功能：
- * - 競賽中：可打卡（含確認）+ 可撤回 + 即時排行榜 + 倒數結束
+ * - 競賽中：可點名（含確認）+ 可撤回 + 即時排行榜 + 倒數結束
  * - 休息期：禁止操作 + 顯示上週最終排行榜 + 倒數下次開始
  * - 30 秒輪詢，看別人的動作
  * ============================================================ */
@@ -29,7 +29,7 @@
   const COMP_START_MIN = 30;
   const COMP_DURATION_HOURS = 35.5;
 
-  const POLL_INTERVAL_MS = 30000;     // 別人打卡：30 秒輪詢一次
+  const POLL_INTERVAL_MS = 30000;     // 別人點名：30 秒輪詢一次
   const TICK_INTERVAL_MS = 1000;      // 倒數 + 狀態切換：每秒檢查
 
   const ZONE_LABELS = {
@@ -194,7 +194,7 @@
     } else if (myCheckin) {
       actionHtml = `
         <button class="btn-done" disabled>✅ 已於 ${escapeHtml(fmtTime(myCheckin.checked_at))} 完成</button>
-        <button id="ck-undo-btn" title="撤回打卡">↶ 撤回</button>
+        <button id="ck-undo-btn" title="撤回點名">↶ 撤回</button>
       `;
     } else {
       actionHtml = '<button id="ck-btn">✋ 我點完本週</button>';
@@ -256,7 +256,7 @@
 
     if (done.length === 0) {
       html += '<div class="lb-empty">';
-      html += competitionState.state === 'ACTIVE' ? '還沒有人打卡，搶頭香！' : '上週沒有人打卡';
+      html += competitionState.state === 'ACTIVE' ? '還沒有人點名，看誰是忠信又精明的！' : '上週沒有人點名';
       html += '</div>';
       $lb.innerHTML = html;
       return;
@@ -332,7 +332,7 @@
         card.classList.add('cm-done');
       } else {
         status.className = 'cm-checkin pending';
-        status.textContent = competitionState.state === 'ACTIVE' ? '⏳ 待點名' : '— 未打卡';
+        status.textContent = competitionState.state === 'ACTIVE' ? '⏳ 待點名' : '— 未點名';
         card.classList.remove('cm-done');
       }
     });
@@ -383,7 +383,7 @@
       return;
     }
 
-    if (!confirm(`確定以「${selectedName}」的身分打卡嗎？\n\n打卡後可以撤回，但只能在競賽進行中。`)) {
+    if (!confirm(`確定以「${selectedName}」的身分點名嗎？\n\n點名後可以撤回，但只能在競賽進行中。`)) {
       return;
     }
 
@@ -405,7 +405,7 @@
         await loadCheckins();
         renderAll();
       } else {
-        showMsg(`打卡失敗：${error.message}`, 'error');
+        showMsg(`點名失敗：${error.message}`, 'error');
         if (btn) {
           btn.disabled = false;
           btn.textContent = '✋ 我點完本週';
@@ -414,7 +414,7 @@
       return;
     }
 
-    showMsg('🎉 打卡成功！', 'success');
+    showMsg('🎉 點名成功！', 'success');
     checkins.push(data);
     checkins.sort((a, b) => new Date(a.checked_at) - new Date(b.checked_at));
     renderAll();
@@ -429,11 +429,11 @@
 
     const myCheckin = checkins.find((c) => c.member_name === selectedName);
     if (!myCheckin) {
-      showMsg('找不到打卡紀錄', 'error');
+      showMsg('找不到點名紀錄', 'error');
       return;
     }
 
-    if (!confirm(`確定撤回「${selectedName}」的打卡嗎？\n\n撤回後可以重新打卡，但完成時間會重新計算。`)) {
+    if (!confirm(`確定撤回「${selectedName}」的點名嗎？\n\n撤回後可以重新點名，但完成時間會重新計算。`)) {
       return;
     }
 
@@ -457,7 +457,7 @@
       return;
     }
 
-    showMsg('已撤回打卡', 'success');
+    showMsg('已撤回點名', 'success');
     checkins = checkins.filter((c) => c.id !== myCheckin.id);
     renderAll();
   }
@@ -500,7 +500,7 @@
     }, TICK_INTERVAL_MS);
   }
 
-  // 每 30 秒：拉一次最新打卡列表（看別人）
+  // 每 30 秒：拉一次最新點名列表（看別人）
   function startPolling() {
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(async () => {

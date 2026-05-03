@@ -1,6 +1,6 @@
-/* === 配搭打卡互動樣式 === */
+/* === 配搭點名互動樣式 === */
 
-/* 打卡列：sticky 在 header 下方 */
+/* 點名列：sticky 在 header 下方 */
 #checkin-bar {
   position: sticky;
   top: 0;
@@ -291,7 +291,7 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 卡片打卡狀態（追加在 .cm 卡底下） */
+/* 卡片點名狀態（追加在 .cm 卡底下） */
 .cm-checkin {
   margin-top: 6px;
   font-size: 10px;
