@@ -178,6 +178,122 @@ def load_html_files_as_text(dashboard_dir: str) -> str:
     return context
 
 
+def extract_cowork_data(cowork_html_path: str) -> Optional[str]:
+    """
+    從 cowork.html 中提取配搭出席總覽資料
+    """
+    try:
+        with open(cowork_html_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # 先移除換行符，讓 HTML 變成單行
+        content = content.replace('\n', '').replace('\r', '')
+        
+        markdown = "## ⭐ 配搭出席總覽\n\n"
+        markdown += "以下為各區配搭的詳細出席狀況（主日、小排、晨興、禱告、出訪、受訪）：\n\n"
+        
+        # 提取各區資料 - 使用貪婪匹配
+        sections = re.findall(r'<section class="grp-section">(.*?)</section>', content, re.DOTALL)
+        
+        print(f"  - 找到 {len(sections)} 個區")
+        
+        for section_content in sections:
+            # 提取區名稱
+            grp_name_match = re.search(r'<span class="grp-name">(.*?)</span>', section_content)
+            section_name = grp_name_match.group(1) if grp_name_match else '未知'
+            
+            markdown += f"### {section_name}\n\n"
+            
+            # 提取該區的各小區 - 先找到所有小區的位置
+            dk_block_starts = []
+            for match in re.finditer(r'<div class="dk-block">', section_content):
+                dk_block_starts.append(match.start())
+            
+            print(f"  - {section_name}: {len(dk_block_starts)} 個小區")
+            
+            # 根據位置提取每個小區的完整內容
+            for i in range(len(dk_block_starts)):
+                start = dk_block_starts[i]
+                if i + 1 < len(dk_block_starts):
+                    end = dk_block_starts[i + 1]
+                else:
+                    end = len(section_content)
+                dk_block = section_content[start:end]
+                
+                # 提取小區名稱和 badge
+                dk_title_match = re.search(r'<span class="dk-title">(.*?)</span>', dk_block)
+                dk_name = dk_title_match.group(1) if dk_title_match else '未知'
+                
+                dk_badge_match = re.search(r'<span class="dk-badge[^"]*">(.*?)</span>', dk_block)
+                badge_text = dk_badge_match.group(1) if dk_badge_match else ''
+                
+                markdown += f"#### {dk_name} ({badge_text})\n\n"
+                
+                # 提取所有 cm div - 支持額外屬性
+                cm_pattern = r'<div\s+class="cm[^"]*"[^>]*>\s*<div\s+class="cm-name">(.*?)</div>\s*<div\s+class="cm-pips">(.*?)</div>\s*</div>'
+                cm_blocks = re.findall(cm_pattern, dk_block, re.DOTALL)
+                
+                # 提取所有 cm-warn div
+                warn_pattern = r'<div\s+class="cm-warn">(.*?)</div>'
+                warn_blocks = re.findall(warn_pattern, dk_block, re.DOTALL)
+                
+                # 將 cm 和 warn 配對 - 使用核心 miss 檢測
+                cm_with_warn = []
+                warn_index = 0
+                for i, (cm_name, cm_pips) in enumerate(cm_blocks):
+                    # 檢查這個 cm 是否有核心 miss
+                    pips_matches = re.findall(r'<span class="cp (ok|miss|na)">(.*?)</span>', cm_pips)
+                    core_items = ['主日', '小排', '晨興', '禱告']
+                    has_core_miss = False
+                    for status, text in pips_matches:
+                        # 清理 text，去掉 ✓ 和 ✗ 符號
+                        text_clean = text.strip().replace('✓', '').replace('✗', '').strip()
+                        if status == 'miss' and text_clean in core_items:
+                            has_core_miss = True
+                            break
+                    
+                    # 如果有核心 miss 且還有 warn 可用，就分配一個 warn
+                    if has_core_miss and warn_index < len(warn_blocks):
+                        warn_text = warn_blocks[warn_index]
+                        warn_index += 1
+                    else:
+                        warn_text = ''
+                    
+                    cm_with_warn.append((cm_name, cm_pips, warn_text))
+                
+                print(f"    - {dk_name}: {len(cm_with_warn)} 個配搭, {len(warn_blocks)} 個警告")
+                
+                # 顯示所有配搭
+                for cm_name, cm_pips, warn_text in cm_with_warn:
+                    # 清理 warn_text 中的標籤
+                    if warn_text:
+                        warn_text = re.sub(r'<[^>]+>', '', warn_text)
+                    
+                    # 解析出席狀況
+                    pips = []
+                    pips_matches = re.findall(r'<span class="cp (ok|miss|na)">(.*?)</span>', cm_pips)
+                    for status, text in pips_matches:
+                        # 清理 text 中的空白字符
+                        text_clean = text.strip()
+                        pips.append(f"{text_clean} ({'✓' if status == 'ok' else '✗'})")
+                    
+                    if warn_text:
+                        markdown += f"- **{cm_name}**: {', '.join(pips)} ⚠️ {warn_text}\n"
+                    else:
+                        markdown += f"- **{cm_name}**: {', '.join(pips)}\n"
+                
+                markdown += "\n"
+        
+        print(f"✅ 成功載入配搭出席總覽資料，總字數: {len(markdown)}")
+        return markdown
+        
+    except Exception as e:
+        print(f"⚠️ 讀取 cowork.html 失敗: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 def extract_weekly_data(weekly_html_path: str) -> Optional[Dict]:
     """
     從 weekly.html 中提取點名追蹤資料
@@ -272,19 +388,59 @@ def format_weekly_data(weekly_data: Dict) -> str:
             for act_name, act_count in extra.items():
                 markdown += f"  - {act_name}: {act_count} 人\n"
         
-        # 未出席成員
+        # 未出席成員 - 檢查主日出席狀況
         district_members = members.get(district_id, [])
-        absent_members = [m for m in district_members if m.get('zero', False)]
+        absent_members = [m for m in district_members if m.get('a', {}).get('主日', 0) == 0]
         
         if absent_members:
-            markdown += f"- **本週未出席成員** ({len(absent_members)} 人):\n"
+            markdown += f"- **本週未出席成員（主日）** ({len(absent_members)} 人):\n"
             for m in absent_members:
                 name = m.get('n', '未知')
                 pai = m.get('pai', '未分排') or '未分排'
                 hist = m.get('hist', 0)
-                markdown += f"  - {name}（配搭: {pai}, 歷史出席率: {hist}%）\n"
+                attendance = m.get('a', {})
+                markdown += f"  - {name}（配搭: {pai}, 歷史出席率: {hist}%, 主日: {attendance.get('主日', 0)}, 小排: {attendance.get('小排', 0)}, 晨興: {attendance.get('晨興', 0)}, 禱告: {attendance.get('禱告', 0)}）\n"
+        else:
+            # 即使沒有未出席成員，也顯示訊息
+            markdown += f"- **本週未出席成員（主日）**: 無（全數出席）\n"
         
         markdown += "\n"
+    
+    # 添加配搭出席統計總結
+    markdown += "### 📊 配搭出席統計（主日）\n\n"
+    
+    pai_stats = {}  # {配搭: {總人數, 未出席人數}}
+    
+    for district_id, district_members in members.items():
+        for m in district_members:
+            pai = m.get('pai', '未分排') or '未分排'
+            if pai not in pai_stats:
+                pai_stats[pai] = {'total': 0, 'absent': 0}
+            pai_stats[pai]['total'] += 1
+            # 檢查主日是否出席
+            if m.get('a', {}).get('主日', 0) == 0:
+                pai_stats[pai]['absent'] += 1
+    
+    # 找出出席率較低的配搭
+    pai_list = []
+    for pai, stats in pai_stats.items():
+        if stats['total'] > 0:
+            attendance_rate = (stats['total'] - stats['absent']) / stats['total'] * 100
+            if attendance_rate < 100:  # 只顯示有未出席的配搭
+                pai_list.append((pai, stats['total'], stats['absent'], attendance_rate))
+    
+    if pai_list:
+        # 按出席率排序
+        pai_list.sort(key=lambda x: x[3])
+        
+        markdown += "**出席率較低的配搭**（按出席率排序）:\n\n"
+        for pai, total, absent, rate in pai_list:
+            status = "⚠️" if rate < 80 else "📊"
+            markdown += f"- {status} **{pai}**: {total} 人中 {absent} 人未出席（出席率: {rate:.1f}%）\n"
+    else:
+        markdown += "所有配搭主日出席率均為 100%，無需特別加強。\n"
+    
+    markdown += "\n"
     
     return markdown
 
@@ -657,6 +813,14 @@ def generate_rag_context() -> str:
         context += html_text
         context += "\n"
     
+    # 5. 載入 cowork.html 配搭出席總覽
+    cowork_html_path = os.path.join(DASHBOARD_BASE_DIR, 'cowork.html')
+    if os.path.exists(cowork_html_path):
+        cowork_data = extract_cowork_data(cowork_html_path)
+        if cowork_data:
+            context += cowork_data
+            context += "\n"
+    
     print(f"✅ RAG context 生成完成，總字數: {len(context)}")
     return context
 
@@ -698,8 +862,9 @@ def generate_response(query: str) -> str:
 - 🏆 排行榜：出席積分排名
 - 💌 邀請與恢復資料：可恢復成員、不穩定成員的詳細資料
 - 🔙 可恢復成員詳細資料：長期缺席和不穩定出席成員的統計
-- � 本週點名追蹤：各小區本週出席狀況、各排出席人數、未出席成員名單（含配搭和歷史出席率）
-- �📄 HTML 頁面內容：各主要頁面的文字說明和使用指南
+- 📋 本週點名追蹤：各小區本週出席狀況、各排出席人數、未出席成員名單（含配搭和歷史出席率）
+- ⭐ 配搭出席總覽：配搭的詳細出席狀況（主日、小排、晨興、禱告），標示需要補填的活動
+- 📄 HTML 頁面內容：各主要頁面的文字說明和使用指南
 
 回答原則：
 1. 根據問題從資料中提取相關資訊
@@ -710,6 +875,7 @@ def generate_response(query: str) -> str:
 6. 對於恢復資料，可以建議關懷對象和優先順序
 7. 可以從 HTML 頁面內容中提取系統使用說明和操作指南
 8. 對於點名追蹤問題，可以查詢具體未出席成員名單及其配搭
+9. **重要**：對於「配搭」相關的查詢，應該優先使用「⭐ 配搭出席總覽」的資料，這個資料只包含配搭，不包含一般聖徒
 """
 
     full_prompt = f"{system_prompt}\n\n---\n\n{GLOBAL_RAG_CONTEXT}\n\n---\n\n用戶問題：{query}"
@@ -727,4 +893,4 @@ if __name__ == "__main__":
     # print("\n" + "="*80)
     # print("測試查詢：青年一區在3月參加主日聚會的有多少人？")
     # print("="*80)
-    print(generate_response("甘順基目前的分數為何？"))
+    print(generate_response("最近一週有哪些配搭核心待補？請列出名單"))
