@@ -515,8 +515,8 @@ def load_district_json_data(dashboard_dir: str) -> Dict[str, Dict]:
             except Exception as e:
                 print(f"⚠️ 讀取 {district}/recoverable.json 失敗: {e}")
         
-        # 從 invite.html 提取 RECOVERABLE 資料（如果沒有 JSON 檔案）
-        if 'invite' not in data[district] or 'recoverable' not in data[district]:
+        # 從 invite.html 提取 RECOVERABLE 和 IRREGULAR 資料（如果沒有 JSON 檔案）
+        if 'invite' not in data[district] or 'recoverable' not in data[district] or 'irregular' not in data[district].get('invite', {}):
             invite_html = os.path.join(district_dir, 'invite.html')
             if os.path.exists(invite_html):
                 try:
@@ -535,8 +535,41 @@ def load_district_json_data(dashboard_dir: str) -> Dict[str, Dict]:
                             print(f"✅ 從 {district}/invite.html 提取 RECOVERABLE 資料 ({len(recoverable_data)} 人)")
                         except:
                             pass
+                    
+                    # 提取 IRREGULAR 資料（出席不穩定成員）
+                    irregular_match = re.search(r'const IRREGULAR = (\[.*?\]);', html_content, re.DOTALL)
+                    if irregular_match:
+                        try:
+                            irregular_json = irregular_match.group(1).replace("'", '"')
+                            irregular_data = json.loads(irregular_json)
+                            if 'invite' not in data[district]:
+                                data[district]['invite'] = {}
+                            data[district]['invite']['irregular'] = irregular_data
+                            print(f"✅ 從 {district}/invite.html 提取 IRREGULAR 資料 ({len(irregular_data)} 人)")
+                        except:
+                            pass
                 except Exception as e:
                     print(f"⚠️ 讀取 {district}/invite.html 失敗: {e}")
+        
+        # 從 index.html 提取 RAW_DATA（關心名單資料）
+        index_html = os.path.join(district_dir, 'index.html')
+        if os.path.exists(index_html):
+            try:
+                with open(index_html, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                
+                # 提取 RAW_DATA 資料
+                raw_data_match = re.search(r'const RAW_DATA = (\[.*?\]);', html_content, re.DOTALL)
+                if raw_data_match:
+                    try:
+                        raw_data_json = raw_data_match.group(1)
+                        raw_data = json.loads(raw_data_json)
+                        data[district]['raw_data'] = raw_data
+                        print(f"✅ 從 {district}/index.html 提取 RAW_DATA ({len(raw_data)} 人)")
+                    except:
+                        pass
+            except Exception as e:
+                print(f"⚠️ 讀取 {district}/index.html 失敗: {e}")
     
     print(f"✅ 成功載入 {len(data)} 個小區的 JSON 資料")
     return data
@@ -773,6 +806,156 @@ def format_recoverable_data(district_data: Dict) -> str:
     return markdown
 
 
+def format_care_list_data(district_data: Dict) -> str:
+    """
+    將關心名單資料格式化為 markdown
+    包含：
+    1. 上週有來但這週沒來的成員（只缺席 1 週）
+    2. 連續缺席 2 週以上的成員，以及他們上次主日出席時間
+    """
+    if not district_data:
+        return "無關心名單資料"
+    
+    markdown = "## 🚨 關心名單\n\n"
+    
+    district_names = {
+        'y1': '青年一區', 'y2': '青年二區', 'y3': '青年三區',
+        'hs1': '高中一區', 'hs2': '高中二區', 'hs3': '高中三區',
+        'ms1': '國中一區', 'ms2': '國中二區'
+    }
+    
+    for district_key, data in district_data.items():
+        if 'raw_data' not in data:
+            continue
+        
+        raw_data = data['raw_data']
+        absentees_this_week = []  # 上週有來但這週沒來
+        absentees_consecutive = []  # 連續缺席 2 週以上
+        
+        for person in raw_data:
+            name = person.get('姓名', '')
+            if not name:
+                continue
+            
+            # 獲取主日出席資料
+            sunday_info = person.get('activities', {}).get('主日', {})
+            march = sunday_info.get('march', [])
+            weeks = sunday_info.get('weeks', [])
+            
+            if not march or len(march) < 2:
+                continue
+            
+            # 檢查本週（最後一週）是否缺席
+            if march[-1] == 1:
+                continue  # 本週有出席，跳過
+            
+            # 檢查上週（倒數第二週）是否出席
+            if len(march) >= 2 and march[-2] == 1:
+                # 上週有來但這週沒來
+                last_week_label = weeks[-2] if len(weeks) >= 2 else '未知'
+                this_week_label = weeks[-1] if len(weeks) >= 1 else '未知'
+                
+                # 檢查其他活動的最新週出席情況
+                other_acts = ['小排', '晨興', '禱告', '出訪', '受訪']
+                other_attendance = {}
+                for act in other_acts:
+                    act_info = person.get('activities', {}).get(act, {})
+                    act_march = act_info.get('march', [])
+                    if act_march and len(act_march) > 0:
+                        other_attendance[act] = act_march[-1]
+                
+                has_other = any(v == 1 for v in other_attendance.values())
+                
+                absentees_this_week.append({
+                    'name': name,
+                    'pai': person.get('排', '未分排'),
+                    'last_week': last_week_label,
+                    'this_week': this_week_label,
+                    'other_attendance': other_attendance,
+                    'has_other': has_other
+                })
+            else:
+                # 計算連續缺席週數
+                consecutive = 0
+                for i in range(len(march) - 1, -1, -1):
+                    if march[i] == 0:
+                        consecutive += 1
+                    else:
+                        break
+                
+                # 只關心連續缺席 2 週以上的
+                if consecutive >= 2:
+                    # 找出上次主日出席時間
+                    last_week = None
+                    for j in range(len(march) - 1, -1, -1):
+                        if march[j] == 1:
+                            last_week = weeks[j] if j < len(weeks) else '未知'
+                            break
+                    
+                    # 檢查其他活動的最新週出席情況
+                    other_acts = ['小排', '晨興', '禱告', '出訪', '受訪']
+                    other_attendance = {}
+                    for act in other_acts:
+                        act_info = person.get('activities', {}).get(act, {})
+                        act_march = act_info.get('march', [])
+                        if act_march and len(act_march) > 0:
+                            other_attendance[act] = act_march[-1]
+                    
+                    has_other = any(v == 1 for v in other_attendance.values())
+                    
+                    absentees_consecutive.append({
+                        'name': name,
+                        'pai': person.get('排', '未分排'),
+                        'consecutive': consecutive,
+                        'last_week': last_week or '本期未出席',
+                        'other_attendance': other_attendance,
+                        'has_other': has_other
+                    })
+        
+        if absentees_this_week or absentees_consecutive:
+            markdown += f"### {district_names.get(district_key, district_key)}\n\n"
+        
+        # 顯示上週有來但這週沒來的成員
+        if absentees_this_week:
+            markdown += f"**🟠 上週有來但這週沒來** ({len(absentees_this_week)} 人):\n\n"
+            for a in absentees_this_week[:15]:  # 最多顯示 15 人
+                if a['has_other']:
+                    attended_acts = [act for act, status in a['other_attendance'].items() if status == 1]
+                    markdown += f"- {a['name']}（{a['pai']}，{', '.join(attended_acts)} 有出席）\n"
+                else:
+                    markdown += f"- {a['name']}（{a['pai']}，其他活動也沒出席）\n"
+            if len(absentees_this_week) > 15:
+                markdown += f"... 還有 {len(absentees_this_week) - 15} 人\n"
+            markdown += "\n"
+        
+        # 顯示連續缺席 2 週以上的成員
+        if absentees_consecutive:
+            markdown += f"**🔴 連續缺席 2 週以上** ({len(absentees_consecutive)} 人):\n\n"
+            
+            # 分為兩類：需主動聯繫（其他活動也沒出席）和鼓勵回來主日（其他活動有出席）
+            urgent = [a for a in absentees_consecutive if not a['has_other']]
+            encourage = [a for a in absentees_consecutive if a['has_other']]
+            
+            if urgent:
+                markdown += "需主動聯繫（主日及其他活動皆未出席）:\n"
+                for a in urgent[:10]:
+                    markdown += f"- {a['name']}（{a['pai']}，連續缺席 {a['consecutive']} 週，上次主日：{a['last_week']}）\n"
+                if len(urgent) > 10:
+                    markdown += f"... 還有 {len(urgent) - 10} 人\n"
+                markdown += "\n"
+            
+            if encourage:
+                markdown += "鼓勵回來主日（召會生活仍在，其他活動有出席）:\n"
+                for a in encourage[:10]:
+                    attended_acts = [act for act, status in a['other_attendance'].items() if status == 1]
+                    markdown += f"- {a['name']}（{a['pai']}，連續缺席 {a['consecutive']} 週，上次主日：{a['last_week']}，{', '.join(attended_acts)} 有出席）\n"
+                if len(encourage) > 10:
+                    markdown += f"... 還有 {len(encourage) - 10} 人\n"
+                markdown += "\n"
+    
+    return markdown
+
+
 def generate_rag_context() -> str:
     """
     生成完整的 RAG context
@@ -797,6 +980,8 @@ def generate_rag_context() -> str:
         context += format_invite_data(district_data)
         context += "\n"
         context += format_recoverable_data(district_data)
+        context += "\n"
+        context += format_care_list_data(district_data)
         context += "\n"
     
     # 3. 載入 weekly.html 點名追蹤資料
@@ -864,6 +1049,9 @@ def generate_response(query: str) -> str:
 - 🔙 可恢復成員詳細資料：長期缺席和不穩定出席成員的統計
 - 📋 本週點名追蹤：各小區本週出席狀況、各排出席人數、未出席成員名單（含配搭和歷史出席率）
 - ⭐ 配搭出席總覽：配搭的詳細出席狀況（主日、小排、晨興、禱告），標示需要補填的活動
+- 🚨 關心名單：包含兩類成員
+  - 🟠 上週有來但這週沒來：只缺席 1 週的成員
+  - 🔴 連續缺席 2 週以上：分為「需主動聯繫」和「鼓勵回來主日」兩類
 - 📄 HTML 頁面內容：各主要頁面的文字說明和使用指南
 
 回答原則：
@@ -876,6 +1064,7 @@ def generate_response(query: str) -> str:
 7. 可以從 HTML 頁面內容中提取系統使用說明和操作指南
 8. 對於點名追蹤問題，可以查詢具體未出席成員名單及其配搭
 9. **重要**：對於「配搭」相關的查詢，應該優先使用「⭐ 配搭出席總覽」的資料，這個資料只包含配搭，不包含一般聖徒
+10. 使用「🚨 關心名單」資料
 """
 
     full_prompt = f"{system_prompt}\n\n---\n\n{GLOBAL_RAG_CONTEXT}\n\n---\n\n用戶問題：{query}"
@@ -893,4 +1082,5 @@ if __name__ == "__main__":
     # print("\n" + "="*80)
     # print("測試查詢：青年一區在3月參加主日聚會的有多少人？")
     # print("="*80)
-    print(generate_response("最近一週有哪些配搭核心待補？請列出名單"))
+    # print(generate_response("最近一週有哪些配搭核心待補？請列出名單"))
+    print(generate_response("請問高中大區有哪些名單是上週沒有來主日但這週主日有參加的呢？"))
