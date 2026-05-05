@@ -43,15 +43,26 @@ def get_sheet_conn():
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds_json = os.environ.get("GSPREAD_JSON")
-        if not creds_json: 
+        if not creds_json:
+            logger.warning("⚠️ GSPREAD_JSON 環境變數未設定")
+            return None
+        
+        sheet_id = os.environ.get("GOOGLE_SHEET_ID")
+        if not sheet_id:
+            logger.warning("⚠️ GOOGLE_SHEET_ID 環境變數未設定")
             return None
         
         creds_dict = json.loads(creds_json)
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
-        return client.open_by_key(os.environ.get("GOOGLE_SHEET_ID"))
+        sheet = client.open_by_key(sheet_id)
+        logger.info(f"✅ Google Sheet 連線成功: {sheet.title}")
+        return sheet
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ GSPREAD_JSON 格式錯誤: {e}")
+        return None
     except Exception as e:
-        print(f"❌ Google Sheet 連線失敗: {e}")
+        logger.error(f"❌ Google Sheet 連線失敗: {e}")
         return None
 
 
@@ -63,36 +74,53 @@ def record_interaction(group_id, group_name, user_id, user_name, message):
     """
     try:
         sheet = get_sheet_conn()
-        if not sheet: 
+        if not sheet:
+            logger.info("⏭️ 跳過 Google Sheet 記錄（連線失敗）")
             return
+        
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # --- A. 更新 Logs (流水帳) ---
-        log_ws = sheet.worksheet("Logs")
-        # 格式：時間 | 群組ID | 群組名稱 | 使用者ID | 使用者名稱 | 訊息內容
-        log_ws.append_row([now, group_id, group_name, user_id, user_name, message])
+        try:
+            log_ws = sheet.worksheet("Logs")
+            # 格式：時間 | 群組ID | 群組名稱 | 使用者ID | 使用者名稱 | 訊息內容
+            log_ws.append_row([now, group_id, group_name, user_id, user_name, message])
+            logger.info(f"✅ Logs 記錄成功: {user_name}")
+        except gspread.exceptions.WorksheetNotFound:
+            logger.error("❌ 'Logs' 分頁不存在，請在 Google Sheet 中建立此分頁")
+            return
+        except Exception as e:
+            logger.error(f"❌ Logs 記錄失敗: {e}")
+            return
 
         # --- B. 更新 Users (名冊) ---
-        user_ws = sheet.worksheet("Users")
-        all_users = user_ws.get_all_values()
-        
-        # 找看看這個 ID 是否已經在表裡 (比對第 2 欄的使用者 ID)
-        found_row_index = -1
-        for i, row in enumerate(all_users):
-            if len(row) > 1 and row[1] == user_id:
-                found_row_index = i + 1
-                break
-        
-        if found_row_index != -1:
-            # 已存在，更新名稱、最後訊息、時間
-            user_ws.update_cell(found_row_index, 3, user_name) # 更新名稱
-            user_ws.update_cell(found_row_index, 4, now)       # 更新最後時間
-        else:
-            # 新面孔，新增一行
-            user_ws.append_row([now, user_id, user_name, now, message])
+        try:
+            user_ws = sheet.worksheet("Users")
+            all_users = user_ws.get_all_values()
+            
+            # 找看看這個 ID 是否已經在表裡 (比對第 2 欄的使用者 ID)
+            found_row_index = -1
+            for i, row in enumerate(all_users):
+                if len(row) > 1 and row[1] == user_id:
+                    found_row_index = i + 1
+                    break
+            
+            if found_row_index != -1:
+                # 已存在，更新名稱、最後訊息、時間
+                user_ws.update_cell(found_row_index, 3, user_name) # 更新名稱
+                user_ws.update_cell(found_row_index, 4, now)       # 更新最後時間
+                logger.info(f"✅ Users 更新成功: {user_name} (row {found_row_index})")
+            else:
+                # 新面孔，新增一行
+                user_ws.append_row([now, user_id, user_name, now, message])
+                logger.info(f"✅ Users 新增成功: {user_name}")
+        except gspread.exceptions.WorksheetNotFound:
+            logger.error("❌ 'Users' 分頁不存在，請在 Google Sheet 中建立此分頁")
+        except Exception as e:
+            logger.error(f"❌ Users 記錄失敗: {e}")
 
     except Exception as e:
-        logger.error(f"❌ 雲端紀錄失敗: {e}")
+        logger.error(f"❌ 雲端紀錄失敗: {e}", exc_info=True)
 
 
 def log_user_info(event):
