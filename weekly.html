@@ -49,25 +49,32 @@ body {
   gap: 6px;
 }
 .back-btn:hover { color: white; }
-.topbar-left {
+.topbar-left, .topbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
-.week-toggle {
+.week-nav {
   color: rgba(255,255,255,0.78);
   text-decoration: none;
   font-size: 13px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   padding: 5px 12px;
   border-radius: 6px;
   background: rgba(99, 179, 237, 0.12);
   border: 1px solid rgba(99, 179, 237, 0.25);
   transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
 }
-.week-toggle:hover {
+.week-nav:hover {
   background: rgba(99, 179, 237, 0.22);
   color: white;
+}
+.week-nav.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
 }
 .topbar-title {
   font-size: 15px;
@@ -449,10 +456,13 @@ body {
 <div class="topbar">
   <div class="topbar-left">
     <a href="index.html" class="back-btn">← 首頁</a>
-    <a href="weekly-prev.html" class="week-toggle">📅 看上週</a>
+    <a href="weekly-w20.html" class="week-nav prev">← 5/5～5/11</a>
   </div>
   <div class="topbar-title">📋 本週點名追蹤</div>
-  <div class="topbar-date">5/12～5/18</div>
+  <div class="topbar-right">
+    <a href="#" class="week-nav next disabled">本週為最新</a>
+    <div class="topbar-date">5/12～5/18</div>
+  </div>
 </div>
 
 <div class="container">
