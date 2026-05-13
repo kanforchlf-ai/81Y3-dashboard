@@ -49,6 +49,26 @@ body {
   gap: 6px;
 }
 .back-btn:hover { color: white; }
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.week-toggle {
+  color: rgba(255,255,255,0.78);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(99, 179, 237, 0.12);
+  border: 1px solid rgba(99, 179, 237, 0.25);
+  transition: background 0.2s, color 0.2s;
+}
+.week-toggle:hover {
+  background: rgba(99, 179, 237, 0.22);
+  color: white;
+}
 .topbar-title {
   font-size: 15px;
   font-weight: 700;
@@ -427,7 +447,10 @@ body {
 <body>
 
 <div class="topbar">
-  <a href="index.html" class="back-btn">← 首頁</a>
+  <div class="topbar-left">
+    <a href="index.html" class="back-btn">← 首頁</a>
+    <a href="weekly-prev.html" class="week-toggle">📅 看上週</a>
+  </div>
   <div class="topbar-title">📋 本週點名追蹤</div>
   <div class="topbar-date">5/12～5/18</div>
 </div>
