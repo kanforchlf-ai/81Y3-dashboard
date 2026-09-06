@@ -120,6 +120,43 @@ body {
   color: rgba(255,255,255,0.4);
 }
 
+/* 月目標達成率 */
+.target-bar {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+.target-head {
+  font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(255,255,255,0.75); margin-bottom: 12px;
+}
+.target-items {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+}
+@media (max-width: 640px) {
+  .target-items { grid-template-columns: repeat(2, 1fr); }
+}
+.target-item { text-align: center; }
+.target-item .tname {
+  font-size: 11px; color: rgba(255,255,255,0.45);
+  letter-spacing: .5px; display: block; margin-bottom: 4px;
+}
+.target-item .tval { font-size: 17px; font-weight: 800; display: block; }
+.target-item .tbar {
+  height: 5px; background: rgba(255,255,255,0.08);
+  border-radius: 3px; overflow: hidden; margin: 6px 0 4px;
+}
+.target-item .tbar .tfill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+.target-item.hit .tbar .tfill {
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+}
+.target-item .tpct { font-size: 11px; color: rgba(255,255,255,0.5); }
+
 /* Summary stat cards */
 .stat-grid {
   display: grid;
@@ -470,6 +507,8 @@ body {
     <h1>📋 本週點名追蹤</h1>
     <div class="sub">2026年9月1日 ～ 7日（第37週）</div>
   </div>
+
+  <!-- TARGET_BAR_START --><div class="target-bar"><div class="target-head">🎯 9月人數目標 235 人</div><div class="target-items"><div class="target-item"><span class="tname">⚡ 青年</span><span class="tval">45 / 70</span><div class="tbar"><div class="tfill" style="width:64%"></div></div><span class="tpct">64%</span></div><div class="target-item"><span class="tname">🔥 高中</span><span class="tval">0 / 55</span><div class="tbar"><div class="tfill" style="width:0%"></div></div><span class="tpct">0%</span></div><div class="target-item"><span class="tname">🌱 國中</span><span class="tval">34 / 110</span><div class="tbar"><div class="tfill" style="width:31%"></div></div><span class="tpct">31%</span></div><div class="target-item"><span class="tname">📍 全會所</span><span class="tval">79 / 235</span><div class="tbar"><div class="tfill" style="width:34%"></div></div><span class="tpct">34%</span></div></div></div><!-- TARGET_BAR_END -->
 
   <!-- Summary cards -->
   <div class="stat-grid">
