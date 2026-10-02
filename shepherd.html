@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青年三區 牧養關係圖</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a14; --surface:#1a1a2e; --panel:#16213e; --border:rgba(255,255,255,.1);
+  --ink:#f3f3f7; --ink2:#aaa; --ink3:#777;
+  --c-sh:#8b5cf6; --c-saint:#059669; --c-friend:#d97706;
+  --link:rgba(255,255,255,.22); --link-hi:rgba(255,255,255,.75);
+  --label-lamb:#c9c9d6; --ring:#1a1a2e;
+}
+html[data-theme="light"]{
+  --bg:#F4F4F0; --surface:#FFFFFF; --panel:#FFFFFF; --border:#E2E2EC;
+  --ink:#1A1A2E; --ink2:#6B6B8A; --ink3:#9a9ab0;
+  --c-sh:#7c3aed; --c-saint:#059669; --c-friend:#b45309;
+  --link:rgba(26,26,46,.22); --link-hi:rgba(26,26,46,.8);
+  --label-lamb:#3a3a55; --ring:#FFFFFF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",-apple-system,"Microsoft JhengHei",sans-serif;font-size:14px;line-height:1.5}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.topbar h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.5px}
+.badge{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(217,119,6,.18);color:var(--c-friend);border:1px solid var(--c-friend)}
+.topbar .date{color:var(--ink2);font-size:12px}
+.topbar .sp{flex:1}
+.btn{background:transparent;border:1px solid var(--border);color:var(--ink2);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:12px}
+.btn:hover{color:var(--ink);border-color:var(--ink3)}
+.btn.on{color:var(--ink);border-color:var(--c-sh);background:rgba(139,92,246,.12)}
+.stats{display:flex;gap:10px;padding:12px 20px;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:120px}
+.stat .v{font-size:22px;font-weight:700;line-height:1.1}
+.stat .k{font-size:11px;color:var(--ink2);margin-top:2px}
+.controls{display:flex;gap:10px;padding:0 20px 10px;align-items:center;flex-wrap:wrap}
+.controls input{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;width:200px}
+.legend{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none}
+.dot.sh{background:var(--c-sh);width:16px;height:16px}
+.dot.saint{background:var(--c-saint)}
+.dot.friend{background:transparent;border:2.5px solid var(--c-friend)}
+.line{width:22px;height:0;border-top:2px solid var(--link-hi);display:inline-block}
+.main{display:grid;grid-template-columns:1fr 280px;gap:12px;padding:0 20px 20px}
+.graph{background:var(--surface);border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden;min-height:560px;height:640px}
+svg{width:100%;height:100%;display:block;cursor:grab}
+svg:active{cursor:grabbing}
+.hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--ink3);pointer-events:none}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto;max-height:640px}
+.panel h2{font-size:14px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.panel h2 .x{margin-left:auto;cursor:pointer;color:var(--ink3);font-weight:400}
+.rank{list-style:none;margin:0;padding:0}
+.rank li{display:grid;grid-template-columns:64px 1fr 28px;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-radius:6px}
+.rank li:hover{background:rgba(139,92,246,.1)}
+.rank .bar{height:8px;border-radius:4px;background:var(--c-sh);opacity:.85}
+.rank .n{text-align:right;color:var(--ink2);font-size:12px}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.plist li:last-child{border-bottom:none}
+.plist .tag{font-size:10px;color:var(--ink2);margin-left:auto;text-align:right}
+.sub{font-size:12px;color:var(--ink2);margin:10px 0 4px}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .12s;max-width:220px;z-index:5}
+.tip b{display:block;font-size:13px}
+.tip .m{color:var(--ink2)}
+details{margin:0 20px 24px}
+summary{cursor:pointer;color:var(--ink2);font-size:13px}
+table{border-collapse:collapse;width:100%;margin-top:10px;font-size:13px;background:var(--surface);border-radius:10px;overflow:hidden}
+th,td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--ink2);font-weight:600;font-size:12px}
+.node text{font-size:11px;fill:var(--label-lamb);pointer-events:none;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.node.shepherd text{font-size:13px;font-weight:700;fill:var(--ink)}
+.node{cursor:pointer}
+.node.dim{opacity:.12}
+.node.hi circle{stroke:var(--ink);stroke-width:2.5px}
+line.link{stroke:var(--link);stroke-width:1.5px}
+line.link.hi{stroke:var(--link-hi);stroke-width:2.5px}
+line.link.dim{opacity:.06}
+.empty{color:var(--ink3);font-size:12px;padding:30px 0;text-align:center}
+@media (max-width:860px){.main{grid-template-columns:1fr}.graph{min-height:460px;height:60vh}.panel{max-height:none}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>青年三區 牧養關係圖</h1>
+  <span class="badge">示範資料（配對為隨機產生）</span>
+  <span class="date">資料日期 2026-10-02</span>
+  <span class="sp"></span>
+  <button class="btn" id="btnTheme" title="切換深淺色">☀️ 淺色</button>
+</div>
+<div class="stats" id="stats"></div>
+<div class="controls">
+  <input id="q" type="search" placeholder="搜尋姓名…" autocomplete="off">
+  <button class="btn" id="btnShared">只看共同牧養</button>
+  <button class="btn" id="btnReset">重置視圖</button>
+  <span class="sp" style="flex:1"></span>
+  <div class="legend">
+    <span><i class="dot sh"></i>牧養者（大小＝小羊數）</span>
+    <span><i class="dot saint"></i>聖徒</span>
+    <span><i class="dot friend"></i>福音朋友</span>
+    <span><i class="line"></i>牧養關係</span>
+  </div>
+</div>
+<div class="main">
+  <div class="graph" id="graph"><svg></svg><div class="hint">拖曳圈圈可移動 · 滾輪縮放 · 點牧養者看他的羊 · 點空白處取消</div><div class="tip" id="tip"></div></div>
+  <aside class="panel" id="panel"></aside>
+</div>
+<details>
+  <summary>表格檢視（小羊 → 牧養者）</summary>
+  <table><thead><tr><th>小羊</th><th>身分</th><th>牧養者</th><th>共同牧養</th></tr></thead><tbody id="tbody"></tbody></table>
+</details>
+
+<script>
+const DATA = {"nodes": [{"id": "甘順基", "kind": "shepherd", "n": 7}, {"id": "沈以恩", "kind": "shepherd", "n": 6}, {"id": "朱璟軒", "kind": "shepherd", "n": 4}, {"id": "林書丞", "kind": "shepherd", "n": 7}, {"id": "王新恩", "kind": "shepherd", "n": 10}, {"id": "張若筠", "kind": "shepherd", "n": 11}, {"id": "吳汶靜", "kind": "shepherd", "n": 6}, {"id": "呂柔蒨", "kind": "shepherd", "n": 13}, {"id": "葉倢妤", "kind": "shepherd", "n": 0}, {"id": "戴采薰", "kind": "shepherd", "n": 7}, {"id": "鍾愛", "kind": "shepherd", "n": 6}, {"id": "蔡溢恩", "kind": "shepherd", "n": 7}, {"id": "謝霖真", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "張若筠"]}, {"id": "呂真柔", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒"]}, {"id": "鄭承庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["張若筠"]}, {"id": "呂庭信", "kind": "lamb", "ident": "聖徒", "shepherds": ["戴采薰", "沈以恩"]}, {"id": "羅信銘", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒", "張若筠"]}, {"id": "洪宇昀", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨"]}, {"id": "莊愛翰", "kind": "lamb", "ident": "聖徒", "shepherds": ["蔡溢恩", "吳汶靜", "張若筠"]}, {"id": "郭綺庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["蔡溢恩", "沈以恩"]}, {"id": "吳欣佳", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒", "林書丞", "呂柔蒨"]}, {"id": "林宇晴", "kind": "lamb", "ident": "福音朋友", "shepherds": ["王新恩", "吳汶靜"]}, {"id": "謝晴承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["朱璟軒", "沈以恩"]}, {"id": "陳晨承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠"]}, {"id": "張妍望", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨"]}, {"id": "張宇彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["甘順基", "吳汶靜"]}, {"id": "鄭愛庭", "kind": "lamb", "ident": "福音朋友", "shepherds": ["蔡溢恩", "呂柔蒨"]}, {"id": "高晴彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "甘順基", "呂柔蒨"]}, {"id": "羅真望", "kind": "lamb", "ident": "福音朋友", "shepherds": ["林書丞", "王新恩"]}, {"id": "呂昀銘", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "王晨安", "kind": "lamb", "ident": "聖徒", "shepherds": ["戴采薰", "甘順基"]}, {"id": "呂庭彥", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "莊安承", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛"]}, {"id": "羅柏詠", "kind": "lamb", "ident": "福音朋友", "shepherds": ["吳汶靜", "王新恩", "張若筠"]}, {"id": "呂彥欣", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠"]}, {"id": "郭欣安", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "邱芸綺", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠", "林書丞"]}, {"id": "莊柔愛", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "林書丞"]}, {"id": "曾欣庭", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨"]}, {"id": "王愛晴", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨", "甘順基"]}, {"id": "李信欣", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨"]}, {"id": "楊真昀", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨", "蔡溢恩"]}, {"id": "周翰佳", "kind": "lamb", "ident": "福音朋友", "shepherds": ["林書丞", "張若筠"]}, {"id": "李瑜信", "kind": "lamb", "ident": "聖徒", "shepherds": ["沈以恩"]}, {"id": "邱宸彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "戴采薰"]}, {"id": "王宇睿", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛", "蔡溢恩", "王新恩"]}, {"id": "楊瑜庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "曾哲瑜", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "鍾愛"]}, {"id": "邱欣睿", "kind": "lamb", "ident": "聖徒", "shepherds": ["沈以恩", "鍾愛"]}, {"id": "邱佳妤", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛"]}, {"id": "謝恩真", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "陳怡恩", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "莊妤晨", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠", "呂柔蒨"]}, {"id": "謝睿愛", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "戴采薰"]}, {"id": "王翰真", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "蔡溢恩"]}, {"id": "何妍愛", "kind": "lamb", "ident": "福音朋友", "shepherds": ["沈以恩", "張若筠", "蔡溢恩"]}, {"id": "劉彥承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "鍾愛"]}, {"id": "廖庭真", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基", "林書丞"]}, {"id": "洪怡庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "吳銘哲", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "林書丞"]}], "links": [{"source": "呂柔蒨", "target": "謝霖真"}, {"source": "張若筠", "target": "謝霖真"}, {"source": "朱璟軒", "target": "呂真柔"}, {"source": "張若筠", "target": "鄭承庭"}, {"source": "戴采薰", "target": "呂庭信"}, {"source": "沈以恩", "target": "呂庭信"}, {"source": "朱璟軒", "target": "羅信銘"}, {"source": "張若筠", "target": "羅信銘"}, {"source": "呂柔蒨", "target": "洪宇昀"}, {"source": "蔡溢恩", "target": "莊愛翰"}, {"source": "吳汶靜", "target": "莊愛翰"}, {"source": "張若筠", "target": "莊愛翰"}, {"source": "蔡溢恩", "target": "郭綺庭"}, {"source": "沈以恩", "target": "郭綺庭"}, {"source": "朱璟軒", "target": "吳欣佳"}, {"source": "林書丞", "target": "吳欣佳"}, {"source": "呂柔蒨", "target": "吳欣佳"}, {"source": "王新恩", "target": "林宇晴"}, {"source": "吳汶靜", "target": "林宇晴"}, {"source": "朱璟軒", "target": "謝晴承"}, {"source": "沈以恩", "target": "謝晴承"}, {"source": "張若筠", "target": "陳晨承"}, {"source": "呂柔蒨", "target": "張妍望"}, {"source": "甘順基", "target": "張宇彥"}, {"source": "吳汶靜", "target": "張宇彥"}, {"source": "蔡溢恩", "target": "鄭愛庭"}, {"source": "呂柔蒨", "target": "鄭愛庭"}, {"source": "戴采薰", "target": "高晴彥"}, {"source": "甘順基", "target": "高晴彥"}, {"source": "呂柔蒨", "target": "高晴彥"}, {"source": "林書丞", "target": "羅真望"}, {"source": "王新恩", "target": "羅真望"}, {"source": "王新恩", "target": "呂昀銘"}, {"source": "戴采薰", "target": "王晨安"}, {"source": "甘順基", "target": "王晨安"}, {"source": "王新恩", "target": "呂庭彥"}, {"source": "鍾愛", "target": "莊安承"}, {"source": "吳汶靜", "target": "羅柏詠"}, {"source": "王新恩", "target": "羅柏詠"}, {"source": "張若筠", "target": "羅柏詠"}, {"source": "張若筠", "target": "呂彥欣"}, {"source": "王新恩", "target": "郭欣安"}, {"source": "張若筠", "target": "邱芸綺"}, {"source": "林書丞", "target": "邱芸綺"}, {"source": "戴采薰", "target": "莊柔愛"}, {"source": "林書丞", "target": "莊柔愛"}, {"source": "呂柔蒨", "target": "曾欣庭"}, {"source": "呂柔蒨", "target": "王愛晴"}, {"source": "甘順基", "target": "王愛晴"}, {"source": "呂柔蒨", "target": "李信欣"}, {"source": "呂柔蒨", "target": "楊真昀"}, {"source": "蔡溢恩", "target": "楊真昀"}, {"source": "林書丞", "target": "周翰佳"}, {"source": "張若筠", "target": "周翰佳"}, {"source": "沈以恩", "target": "李瑜信"}, {"source": "呂柔蒨", "target": "邱宸彥"}, {"source": "戴采薰", "target": "邱宸彥"}, {"source": "鍾愛", "target": "王宇睿"}, {"source": "蔡溢恩", "target": "王宇睿"}, {"source": "王新恩", "target": "王宇睿"}, {"source": "王新恩", "target": "楊瑜庭"}, {"source": "吳汶靜", "target": "曾哲瑜"}, {"source": "鍾愛", "target": "曾哲瑜"}, {"source": "沈以恩", "target": "邱欣睿"}, {"source": "鍾愛", "target": "邱欣睿"}, {"source": "鍾愛", "target": "邱佳妤"}, {"source": "王新恩", "target": "謝恩真"}, {"source": "甘順基", "target": "陳怡恩"}, {"source": "張若筠", "target": "莊妤晨"}, {"source": "呂柔蒨", "target": "莊妤晨"}, {"source": "王新恩", "target": "謝睿愛"}, {"source": "戴采薰", "target": "謝睿愛"}, {"source": "吳汶靜", "target": "王翰真"}, {"source": "蔡溢恩", "target": "王翰真"}, {"source": "沈以恩", "target": "何妍愛"}, {"source": "張若筠", "target": "何妍愛"}, {"source": "蔡溢恩", "target": "何妍愛"}, {"source": "戴采薰", "target": "劉彥承"}, {"source": "鍾愛", "target": "劉彥承"}, {"source": "甘順基", "target": "廖庭真"}, {"source": "林書丞", "target": "廖庭真"}, {"source": "甘順基", "target": "洪怡庭"}, {"source": "呂柔蒨", "target": "吳銘哲"}, {"source": "林書丞", "target": "吳銘哲"}], "stats": {"shepherds": 12, "lambs": 48, "shared": 30, "avg": 7.0, "saints": 28, "friends": 20}};
+const byId = new Map(DATA.nodes.map(n => [n.id, n]));
+const lambsOf = new Map(DATA.nodes.filter(n=>n.kind==='shepherd').map(s=>[s.id, []]));
+DATA.links.forEach(l => lambsOf.get(l.source).push(l.target));
+
+/* ---------- stats ---------- */
+const S = DATA.stats;
+document.getElementById('stats').innerHTML = [
+  [S.shepherds,'牧養者'],[S.lambs,'被牧養的小羊'],[S.shared,'共同牧養（2 人以上）'],[S.avg,'平均每位牧養者照顧'],[S.saints+' / '+S.friends,'聖徒 / 福音朋友']
+].map(([v,k])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+
+/* ---------- table ---------- */
+document.getElementById('tbody').innerHTML = DATA.nodes.filter(n=>n.kind==='lamb').map(n =>
+  `<tr><td>${n.id}</td><td>${n.ident}</td><td>${n.shepherds.join('、')}</td><td>${n.shepherds.length>=2?'✓':''}</td></tr>`).join('');
+
+/* ---------- graph ---------- */
+const svgEl = document.querySelector('svg');
+const svg = d3.select(svgEl);
+const g = svg.append('g');
+const tip = document.getElementById('tip');
+const graphBox = document.getElementById('graph');
+let W = graphBox.clientWidth, H = graphBox.clientHeight;
+
+const rSh = n => 14 + Math.sqrt(n.n) * 4;
+const rLamb = 6;
+
+const nodes = DATA.nodes.map(d => ({...d}));
+const links = DATA.links.map(d => ({...d}));
+
+const sim = d3.forceSimulation(nodes)
+  .force('link', d3.forceLink(links).id(d=>d.id).distance(l => l.target.shepherds.length>=2 ? 90 : 64).strength(0.8))
+  .force('charge', d3.forceManyBody().strength(d => d.kind==='shepherd' ? -1100 : -140))
+  .force('collide', d3.forceCollide(d => (d.kind==='shepherd' ? rSh(d) : rLamb) + 12))
+  .force('center', d3.forceCenter(W/2, H/2))
+  .force('x', d3.forceX(W/2).strength(0.05))
+  .force('y', d3.forceY(H/2).strength(0.05));
+
+const link = g.append('g').selectAll('line').data(links).join('line').attr('class','link');
+const node = g.append('g').selectAll('g').data(nodes).join('g')
+  .attr('class', d => 'node ' + d.kind)
+  .call(d3.drag()
+    .on('start', (e,d)=>{ if(!e.active) sim.alphaTarget(.3).restart(); d.fx=d.x; d.fy=d.y; })
+    .on('drag',  (e,d)=>{ d.fx=e.x; d.fy=e.y; })
+    .on('end',   (e,d)=>{ if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; }));
+
+node.append('circle')
+  .attr('r', d => d.kind==='shepherd' ? rSh(d) : rLamb)
+  .attr('fill', d => d.kind==='shepherd' ? 'var(--c-sh)' : (d.ident==='聖徒' ? 'var(--c-saint)' : 'var(--ring)'))
+  .attr('stroke', d => d.kind==='shepherd' ? 'var(--ring)' : (d.ident==='聖徒' ? 'var(--ring)' : 'var(--c-friend)'))
+  .attr('stroke-width', d => d.kind==='shepherd' ? 2 : (d.ident==='聖徒' ? 1.5 : 2.5));
+node.append('text')
+  .attr('text-anchor','middle')
+  .attr('dy', d => d.kind==='shepherd' ? '.35em' : (rLamb + 11))
+  .text(d => d.id);
+
+sim.on('tick', () => {
+  link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+  node.attr('transform', d=>`translate(${d.x},${d.y})`);
+});
+
+const zoom = d3.zoom().scaleExtent([0.4, 3]).on('zoom', e => g.attr('transform', e.transform));
+svg.call(zoom).on('dblclick.zoom', null);
+
+/* ---------- highlight logic ---------- */
+let pinned = null;   // id of pinned node
+let sharedOnly = false;
+
+function neighborSet(id){
+  const n = byId.get(id); const set = new Set([id]);
+  if (!n) return set;
+  if (n.kind==='shepherd') lambsOf.get(id).forEach(x=>set.add(x));
+  else n.shepherds.forEach(x=>set.add(x));
+  return set;
+}
+function applyHighlight(focusId){
+  const q = document.getElementById('q').value.trim();
+  let keep = null;
+  if (focusId) keep = neighborSet(focusId);
+  else if (q) { keep = new Set(); nodes.forEach(n=>{ if(n.id.includes(q)) neighborSet(n.id).forEach(x=>keep.add(x)); }); }
+  node.classed('dim', d => {
+    if (sharedOnly && d.kind==='lamb' && d.shepherds.length<2) return true;
+    return keep ? !keep.has(d.id) : false;
+  }).classed('hi', d => keep ? keep.has(d.id) && (d.id===focusId || (q && d.id.includes(q))) : false);
+  link.classed('dim', l => {
+    if (sharedOnly && l.target.shepherds.length<2) return true;
+    return keep ? !(keep.has(l.source.id) && keep.has(l.target.id)) : false;
+  }).classed('hi', l => keep ? (keep.has(l.source.id) && keep.has(l.target.id)) : false);
+}
+
+node.on('mouseenter', (e,d) => { if(!pinned) applyHighlight(d.id); showTip(e,d); })
+    .on('mousemove', (e,d) => showTip(e,d))
+    .on('mouseleave', () => { if(!pinned) applyHighlight(null); tip.style.opacity=0; })
+    .on('click', (e,d) => { e.stopPropagation(); pin(d.id); });
+svg.on('click', () => pin(null));
+
+function pin(id){ pinned = id; applyHighlight(id); renderPanel(id); }
+
+function showTip(e,d){
+  const r = graphBox.getBoundingClientRect();
+  let body;
+  if (d.kind==='shepherd'){
+    const ls = lambsOf.get(d.id);
+    body = `<b>${d.id}</b><span class="m">牧養 ${ls.length} 位</span>` + (ls.length?`<div>${ls.join('、')}</div>`:'');
+  } else {
+    body = `<b>${d.id}</b><span class="m">${d.ident}${d.shepherds.length>=2?' · 共同牧養':''}</span><div>牧養者：${d.shepherds.join('、')}</div>`;
+  }
+  tip.innerHTML = body;
+  tip.style.left = (e.clientX - r.left + 14) + 'px';
+  tip.style.top  = (e.clientY - r.top + 14) + 'px';
+  tip.style.opacity = 1;
+}
+
+/* ---------- side panel ---------- */
+const panel = document.getElementById('panel');
+function renderPanel(id){
+  const n = id && byId.get(id);
+  if (!n){
+    const sh = DATA.nodes.filter(x=>x.kind==='shepherd').slice().sort((a,b)=>b.n-a.n);
+    const max = Math.max(1, ...sh.map(x=>x.n));
+    panel.innerHTML = `<h2>牧養者排行</h2><ul class="rank">` +
+      sh.map(s=>`<li data-id="${s.id}"><span>${s.id}</span><div class="bar" style="width:${(s.n/max*100).toFixed(0)}%"></div><span class="n">${s.n}</span></li>`).join('') +
+      `</ul><div class="sub">共同牧養的小羊（${S.shared} 位）</div><ul class="plist">` +
+      DATA.nodes.filter(x=>x.kind==='lamb' && x.shepherds.length>=2).map(l=>`<li data-id="${l.id}"><i class="dot ${l.ident==='聖徒'?'saint':'friend'}"></i>${l.id}<span class="tag">${l.shepherds.join('、')}</span></li>`).join('') + `</ul>`;
+  } else if (n.kind==='shepherd'){
+    const ls = lambsOf.get(n.id).map(x=>byId.get(x));
+    const solo = ls.filter(l=>l.shepherds.length===1), co = ls.filter(l=>l.shepherds.length>=2);
+    const item = l => `<li data-id="${l.id}"><i class="dot ${l.ident==='聖徒'?'saint':'friend'}"></i>${l.id}<span class="tag">${l.shepherds.length>=2 ? '與 '+l.shepherds.filter(s=>s!==n.id).join('、') : ''}</span></li>`;
+    panel.innerHTML = `<h2><i class="dot sh"></i>${n.id}<span class="x" data-id="">✕</span></h2>` +
+      `<div class="sub">共牧養 ${ls.length} 位 · 單獨 ${solo.length} · 共同 ${co.length}</div>` +
+      (ls.length ? `<div class="sub">單獨牧養</div><ul class="plist">${solo.map(item).join('')||'<li class="empty">—</li>'}</ul>` +
+                   `<div class="sub">共同牧養</div><ul class="plist">${co.map(item).join('')||'<li class="empty">—</li>'}</ul>` : `<div class="empty">目前沒有配對的小羊</div>`);
+  } else {
+    panel.innerHTML = `<h2><i class="dot ${n.ident==='聖徒'?'saint':'friend'}"></i>${n.id}<span class="x" data-id="">✕</span></h2>` +
+      `<div class="sub">${n.ident}${n.shepherds.length>=2?' · 共同牧養':''}</div><div class="sub">牧養者</div><ul class="plist">` +
+      n.shepherds.map(s=>`<li data-id="${s}"><i class="dot sh"></i>${s}<span class="tag">${lambsOf.get(s).length} 位</span></li>`).join('') + `</ul>`;
+  }
+}
+panel.addEventListener('click', e => {
+  const li = e.target.closest('[data-id]'); if(!li) return;
+  pin(li.dataset.id || null);
+});
+renderPanel(null);
+
+/* ---------- controls ---------- */
+document.getElementById('q').addEventListener('input', () => { pinned=null; applyHighlight(null); renderPanel(null); });
+document.getElementById('btnShared').addEventListener('click', e => { sharedOnly=!sharedOnly; e.currentTarget.classList.toggle('on', sharedOnly); applyHighlight(pinned); });
+document.getElementById('btnReset').addEventListener('click', () => {
+  pinned=null; sharedOnly=false; document.getElementById('btnShared').classList.remove('on'); document.getElementById('q').value='';
+  applyHighlight(null); renderPanel(null);
+  svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity); sim.alpha(0.6).restart();
+});
+const root = document.documentElement, btnT = document.getElementById('btnTheme');
+function setTheme(t){ root.dataset.theme=t; btnT.textContent = t==='dark' ? '☀️ 淺色' : '🌙 深色'; try{localStorage.setItem('sg-theme',t)}catch(e){} }
+try{ const t=localStorage.getItem('sg-theme'); if(t) setTheme(t); }catch(e){}
+btnT.addEventListener('click', () => setTheme(root.dataset.theme==='dark'?'light':'dark'));
+window.addEventListener('resize', () => { W=graphBox.clientWidth; H=graphBox.clientHeight; sim.force('center', d3.forceCenter(W/2,H/2)).force('x', d3.forceX(W/2).strength(0.05)).force('y', d3.forceY(H/2).strength(0.05)).alpha(0.3).restart(); });
+</script>
+</body>
+</html>
