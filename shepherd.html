@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function(){
+  const KEY = 'auth_81y3', CORRECT = '5281';   // 與 cowork.html 共用同一把密碼
+  if (sessionStorage.getItem(KEY) !== CORRECT) {
+    const input = prompt('請輸入密碼');
+    if (input !== CORRECT) {
+      document.documentElement.innerHTML = '<div style="font-family:sans-serif;text-align:center;margin-top:20%;color:#999">密碼錯誤</div>';
+      throw new Error('unauthorized');
+    }
+    sessionStorage.setItem(KEY, CORRECT);
+  }
+})();
+</script>
 <title>青年三區 牧養關係圖</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
@@ -11,14 +24,14 @@
   --ink:#f3f3f7; --ink2:#aaa; --ink3:#777;
   --c-sh:#8b5cf6; --c-saint:#059669; --c-friend:#d97706;
   --link:rgba(255,255,255,.22); --link-hi:rgba(255,255,255,.75);
-  --label-lamb:#c9c9d6; --ring:#1a1a2e;
+  --label-lamb:#c9c9d6; --ring:#1a1a2e; --c-star:#f7d060;
 }
 html[data-theme="light"]{
   --bg:#F4F4F0; --surface:#FFFFFF; --panel:#FFFFFF; --border:#E2E2EC;
   --ink:#1A1A2E; --ink2:#6B6B8A; --ink3:#9a9ab0;
   --c-sh:#7c3aed; --c-saint:#059669; --c-friend:#b45309;
   --link:rgba(26,26,46,.22); --link-hi:rgba(26,26,46,.8);
-  --label-lamb:#3a3a55; --ring:#FFFFFF;
+  --label-lamb:#3a3a55; --ring:#FFFFFF; --c-star:#a16207;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",-apple-system,"Microsoft JhengHei",sans-serif;font-size:14px;line-height:1.5}
@@ -71,6 +84,10 @@ th,td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left}
 th{color:var(--ink2);font-weight:600;font-size:12px}
 .node text{font-size:11px;fill:var(--label-lamb);pointer-events:none;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
 .node.shepherd text{font-size:13px;font-weight:700;fill:var(--ink)}
+.node.star path{fill:var(--c-star);stroke:var(--ring);stroke-width:1px}
+.node.star text{fill:var(--c-star)}
+.star-i{color:var(--c-star);font-size:15px;line-height:1}
+.stat.hot .v{color:var(--c-star)}
 .node{cursor:pointer}
 .node.dim{opacity:.12}
 .node.hi circle{stroke:var(--ink);stroke-width:2.5px}
@@ -84,8 +101,8 @@ line.link.dim{opacity:.06}
 <body>
 <div class="topbar">
   <h1>青年三區 牧養關係圖</h1>
-  <span class="badge">示範資料（配對為隨機產生）</span>
-  <span class="date">資料日期 2026-10-02</span>
+  
+  <span class="date">資料日期 2026-10-03</span>
   <span class="sp"></span>
   <button class="btn" id="btnTheme" title="切換深淺色">☀️ 淺色</button>
 </div>
@@ -97,9 +114,11 @@ line.link.dim{opacity:.06}
   <span class="sp" style="flex:1"></span>
   <div class="legend">
     <span><i class="dot sh"></i>牧養者（大小＝小羊數）</span>
+    <span><i class="dot sh" style="box-shadow:0 0 0 3px var(--c-saint)"></i>牧養者，自己也被牧養</span>
     <span><i class="dot saint"></i>聖徒</span>
     <span><i class="dot friend"></i>福音朋友</span>
     <span><i class="line"></i>牧養關係</span>
+    <span><i class="star-i">★</i>有來聚會、還沒人牧養（大小＝出席週數）</span>
   </div>
 </div>
 <div class="main">
@@ -107,12 +126,16 @@ line.link.dim{opacity:.06}
   <aside class="panel" id="panel"></aside>
 </div>
 <details>
+  <summary>表格檢視（待認領的星星）</summary>
+  <table><thead><tr><th>姓名</th><th>身分</th><th>群組</th><th>排</th><th>出席週數</th><th>主日</th><th>最後出現</th></tr></thead><tbody id="tstars"></tbody></table>
+</details>
+<details>
   <summary>表格檢視（小羊 → 牧養者）</summary>
   <table><thead><tr><th>小羊</th><th>身分</th><th>牧養者</th><th>共同牧養</th></tr></thead><tbody id="tbody"></tbody></table>
 </details>
 
 <script>
-const DATA = {"nodes": [{"id": "甘順基", "kind": "shepherd", "n": 7}, {"id": "沈以恩", "kind": "shepherd", "n": 6}, {"id": "朱璟軒", "kind": "shepherd", "n": 4}, {"id": "林書丞", "kind": "shepherd", "n": 7}, {"id": "王新恩", "kind": "shepherd", "n": 10}, {"id": "張若筠", "kind": "shepherd", "n": 11}, {"id": "吳汶靜", "kind": "shepherd", "n": 6}, {"id": "呂柔蒨", "kind": "shepherd", "n": 13}, {"id": "葉倢妤", "kind": "shepherd", "n": 0}, {"id": "戴采薰", "kind": "shepherd", "n": 7}, {"id": "鍾愛", "kind": "shepherd", "n": 6}, {"id": "蔡溢恩", "kind": "shepherd", "n": 7}, {"id": "謝霖真", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "張若筠"]}, {"id": "呂真柔", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒"]}, {"id": "鄭承庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["張若筠"]}, {"id": "呂庭信", "kind": "lamb", "ident": "聖徒", "shepherds": ["戴采薰", "沈以恩"]}, {"id": "羅信銘", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒", "張若筠"]}, {"id": "洪宇昀", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨"]}, {"id": "莊愛翰", "kind": "lamb", "ident": "聖徒", "shepherds": ["蔡溢恩", "吳汶靜", "張若筠"]}, {"id": "郭綺庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["蔡溢恩", "沈以恩"]}, {"id": "吳欣佳", "kind": "lamb", "ident": "聖徒", "shepherds": ["朱璟軒", "林書丞", "呂柔蒨"]}, {"id": "林宇晴", "kind": "lamb", "ident": "福音朋友", "shepherds": ["王新恩", "吳汶靜"]}, {"id": "謝晴承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["朱璟軒", "沈以恩"]}, {"id": "陳晨承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠"]}, {"id": "張妍望", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨"]}, {"id": "張宇彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["甘順基", "吳汶靜"]}, {"id": "鄭愛庭", "kind": "lamb", "ident": "福音朋友", "shepherds": ["蔡溢恩", "呂柔蒨"]}, {"id": "高晴彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "甘順基", "呂柔蒨"]}, {"id": "羅真望", "kind": "lamb", "ident": "福音朋友", "shepherds": ["林書丞", "王新恩"]}, {"id": "呂昀銘", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "王晨安", "kind": "lamb", "ident": "聖徒", "shepherds": ["戴采薰", "甘順基"]}, {"id": "呂庭彥", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "莊安承", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛"]}, {"id": "羅柏詠", "kind": "lamb", "ident": "福音朋友", "shepherds": ["吳汶靜", "王新恩", "張若筠"]}, {"id": "呂彥欣", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠"]}, {"id": "郭欣安", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "邱芸綺", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠", "林書丞"]}, {"id": "莊柔愛", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "林書丞"]}, {"id": "曾欣庭", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨"]}, {"id": "王愛晴", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨", "甘順基"]}, {"id": "李信欣", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨"]}, {"id": "楊真昀", "kind": "lamb", "ident": "聖徒", "shepherds": ["呂柔蒨", "蔡溢恩"]}, {"id": "周翰佳", "kind": "lamb", "ident": "福音朋友", "shepherds": ["林書丞", "張若筠"]}, {"id": "李瑜信", "kind": "lamb", "ident": "聖徒", "shepherds": ["沈以恩"]}, {"id": "邱宸彥", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "戴采薰"]}, {"id": "王宇睿", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛", "蔡溢恩", "王新恩"]}, {"id": "楊瑜庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "曾哲瑜", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "鍾愛"]}, {"id": "邱欣睿", "kind": "lamb", "ident": "聖徒", "shepherds": ["沈以恩", "鍾愛"]}, {"id": "邱佳妤", "kind": "lamb", "ident": "聖徒", "shepherds": ["鍾愛"]}, {"id": "謝恩真", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "陳怡恩", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "莊妤晨", "kind": "lamb", "ident": "福音朋友", "shepherds": ["張若筠", "呂柔蒨"]}, {"id": "謝睿愛", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "戴采薰"]}, {"id": "王翰真", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "蔡溢恩"]}, {"id": "何妍愛", "kind": "lamb", "ident": "福音朋友", "shepherds": ["沈以恩", "張若筠", "蔡溢恩"]}, {"id": "劉彥承", "kind": "lamb", "ident": "福音朋友", "shepherds": ["戴采薰", "鍾愛"]}, {"id": "廖庭真", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基", "林書丞"]}, {"id": "洪怡庭", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "吳銘哲", "kind": "lamb", "ident": "福音朋友", "shepherds": ["呂柔蒨", "林書丞"]}], "links": [{"source": "呂柔蒨", "target": "謝霖真"}, {"source": "張若筠", "target": "謝霖真"}, {"source": "朱璟軒", "target": "呂真柔"}, {"source": "張若筠", "target": "鄭承庭"}, {"source": "戴采薰", "target": "呂庭信"}, {"source": "沈以恩", "target": "呂庭信"}, {"source": "朱璟軒", "target": "羅信銘"}, {"source": "張若筠", "target": "羅信銘"}, {"source": "呂柔蒨", "target": "洪宇昀"}, {"source": "蔡溢恩", "target": "莊愛翰"}, {"source": "吳汶靜", "target": "莊愛翰"}, {"source": "張若筠", "target": "莊愛翰"}, {"source": "蔡溢恩", "target": "郭綺庭"}, {"source": "沈以恩", "target": "郭綺庭"}, {"source": "朱璟軒", "target": "吳欣佳"}, {"source": "林書丞", "target": "吳欣佳"}, {"source": "呂柔蒨", "target": "吳欣佳"}, {"source": "王新恩", "target": "林宇晴"}, {"source": "吳汶靜", "target": "林宇晴"}, {"source": "朱璟軒", "target": "謝晴承"}, {"source": "沈以恩", "target": "謝晴承"}, {"source": "張若筠", "target": "陳晨承"}, {"source": "呂柔蒨", "target": "張妍望"}, {"source": "甘順基", "target": "張宇彥"}, {"source": "吳汶靜", "target": "張宇彥"}, {"source": "蔡溢恩", "target": "鄭愛庭"}, {"source": "呂柔蒨", "target": "鄭愛庭"}, {"source": "戴采薰", "target": "高晴彥"}, {"source": "甘順基", "target": "高晴彥"}, {"source": "呂柔蒨", "target": "高晴彥"}, {"source": "林書丞", "target": "羅真望"}, {"source": "王新恩", "target": "羅真望"}, {"source": "王新恩", "target": "呂昀銘"}, {"source": "戴采薰", "target": "王晨安"}, {"source": "甘順基", "target": "王晨安"}, {"source": "王新恩", "target": "呂庭彥"}, {"source": "鍾愛", "target": "莊安承"}, {"source": "吳汶靜", "target": "羅柏詠"}, {"source": "王新恩", "target": "羅柏詠"}, {"source": "張若筠", "target": "羅柏詠"}, {"source": "張若筠", "target": "呂彥欣"}, {"source": "王新恩", "target": "郭欣安"}, {"source": "張若筠", "target": "邱芸綺"}, {"source": "林書丞", "target": "邱芸綺"}, {"source": "戴采薰", "target": "莊柔愛"}, {"source": "林書丞", "target": "莊柔愛"}, {"source": "呂柔蒨", "target": "曾欣庭"}, {"source": "呂柔蒨", "target": "王愛晴"}, {"source": "甘順基", "target": "王愛晴"}, {"source": "呂柔蒨", "target": "李信欣"}, {"source": "呂柔蒨", "target": "楊真昀"}, {"source": "蔡溢恩", "target": "楊真昀"}, {"source": "林書丞", "target": "周翰佳"}, {"source": "張若筠", "target": "周翰佳"}, {"source": "沈以恩", "target": "李瑜信"}, {"source": "呂柔蒨", "target": "邱宸彥"}, {"source": "戴采薰", "target": "邱宸彥"}, {"source": "鍾愛", "target": "王宇睿"}, {"source": "蔡溢恩", "target": "王宇睿"}, {"source": "王新恩", "target": "王宇睿"}, {"source": "王新恩", "target": "楊瑜庭"}, {"source": "吳汶靜", "target": "曾哲瑜"}, {"source": "鍾愛", "target": "曾哲瑜"}, {"source": "沈以恩", "target": "邱欣睿"}, {"source": "鍾愛", "target": "邱欣睿"}, {"source": "鍾愛", "target": "邱佳妤"}, {"source": "王新恩", "target": "謝恩真"}, {"source": "甘順基", "target": "陳怡恩"}, {"source": "張若筠", "target": "莊妤晨"}, {"source": "呂柔蒨", "target": "莊妤晨"}, {"source": "王新恩", "target": "謝睿愛"}, {"source": "戴采薰", "target": "謝睿愛"}, {"source": "吳汶靜", "target": "王翰真"}, {"source": "蔡溢恩", "target": "王翰真"}, {"source": "沈以恩", "target": "何妍愛"}, {"source": "張若筠", "target": "何妍愛"}, {"source": "蔡溢恩", "target": "何妍愛"}, {"source": "戴采薰", "target": "劉彥承"}, {"source": "鍾愛", "target": "劉彥承"}, {"source": "甘順基", "target": "廖庭真"}, {"source": "林書丞", "target": "廖庭真"}, {"source": "甘順基", "target": "洪怡庭"}, {"source": "呂柔蒨", "target": "吳銘哲"}, {"source": "林書丞", "target": "吳銘哲"}], "stats": {"shepherds": 12, "lambs": 48, "shared": 30, "avg": 7.0, "saints": 28, "friends": 20}};
+const DATA = {"nodes": [{"id": "甘順基", "kind": "shepherd", "n": 4, "ident": "聖徒", "shepherds": []}, {"id": "沈以恩", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "朱璟軒", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "林書丞", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "王新恩", "kind": "shepherd", "n": 7, "ident": "聖徒", "shepherds": []}, {"id": "張若筠", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "吳汶靜", "kind": "shepherd", "n": 5, "ident": "聖徒", "shepherds": []}, {"id": "呂柔蒨", "kind": "shepherd", "n": 3, "ident": "聖徒", "shepherds": []}, {"id": "葉倢妤", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "戴采薰", "kind": "shepherd", "n": 3, "ident": "聖徒", "shepherds": []}, {"id": "鍾愛", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "蔡溢恩", "kind": "shepherd", "n": 0, "ident": "聖徒", "shepherds": []}, {"id": "梁凱婷", "kind": "shepherd", "n": 2, "ident": "聖徒", "shepherds": ["吳汶靜"]}, {"id": "陳利益", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "陳東定", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "陳昱宏", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "張虔立", "kind": "lamb", "ident": "聖徒", "shepherds": ["甘順基"]}, {"id": "彭芊妘", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "王新恩"]}, {"id": "曾子榆", "kind": "lamb", "ident": "福音朋友", "shepherds": ["吳汶靜", "戴采薰"]}, {"id": "陳佳莉", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜", "梁凱婷"]}, {"id": "黃婷鈺", "kind": "lamb", "ident": "聖徒", "shepherds": ["吳汶靜"]}, {"id": "張皓雅", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "呂柔蒨"]}, {"id": "江至美", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "呂柔蒨"]}, {"id": "葉宛瑄", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "呂柔蒨"]}, {"id": "呂妍心", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "戴采薰"]}, {"id": "趙培媛", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩", "戴采薰"]}, {"id": "楊宜潔", "kind": "lamb", "ident": "聖徒", "shepherds": ["王新恩"]}, {"id": "鍾佳芸", "kind": "lamb", "ident": "聖徒", "shepherds": ["梁凱婷"]}, {"id": "蔡旻翰", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 26, "sunday": 25, "last": "9月第四週", "shepherds": []}, {"id": "陳柏勳", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 25, "sunday": 25, "last": "9月第四週", "shepherds": []}, {"id": "高語謙", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 22, "sunday": 20, "last": "9月第四週", "shepherds": []}, {"id": "彭彥博", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "二排", "weeks": 18, "sunday": 10, "last": "9月第四週", "shepherds": []}, {"id": "吳雨桐", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 16, "sunday": 16, "last": "9月第三週", "shepherds": []}, {"id": "陳實頡", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "", "weeks": 13, "sunday": 5, "last": "9月第三週", "shepherds": []}, {"id": "王麒竣", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 10, "sunday": 8, "last": "9月第三週", "shepherds": []}, {"id": "余振豪", "kind": "star", "ident": "福音朋友", "group": "青職", "pai": "二排", "weeks": 9, "sunday": 0, "last": "9月第二週", "shepherds": []}, {"id": "陳璽文", "kind": "star", "ident": "福音朋友", "group": "青職", "pai": "二排", "weeks": 9, "sunday": 0, "last": "9月第四週", "shepherds": []}, {"id": "高釩予", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "二排", "weeks": 9, "sunday": 0, "last": "9月第三週", "shepherds": []}, {"id": "蔡宇涵", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 7, "sunday": 5, "last": "9月第三週", "shepherds": []}, {"id": "謝全真", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 7, "sunday": 6, "last": "8月第四週", "shepherds": []}, {"id": "高瑞謙", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "二排", "weeks": 6, "sunday": 4, "last": "9月第四週", "shepherds": []}, {"id": "吳呈峻", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "二排", "weeks": 5, "sunday": 5, "last": "7月第四週", "shepherds": []}, {"id": "鍾悅", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 3, "sunday": 3, "last": "7月第一週", "shepherds": []}, {"id": "周品瑜", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "二排", "weeks": 2, "sunday": 1, "last": "5月第四週", "shepherds": []}, {"id": "張舒涵", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "二排", "weeks": 2, "sunday": 2, "last": "7月第一週", "shepherds": []}, {"id": "徐靖城", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "一排", "weeks": 2, "sunday": 1, "last": "7月第二週", "shepherds": []}, {"id": "李孟汶", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 2, "sunday": 1, "last": "9月第三週", "shepherds": []}, {"id": "吳汶璇", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 1, "sunday": 0, "last": "9月第三週", "shepherds": []}, {"id": "李彥睿", "kind": "star", "ident": "聖徒", "group": "青職", "pai": "一排", "weeks": 1, "sunday": 1, "last": "9月第三週", "shepherds": []}, {"id": "李觀豪", "kind": "star", "ident": "福音朋友", "group": "青職", "pai": "一排", "weeks": 1, "sunday": 0, "last": "9月第三週", "shepherds": []}, {"id": "石久安", "kind": "star", "ident": "聖徒", "group": "大專", "pai": "", "weeks": 1, "sunday": 1, "last": "6月第五週", "shepherds": []}], "links": [{"source": "甘順基", "target": "陳利益"}, {"source": "甘順基", "target": "陳東定"}, {"source": "甘順基", "target": "陳昱宏"}, {"source": "甘順基", "target": "張虔立"}, {"source": "吳汶靜", "target": "梁凱婷"}, {"source": "吳汶靜", "target": "彭芊妘"}, {"source": "王新恩", "target": "彭芊妘"}, {"source": "吳汶靜", "target": "曾子榆"}, {"source": "戴采薰", "target": "曾子榆"}, {"source": "吳汶靜", "target": "陳佳莉"}, {"source": "梁凱婷", "target": "陳佳莉"}, {"source": "吳汶靜", "target": "黃婷鈺"}, {"source": "王新恩", "target": "張皓雅"}, {"source": "呂柔蒨", "target": "張皓雅"}, {"source": "王新恩", "target": "江至美"}, {"source": "呂柔蒨", "target": "江至美"}, {"source": "王新恩", "target": "葉宛瑄"}, {"source": "呂柔蒨", "target": "葉宛瑄"}, {"source": "王新恩", "target": "呂妍心"}, {"source": "戴采薰", "target": "呂妍心"}, {"source": "王新恩", "target": "趙培媛"}, {"source": "戴采薰", "target": "趙培媛"}, {"source": "王新恩", "target": "楊宜潔"}, {"source": "梁凱婷", "target": "鍾佳芸"}], "stats": {"shepherds": 13, "lambs": 16, "shared": 8, "avg": 1.8, "saints": 15, "friends": 1, "stars": 23, "stars_hot": 6}};
 const byId = new Map(DATA.nodes.map(n => [n.id, n]));
 const lambsOf = new Map(DATA.nodes.filter(n=>n.kind==='shepherd').map(s=>[s.id, []]));
 DATA.links.forEach(l => lambsOf.get(l.source).push(l.target));
@@ -120,12 +143,15 @@ DATA.links.forEach(l => lambsOf.get(l.source).push(l.target));
 /* ---------- stats ---------- */
 const S = DATA.stats;
 document.getElementById('stats').innerHTML = [
-  [S.shepherds,'牧養者'],[S.lambs,'被牧養的小羊'],[S.shared,'共同牧養（2 人以上）'],[S.avg,'平均每位牧養者照顧'],[S.saints+' / '+S.friends,'聖徒 / 福音朋友']
-].map(([v,k])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+  [S.shepherds,'牧養者'],[S.lambs,'被牧養的小羊'],[S.shared,'共同牧養（2 人以上）'],[S.avg,'平均每位牧養者照顧'],[S.saints+' / '+S.friends,'聖徒 / 福音朋友'],[S.stars,'⭐ 待認領的星星','hot'],[S.stars_hot,'其中出席 13 週以上','hot']
+].map(([v,k,c])=>`<div class="stat ${c||''}"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
 
 /* ---------- table ---------- */
-document.getElementById('tbody').innerHTML = DATA.nodes.filter(n=>n.kind==='lamb').map(n =>
+document.getElementById('tbody').innerHTML = DATA.nodes.filter(n=>n.shepherds.length).map(n =>
   `<tr><td>${n.id}</td><td>${n.ident}</td><td>${n.shepherds.join('、')}</td><td>${n.shepherds.length>=2?'✓':''}</td></tr>`).join('');
+
+document.getElementById('tstars').innerHTML = DATA.nodes.filter(n=>n.kind==='star').map(n =>
+  `<tr><td>${n.id}</td><td>${n.ident}</td><td>${n.group}</td><td>${n.pai}</td><td>${n.weeks}</td><td>${n.sunday}</td><td>${n.last}</td></tr>`).join('');
 
 /* ---------- graph ---------- */
 const svgEl = document.querySelector('svg');
@@ -137,17 +163,27 @@ let W = graphBox.clientWidth, H = graphBox.clientHeight;
 
 const rSh = n => 14 + Math.sqrt(n.n) * 4;
 const rLamb = 6;
+const rStar = d => 5 + d.weeks * 0.35;
+const starPath = r => d3.symbol().type(d3.symbolStar).size(r*r*2.2)();
+const nodeR = d => d.kind==='shepherd' ? rSh(d) : d.kind==='star' ? rStar(d) : rLamb;
+// 星星平均分佈在外圈：每顆給一個固定角度的目標點（橢圓，貼合畫布比例）
+const starList = DATA.nodes.filter(d => d.kind==='star');
+const starTarget = (d) => { const i = starList.findIndex(x=>x.id===d.id); const a = -Math.PI/2 + 2*Math.PI*i/Math.max(1,starList.length); return [W/2 + (W/2-70)*Math.cos(a), H/2 + (H/2-44)*Math.sin(a)]; };
+const radialF = () => d3.forceRadial(0, W/2, H/2).strength(0);
+const starX = () => d3.forceX(d => d.kind==='star' ? starTarget(d)[0] : W/2).strength(d => d.kind==='star' ? 0.9 : 0);
+const starY = () => d3.forceY(d => d.kind==='star' ? starTarget(d)[1] : H/2).strength(d => d.kind==='star' ? 0.9 : 0);
 
 const nodes = DATA.nodes.map(d => ({...d}));
 const links = DATA.links.map(d => ({...d}));
 
 const sim = d3.forceSimulation(nodes)
   .force('link', d3.forceLink(links).id(d=>d.id).distance(l => l.target.shepherds.length>=2 ? 90 : 64).strength(0.8))
-  .force('charge', d3.forceManyBody().strength(d => d.kind==='shepherd' ? -1100 : -140))
-  .force('collide', d3.forceCollide(d => (d.kind==='shepherd' ? rSh(d) : rLamb) + 12))
+  .force('charge', d3.forceManyBody().strength(d => d.kind==='shepherd' ? -1100 : d.kind==='star' ? -10 : -140))
+  .force('collide', d3.forceCollide(d => nodeR(d) + (d.kind==='star' ? 14 : 12)))
+  .force('radial', radialF()).force('sx', starX()).force('sy', starY())
   .force('center', d3.forceCenter(W/2, H/2))
-  .force('x', d3.forceX(W/2).strength(0.05))
-  .force('y', d3.forceY(H/2).strength(0.05));
+  .force('x', d3.forceX(W/2).strength(d => d.kind==='star' ? 0 : 0.05))
+  .force('y', d3.forceY(H/2).strength(d => d.kind==='star' ? 0 : 0.05));
 
 const link = g.append('g').selectAll('line').data(links).join('line').attr('class','link');
 const node = g.append('g').selectAll('g').data(nodes).join('g')
@@ -157,14 +193,15 @@ const node = g.append('g').selectAll('g').data(nodes).join('g')
     .on('drag',  (e,d)=>{ d.fx=e.x; d.fy=e.y; })
     .on('end',   (e,d)=>{ if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; }));
 
-node.append('circle')
+node.filter(d => d.kind==='star').append('path').attr('d', d => starPath(rStar(d)));
+node.filter(d => d.kind!=='star').append('circle')
   .attr('r', d => d.kind==='shepherd' ? rSh(d) : rLamb)
   .attr('fill', d => d.kind==='shepherd' ? 'var(--c-sh)' : (d.ident==='聖徒' ? 'var(--c-saint)' : 'var(--ring)'))
-  .attr('stroke', d => d.kind==='shepherd' ? 'var(--ring)' : (d.ident==='聖徒' ? 'var(--ring)' : 'var(--c-friend)'))
-  .attr('stroke-width', d => d.kind==='shepherd' ? 2 : (d.ident==='聖徒' ? 1.5 : 2.5));
+  .attr('stroke', d => d.kind==='shepherd' ? (d.shepherds.length ? 'var(--c-saint)' : 'var(--ring)') : (d.ident==='聖徒' ? 'var(--ring)' : 'var(--c-friend)'))
+  .attr('stroke-width', d => d.kind==='shepherd' ? (d.shepherds.length ? 3.5 : 2) : (d.ident==='聖徒' ? 1.5 : 2.5));
 node.append('text')
   .attr('text-anchor','middle')
-  .attr('dy', d => d.kind==='shepherd' ? '.35em' : (rLamb + 11))
+  .attr('dy', d => d.kind==='shepherd' ? '.35em' : d.kind==='star' ? (rStar(d) + 12) : (rLamb + 11))
   .text(d => d.id);
 
 sim.on('tick', () => {
@@ -183,7 +220,7 @@ function neighborSet(id){
   const n = byId.get(id); const set = new Set([id]);
   if (!n) return set;
   if (n.kind==='shepherd') lambsOf.get(id).forEach(x=>set.add(x));
-  else n.shepherds.forEach(x=>set.add(x));
+  (n.shepherds||[]).forEach(x=>set.add(x));
   return set;
 }
 function applyHighlight(focusId){
@@ -192,9 +229,10 @@ function applyHighlight(focusId){
   if (focusId) keep = neighborSet(focusId);
   else if (q) { keep = new Set(); nodes.forEach(n=>{ if(n.id.includes(q)) neighborSet(n.id).forEach(x=>keep.add(x)); }); }
   node.classed('dim', d => {
-    if (sharedOnly && d.kind==='lamb' && d.shepherds.length<2) return true;
+    if (sharedOnly && d.kind!=='shepherd' && d.shepherds.length<2) return true;
     return keep ? !keep.has(d.id) : false;
   }).classed('hi', d => keep ? keep.has(d.id) && (d.id===focusId || (q && d.id.includes(q))) : false);
+  node.filter(d=>d.kind==='star').select('path').attr('stroke', d => (keep && keep.has(d.id)) ? 'var(--ink)' : 'var(--ring)').attr('stroke-width', d => (keep && keep.has(d.id)) ? 2 : 1);
   link.classed('dim', l => {
     if (sharedOnly && l.target.shepherds.length<2) return true;
     return keep ? !(keep.has(l.source.id) && keep.has(l.target.id)) : false;
@@ -214,7 +252,9 @@ function showTip(e,d){
   let body;
   if (d.kind==='shepherd'){
     const ls = lambsOf.get(d.id);
-    body = `<b>${d.id}</b><span class="m">牧養 ${ls.length} 位</span>` + (ls.length?`<div>${ls.join('、')}</div>`:'');
+    body = `<b>${d.id}</b><span class="m">牧養 ${ls.length} 位</span>` + (ls.length?`<div>${ls.join('、')}</div>`:'') + (d.shepherds.length?`<div class="m">自己的牧養者：${d.shepherds.join('、')}</div>`:'');
+  } else if (d.kind==='star'){
+    body = `<b>★ ${d.id}</b><span class="m">${[d.ident,d.group,d.pai].filter(Boolean).join(' · ')}</span><div>近半年出席 <b>${d.weeks}</b> 週（主日 ${d.sunday} 次）</div><div class="m">最後出現：${d.last}　尚未有人牧養</div>`;
   } else {
     body = `<b>${d.id}</b><span class="m">${d.ident}${d.shepherds.length>=2?' · 共同牧養':''}</span><div>牧養者：${d.shepherds.join('、')}</div>`;
   }
@@ -234,15 +274,23 @@ function renderPanel(id){
     panel.innerHTML = `<h2>牧養者排行</h2><ul class="rank">` +
       sh.map(s=>`<li data-id="${s.id}"><span>${s.id}</span><div class="bar" style="width:${(s.n/max*100).toFixed(0)}%"></div><span class="n">${s.n}</span></li>`).join('') +
       `</ul><div class="sub">共同牧養的小羊（${S.shared} 位）</div><ul class="plist">` +
-      DATA.nodes.filter(x=>x.kind==='lamb' && x.shepherds.length>=2).map(l=>`<li data-id="${l.id}"><i class="dot ${l.ident==='聖徒'?'saint':'friend'}"></i>${l.id}<span class="tag">${l.shepherds.join('、')}</span></li>`).join('') + `</ul>`;
+      DATA.nodes.filter(x=>x.shepherds.length>=2).map(l=>`<li data-id="${l.id}"><i class="dot ${l.ident==='聖徒'?'saint':'friend'}"></i>${l.id}<span class="tag">${l.shepherds.join('、')}</span></li>`).join('') + `</ul>` +
+      `<div class="sub">⭐ 待認領的星星（${S.stars} 位，依出席週數）</div><ul class="plist">` +
+      DATA.nodes.filter(x=>x.kind==='star').map(l=>`<li data-id="${l.id}"><i class="star-i">★</i>${l.id}<span class="tag">${l.weeks} 週 · ${l.last}</span></li>`).join('') + `</ul>`;
   } else if (n.kind==='shepherd'){
     const ls = lambsOf.get(n.id).map(x=>byId.get(x));
     const solo = ls.filter(l=>l.shepherds.length===1), co = ls.filter(l=>l.shepherds.length>=2);
     const item = l => `<li data-id="${l.id}"><i class="dot ${l.ident==='聖徒'?'saint':'friend'}"></i>${l.id}<span class="tag">${l.shepherds.length>=2 ? '與 '+l.shepherds.filter(s=>s!==n.id).join('、') : ''}</span></li>`;
     panel.innerHTML = `<h2><i class="dot sh"></i>${n.id}<span class="x" data-id="">✕</span></h2>` +
       `<div class="sub">共牧養 ${ls.length} 位 · 單獨 ${solo.length} · 共同 ${co.length}</div>` +
+      (n.shepherds.length ? `<div class="sub">自己的牧養者</div><ul class="plist">${n.shepherds.map(s=>`<li data-id="${s}"><i class="dot sh"></i>${s}</li>`).join('')}</ul>` : '') +
       (ls.length ? `<div class="sub">單獨牧養</div><ul class="plist">${solo.map(item).join('')||'<li class="empty">—</li>'}</ul>` +
                    `<div class="sub">共同牧養</div><ul class="plist">${co.map(item).join('')||'<li class="empty">—</li>'}</ul>` : `<div class="empty">目前沒有配對的小羊</div>`);
+  } else if (n.kind==='star'){
+    panel.innerHTML = `<h2><i class="star-i">★</i>${n.id}<span class="x" data-id="">✕</span></h2>` +
+      `<div class="sub">${[n.ident,n.group,n.pai].filter(Boolean).join(' · ')||'—'}</div>` +
+      `<div class="sub">近半年出席 <b>${n.weeks}</b> 週 · 主日 ${n.sunday} 次 · 最後出現 ${n.last}</div>` +
+      `<div class="empty">還沒有人牧養，快去撿這顆星星 ⭐</div>`;
   } else {
     panel.innerHTML = `<h2><i class="dot ${n.ident==='聖徒'?'saint':'friend'}"></i>${n.id}<span class="x" data-id="">✕</span></h2>` +
       `<div class="sub">${n.ident}${n.shepherds.length>=2?' · 共同牧養':''}</div><div class="sub">牧養者</div><ul class="plist">` +
@@ -267,7 +315,7 @@ const root = document.documentElement, btnT = document.getElementById('btnTheme'
 function setTheme(t){ root.dataset.theme=t; btnT.textContent = t==='dark' ? '☀️ 淺色' : '🌙 深色'; try{localStorage.setItem('sg-theme',t)}catch(e){} }
 try{ const t=localStorage.getItem('sg-theme'); if(t) setTheme(t); }catch(e){}
 btnT.addEventListener('click', () => setTheme(root.dataset.theme==='dark'?'light':'dark'));
-window.addEventListener('resize', () => { W=graphBox.clientWidth; H=graphBox.clientHeight; sim.force('center', d3.forceCenter(W/2,H/2)).force('x', d3.forceX(W/2).strength(0.05)).force('y', d3.forceY(H/2).strength(0.05)).alpha(0.3).restart(); });
+window.addEventListener('resize', () => { W=graphBox.clientWidth; H=graphBox.clientHeight; sim.force('center', d3.forceCenter(W/2,H/2)).force('x', d3.forceX(W/2).strength(0.05)).force('y', d3.forceY(H/2).strength(0.05)).force('radial', radialF()).force('sx', starX()).force('sy', starY()).alpha(0.3).restart(); });
 </script>
 </body>
 </html>
