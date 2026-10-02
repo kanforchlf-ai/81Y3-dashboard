@@ -57,11 +57,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",-
 .dot.friend{background:transparent;border:2.5px solid var(--c-friend)}
 .line{width:22px;height:0;border-top:2px solid var(--link-hi);display:inline-block}
 .main{display:grid;grid-template-columns:1fr 280px;gap:12px;padding:0 20px 20px}
-.graph{background:var(--surface);border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden;min-height:560px;height:640px}
+.graph{background:var(--surface);border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden;height:clamp(560px, calc(100vh - 240px), 1100px)}
 svg{width:100%;height:100%;display:block;cursor:grab}
 svg:active{cursor:grabbing}
 .hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--ink3);pointer-events:none}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto;max-height:640px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto;max-height:clamp(560px, calc(100vh - 240px), 1100px)}
 .panel h2{font-size:14px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
 .panel h2 .x{margin-left:auto;cursor:pointer;color:var(--ink3);font-weight:400}
 .rank{list-style:none;margin:0;padding:0}
@@ -168,7 +168,21 @@ const starPath = r => d3.symbol().type(d3.symbolStar).size(r*r*2.2)();
 const nodeR = d => d.kind==='shepherd' ? rSh(d) : d.kind==='star' ? rStar(d) : rLamb;
 // 星星平均分佈在外圈：每顆給一個固定角度的目標點（橢圓，貼合畫布比例）
 const starList = DATA.nodes.filter(d => d.kind==='star');
-const starTarget = (d) => { const i = starList.findIndex(x=>x.id===d.id); const a = -Math.PI/2 + 2*Math.PI*i/Math.max(1,starList.length); return [W/2 + (W/2-70)*Math.cos(a), H/2 + (H/2-44)*Math.sin(a)]; };
+let RING = {cx: W/2, cy: H/2, rx: W/2-70, ry: H/2-44};
+const starTarget = (d) => { const i = starList.findIndex(x=>x.id===d.id); const a = -Math.PI/2 + 2*Math.PI*i/Math.max(1,starList.length); return [RING.cx + RING.rx*Math.cos(a), RING.cy + RING.ry*Math.sin(a)]; };
+function bbox(arr){ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; arr.forEach(d=>{ if(d.x==null) return; x0=Math.min(x0,d.x); y0=Math.min(y0,d.y); x1=Math.max(x1,d.x); y1=Math.max(y1,d.y); }); return {x0,y0,x1,y1}; }
+function updateRing(){
+  const core = nodes.filter(d => d.kind!=='star'); if (!core.length) return;
+  const b = bbox(core);
+  // 外圈周長要塞得下所有星星（每顆約 80px 寬含名字）
+  const need = starList.length * 72 / (2*Math.PI);
+  let rx = Math.max((b.x1-b.x0)/2 + 95, need), ry = Math.max((b.y1-b.y0)/2 + 75, need*0.7);
+  // 外圈拉成和畫布一樣的長寬比，寬螢幕時往左右延伸填滿
+  const asp = W / H; if (rx / ry < asp * 0.95) rx = ry * asp * 0.95;
+  RING = {cx:(b.x0+b.x1)/2, cy:(b.y0+b.y1)/2, rx, ry};
+  sim.force('sx').x(d => d.kind==='star' ? starTarget(d)[0] : W/2);
+  sim.force('sy').y(d => d.kind==='star' ? starTarget(d)[1] : H/2);
+}
 const radialF = () => d3.forceRadial(0, W/2, H/2).strength(0);
 const starX = () => d3.forceX(d => d.kind==='star' ? starTarget(d)[0] : W/2).strength(d => d.kind==='star' ? 0.9 : 0);
 const starY = () => d3.forceY(d => d.kind==='star' ? starTarget(d)[1] : H/2).strength(d => d.kind==='star' ? 0.9 : 0);
@@ -176,14 +190,14 @@ const starY = () => d3.forceY(d => d.kind==='star' ? starTarget(d)[1] : H/2).str
 const nodes = DATA.nodes.map(d => ({...d}));
 const links = DATA.links.map(d => ({...d}));
 
-const sim = d3.forceSimulation(nodes)
-  .force('link', d3.forceLink(links).id(d=>d.id).distance(l => l.target.shepherds.length>=2 ? 90 : 64).strength(0.8))
-  .force('charge', d3.forceManyBody().strength(d => d.kind==='shepherd' ? -1100 : d.kind==='star' ? -10 : -140))
+const sim = d3.forceSimulation(nodes).alphaDecay(0.035)
+  .force('link', d3.forceLink(links).id(d=>d.id).distance(l => l.target.shepherds.length>=2 ? 78 : 56).strength(0.8))
+  .force('charge', d3.forceManyBody().strength(d => d.kind==='shepherd' ? (d.n ? -520 : -200) : d.kind==='star' ? -10 : -70))
   .force('collide', d3.forceCollide(d => nodeR(d) + (d.kind==='star' ? 14 : 12)))
   .force('radial', radialF()).force('sx', starX()).force('sy', starY())
   .force('center', d3.forceCenter(W/2, H/2))
-  .force('x', d3.forceX(W/2).strength(d => d.kind==='star' ? 0 : 0.05))
-  .force('y', d3.forceY(H/2).strength(d => d.kind==='star' ? 0 : 0.05));
+  .force('x', d3.forceX(W/2).strength(d => d.kind==='star' ? 0 : (d.kind==='shepherd' && !d.n ? 0.12 : 0.05)))
+  .force('y', d3.forceY(H/2).strength(d => d.kind==='star' ? 0 : (d.kind==='shepherd' && !d.n ? 0.25 : 0.14)));
 
 const link = g.append('g').selectAll('line').data(links).join('line').attr('class','link');
 const node = g.append('g').selectAll('g').data(nodes).join('g')
@@ -204,13 +218,23 @@ node.append('text')
   .attr('dy', d => d.kind==='shepherd' ? '.35em' : d.kind==='star' ? (rStar(d) + 12) : (rLamb + 11))
   .text(d => d.id);
 
+let tickN = 0, autoFit = true;
 sim.on('tick', () => {
+  if (++tickN % 15 === 0) updateRing();
   link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
   node.attr('transform', d=>`translate(${d.x},${d.y})`);
 });
 
-const zoom = d3.zoom().scaleExtent([0.4, 3]).on('zoom', e => g.attr('transform', e.transform));
+const zoom = d3.zoom().scaleExtent([0.3, 4]).on('zoom', e => g.attr('transform', e.transform));
 svg.call(zoom).on('dblclick.zoom', null);
+function fitView(animate=true){
+  const b = bbox(nodes); const pad = 40;
+  const bw = (b.x1-b.x0) + pad*2, bh = (b.y1-b.y0) + pad*2 + 16;
+  const k = Math.min(W/bw, H/bh, 3);
+  const t = d3.zoomIdentity.translate(W/2 - k*(b.x0+b.x1)/2, H/2 - k*(b.y0+b.y1)/2 + 6).scale(k);
+  (animate ? svg.transition().duration(600) : svg).call(zoom.transform, t);
+}
+sim.on('end', () => { if (autoFit) { fitView(); autoFit = false; } });
 
 /* ---------- highlight logic ---------- */
 let pinned = null;   // id of pinned node
@@ -309,13 +333,13 @@ document.getElementById('btnShared').addEventListener('click', e => { sharedOnly
 document.getElementById('btnReset').addEventListener('click', () => {
   pinned=null; sharedOnly=false; document.getElementById('btnShared').classList.remove('on'); document.getElementById('q').value='';
   applyHighlight(null); renderPanel(null);
-  svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity); sim.alpha(0.6).restart();
+  autoFit = true; sim.alpha(0.6).restart();
 });
 const root = document.documentElement, btnT = document.getElementById('btnTheme');
 function setTheme(t){ root.dataset.theme=t; btnT.textContent = t==='dark' ? '☀️ 淺色' : '🌙 深色'; try{localStorage.setItem('sg-theme',t)}catch(e){} }
 try{ const t=localStorage.getItem('sg-theme'); if(t) setTheme(t); }catch(e){}
 btnT.addEventListener('click', () => setTheme(root.dataset.theme==='dark'?'light':'dark'));
-window.addEventListener('resize', () => { W=graphBox.clientWidth; H=graphBox.clientHeight; sim.force('center', d3.forceCenter(W/2,H/2)).force('x', d3.forceX(W/2).strength(0.05)).force('y', d3.forceY(H/2).strength(0.05)).force('radial', radialF()).force('sx', starX()).force('sy', starY()).alpha(0.3).restart(); });
+window.addEventListener('resize', () => { W=graphBox.clientWidth; H=graphBox.clientHeight; sim.force('center', d3.forceCenter(W/2,H/2)).force('x', d3.forceX(W/2).strength(0.05)).force('y', d3.forceY(H/2).strength(0.05)).force('radial', radialF()).force('sx', starX()).force('sy', starY()).alpha(0.3).restart(); autoFit = true; });
 </script>
 </body>
 </html>
