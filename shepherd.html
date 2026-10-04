@@ -219,7 +219,7 @@ const sim = d3.forceSimulation(nodes).alphaDecay(0.035)
 
 const link = g.append('g').selectAll('line').data(links).join('line').attr('class','link');
 const node = g.append('g').selectAll('g').data(nodes).join('g')
-  .attr('class', d => 'node ' + d.kind + (d.kind!=='star' && d.sun===0 ? ' miss' : '') + (d.kind==='lamb' && d.sun===0 && d.streak>=3 ? ' miss3' : '')   // 牧養者本人缺席只畫紅邊，不填滿)
+  .attr('class', d => 'node ' + d.kind + (d.kind!=='star' && d.sun===0 ? ' miss' : '') + (d.kind==='lamb' && d.sun===0 && d.streak>=3 ? ' miss3' : ''))
   .call(d3.drag()
     .on('start', (e,d)=>{ if(!e.active) sim.alphaTarget(.3).restart(); d.fx=d.x; d.fy=d.y; })
     .on('drag',  (e,d)=>{ d.fx=e.x; d.fy=e.y; })
